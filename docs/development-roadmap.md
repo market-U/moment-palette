@@ -1,8 +1,8 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: 最初のOpenSpec change開始準備
+> ステータス: フェーズ1 `establish-frontend-foundation` 進行中
 >
-> 最終更新日: 2026-09-15
+> 最終更新日: 2026-09-17
 
 ## 目的
 
@@ -10,7 +10,7 @@
 
 ## 現在地
 
-- OpenSpecは導入済みで、アクティブなchangeはまだない。
+- 最初のOpenSpec change `establish-frontend-foundation` を開始し、proposal、design、delta specを作成済みである。次はtasksを作成し、内容を確認してから実装へ進む。
 - Gitリポジトリは初期化済みである。
 - アプリケーションコードは未実装である。
 - `docs/vision.md`を実装開始の基準版として合意済みである。未決事項は、実装前にすべて解消するのではなく、該当するchangeまたはF/Sで扱う。
@@ -19,7 +19,7 @@
 - Figma連携を導入済みで、画面ラフからデザインを検討できる状態である。
 - [MomentPaletteのFigma](https://www.figma.com/design/K2tfDw1Wj9pQJ2heFbh7FJ/MomentPalette?node-id=0-1&t=P4QjS9z2QLy0duFM-1)で、主要画面、画面遷移、エリア選択、カメラ、写真、単色塗り、完成・共有の操作案を作成済みである。
 - 初期リリースには、カメラ撮影、端末内の写真、カラーパレットによる単色塗りの三つを含める方針に決定した。
-- 次は、現在の要求・画面資料を基準版としてコミットし、最初のOpenSpec change `establish-frontend-foundation` を開始する。
+- `establish-frontend-foundation` で、フロントエンド基盤、ソース構成、依存規則、開発品質の実装範囲を具体化している。
 
 ## 実行順序
 
@@ -67,9 +67,9 @@
 
 ### 1. フロントエンド基盤を構築する
 
-ステータス: 未着手
+ステータス: 進行中
 
-最初のOpenSpec change候補: `establish-frontend-foundation`
+進行中のOpenSpec change: `establish-frontend-foundation`
 
 想定範囲:
 
@@ -86,7 +86,7 @@
 
 UIコンポーネントライブラリは、画面検討の結果が不足している場合、このchangeでは導入しない。
 
-このchangeは、`openspec-propose`で一括生成せず、proposal、specs、design、tasksを順に作成して各段階で内容を確認する。フォルダ構成、責務分割、採用ライブラリ、依存ルールは主にdesignで検討し、合意後に `docs/architecture/` へ図と文章で残してから実装する。
+このchangeは、`openspec-propose`で一括生成しない。proposalの合意後に、相互に参照しながらspecsとdesignを作成・レビューし、両方の合意後にtasksを作成する。フォルダ構成、責務分割、採用ライブラリ、依存ルールは主にdesignで検討し、合意後に `docs/architecture/` へ図と文章で残してから実装する。
 
 ### 2. 実機F/S用の最小デプロイ環境を構築する
 
@@ -231,11 +231,11 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ## 次のセッションで行うこと
 
-1. 現在の要求・画面・ロードマップ資料を、実装開始の基準版としてコミットする。
-2. `openspec list --json`でアクティブなchangeがないことを確認する。
-3. `establish-frontend-foundation` を新しいOpenSpec changeとして開始する。
-4. proposal、specs、design、tasksを一つずつ作成し、特にフォルダ構成、責務分割、採用ライブラリ、依存方向を対話的に決定する。
-5. designの合意後、実装前にアプリケーションアーキテクチャを `docs/architecture/` へ反映する。
+1. `establish-frontend-foundation` のproposal、specs、design、アプリケーションアーキテクチャ資料の整合を最終確認する。
+2. specsとdesignを基にtasksを作成し、実装順序と検証方法を確認する。
+3. 合意したtasksに従い、フロントエンド基盤を実装する。
+4. 単体テスト、型検査、lint、format確認、production buildを実行する。
+5. 実装と文書の一致を確認し、changeを検証してarchiveする。
 
 ## 更新ルール
 
