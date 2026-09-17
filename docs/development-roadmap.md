@@ -1,6 +1,6 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: フェーズ1 `establish-frontend-foundation` 進行中
+> ステータス: フェーズ1 完了・フェーズ2 着手待ち
 >
 > 最終更新日: 2026-09-17
 
@@ -10,16 +10,17 @@
 
 ## 現在地
 
-- 最初のOpenSpec change `establish-frontend-foundation` を開始し、proposal、design、delta specを作成済みである。次はtasksを作成し、内容を確認してから実装へ進む。
+- 最初のOpenSpec change `establish-frontend-foundation` は、計画した実装と完了確認をすべて終え、verifyとarchiveを行える状態である。
 - Gitリポジトリは初期化済みである。
-- アプリケーションコードは未実装である。
+- Vue 3、Vite、TypeScriptによるアプリケーションシェル、ルーティング、日本語・英語表示、モバイル向け基本レイアウトを実装済みである。
+- Node.jsとpnpmの固定、単体テスト、型検査、lint、format、production build、開発者向け文書を整備済みである。
 - `docs/vision.md`を実装開始の基準版として合意済みである。未決事項は、実装前にすべて解消するのではなく、該当するchangeまたはF/Sで扱う。
 - 配信基盤は、Azure Static Web Apps Free、非公開Azure Blob Storage、SWAマネージドAPIを使用する方針に決定した。
 - テンプレートカタログはBlob上のJSONで管理し、Cosmos DBは使用しない方針に決定した。
 - Figma連携を導入済みで、画面ラフからデザインを検討できる状態である。
 - [MomentPaletteのFigma](https://www.figma.com/design/K2tfDw1Wj9pQJ2heFbh7FJ/MomentPalette?node-id=0-1&t=P4QjS9z2QLy0duFM-1)で、主要画面、画面遷移、エリア選択、カメラ、写真、単色塗り、完成・共有の操作案を作成済みである。
 - 初期リリースには、カメラ撮影、端末内の写真、カラーパレットによる単色塗りの三つを含める方針に決定した。
-- `establish-frontend-foundation` で、フロントエンド基盤、ソース構成、依存規則、開発品質の実装範囲を具体化している。
+- 次はフェーズ1のchangeをverify、archiveした後、フェーズ2として実機F/S用の最小デプロイ環境を構築する。
 
 ## 実行順序
 
@@ -67,9 +68,9 @@
 
 ### 1. フロントエンド基盤を構築する
 
-ステータス: 進行中
+ステータス: 完了
 
-進行中のOpenSpec change: `establish-frontend-foundation`
+対応OpenSpec change: `establish-frontend-foundation`
 
 想定範囲:
 
@@ -231,11 +232,10 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ## 次のセッションで行うこと
 
-1. `establish-frontend-foundation` のproposal、specs、design、アプリケーションアーキテクチャ資料の整合を最終確認する。
-2. specsとdesignを基にtasksを作成し、実装順序と検証方法を確認する。
-3. 合意したtasksに従い、フロントエンド基盤を実装する。
-4. 単体テスト、型検査、lint、format確認、production buildを実行する。
-5. 実装と文書の一致を確認し、changeを検証してarchiveする。
+1. `establish-frontend-foundation` の実装とアーティファクトの一致をverifyする。
+2. 検証結果に問題がなければ、delta specをmain specsへ同期してchangeをarchiveする。
+3. フェーズ2の最小デプロイ環境を一つの検証可能な成果へ絞り、OpenSpec changeを開始する。
+4. Azure Static Web Apps、GitHub Actions、最小限のIaC、暫定アーキテクチャ図の具体的な範囲をproposalで定める。
 
 ## 更新ルール
 

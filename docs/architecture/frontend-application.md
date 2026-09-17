@@ -1,6 +1,6 @@
 # フロントエンドアプリケーションアーキテクチャ
 
-> ステータス: 設計合意済み・実装前
+> ステータス: 実装済み
 >
 > 最終更新日: 2026-09-17
 >
@@ -29,7 +29,8 @@ moment-palette/
 
 ```text
 src/
-├── app/                 # 起動、ルーティング、i18n、設定、依存の組み立て
+├── main.ts              # Vueエントリポイント、依存の組み立て
+├── app/                 # ルートコンポーネント、ルーティング、i18n、設定
 ├── pages/               # 画面全体のレイアウトと画面遷移
 ├── features/            # ユーザー操作単位のUI、状態、ユースケース、port
 ├── domain/              # 中心概念の型と純粋な規則
@@ -49,6 +50,29 @@ src/
 - 複数の領域で実際に再利用する副作用のない関数だけを`shared/lib/`へ移す。
 - クライアント設定は`app/config/`、型は原則として所有するdomain、feature、portの近くへ置く。
 - 用途が明確になる前に`utils/`、`shared/config/`、`shared/types/`を作らない。
+
+このchange完了時点の実装は次のとおりである。
+
+```text
+src/
+├── main.ts
+├── env.d.ts
+├── app/
+│   ├── App.vue
+│   ├── router.ts
+│   ├── styles.css
+│   └── i18n/
+│       ├── index.ts
+│       ├── messages/
+│       │   ├── en.ts
+│       │   └── ja.ts
+│       ├── selectInitialLocale.ts
+│       └── selectInitialLocale.test.ts
+└── pages/
+    └── TitlePage.vue
+```
+
+現時点では利用するユースケースがないため、`features/`、`domain/`、`infrastructure/`、`shared/`は作成していない。
 
 ## importの依存方向
 
@@ -89,7 +113,7 @@ flowchart BT
 - `shared/ui/`はVueと`shared/lib/`へ依存できるが、domain固有の知識を持たない。
 - `pages/`はfeatureを組み合わせるが、`infrastructure/`へ直接依存しない。
 - feature同士は直接importしない。画面上の組み合わせは`pages/`、セッション全体の状態や依存の組み立ては`app/`が担う。
-- `app/`はcomposition rootとして、具体的なinfrastructure実装と、featureが公開する状態factoryやportのInjectionKeyを参照できる。
+- `app/`とVueエントリポイントの`src/main.ts`はcomposition rootとして、具体的なinfrastructure実装と、featureが公開する状態factoryやportのInjectionKeyを参照できる。
 
 初期段階では依存規則のためだけの追加ライブラリは導入しない。規則違反が増え、人手の確認では維持できなくなった時点で自動検査を検討する。
 

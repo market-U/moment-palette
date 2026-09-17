@@ -13,7 +13,7 @@
     "build": "pnpm run typecheck && vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json",
-    "test": "vitest",
+    "test": "vitest --watch",
     "test:run": "vitest run",
     "lint": "eslint .",
     "format": "prettier --write .",

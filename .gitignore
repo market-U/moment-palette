@@ -20,6 +20,7 @@ coverage/
 *.tsbuildinfo
 
 # Test and browser outputs
+.vitest/
 playwright-report/
 test-results/
 
