@@ -1,15 +1,15 @@
 ## 1. ツールチェーンとVueプロジェクトの初期化
 
-- [ ] 1.1 Node.js 24 LTS系列をリポジトリ内のバージョンファイルと`package.json`の`engines`へ記録し、`packageManager`へ正確なpnpmバージョンを指定する
-- [ ] 1.2 リポジトリ直下へVue 3、Vite、TypeScriptの最小構成とpnpmロックファイルを追加し、`vue-router`と`vue-i18n`を導入する
-- [ ] 1.3 TypeScriptのstrict設定と`vue-tsc --noEmit`によるVue SFCの型検査を構成する
-- [ ] 1.4 `dev`、`build`、`preview`、`typecheck`の各スクリプトを`package.json`へ追加し、Viteの既定ブラウザ対象を変更するlegacy pluginを導入していないことを確認する
+- [x] 1.1 Node.js 24 LTS系列をリポジトリ内のバージョンファイルと`package.json`の`engines`へ記録し、`packageManager`へ正確なpnpmバージョンを指定する
+- [x] 1.2 リポジトリ直下へVue 3、Vite、TypeScriptの最小構成とpnpmロックファイルを追加し、`vue-router`と`vue-i18n`を導入する
+- [x] 1.3 TypeScriptのstrict設定と`vue-tsc --noEmit`によるVue SFCの型検査を構成する
+- [x] 1.4 `dev`、`build`、`preview`、`typecheck`の各スクリプトを`package.json`へ追加し、Viteの既定ブラウザ対象を変更するlegacy pluginを導入していないことを確認する
 
 ## 2. 単体テスト・静的解析・整形の基盤
 
-- [ ] 2.1 Vite設定を共有するVitest構成を追加し、watch実行用の`test`と非対話実行用の`test:run`スクリプトを用意する
-- [ ] 2.2 TypeScriptとVueを検査するESLint構成と`lint`スクリプトを追加し、`eslint-config-prettier`でPrettierと競合する規則を無効化する
-- [ ] 2.3 Prettier構成と`format`、`format:check`スクリプトを追加し、`eslint-plugin-prettier`を導入していないことを確認する
+- [x] 2.1 Vite設定を共有するVitest構成を追加し、watch実行用の`test`と非対話実行用の`test:run`スクリプトを用意する
+- [x] 2.2 TypeScriptとVueを検査するESLint構成と`lint`スクリプトを追加し、`eslint-config-prettier`でPrettierと競合する規則を無効化する
+- [x] 2.3 Prettier構成と`format`、`format:check`スクリプトを追加し、`eslint-plugin-prettier`を導入していないことを確認する
 
 ## 3. アプリケーションシェル
 

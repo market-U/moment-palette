@@ -1,0 +1,10 @@
+.agents/
+.claude/
+.codex/
+.git/
+coverage/
+dist/
+docs/
+node_modules/
+openspec/
+pnpm-lock.yaml
