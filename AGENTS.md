@@ -21,6 +21,37 @@
 
 新しいセッションでは、まず `docs/development-roadmap.md` と `openspec list --json` を確認し、現在のフェーズとアクティブなchangeを把握する。
 
+## フロントエンドのソース配置
+
+`src/`配下は次の責務で分ける。利用するコードが生じるまで空ディレクトリや将来用の抽象化を作らない。
+
+- `app/`: ルーティング、i18n、クライアント設定、依存の組み立てなど、アプリケーション全体の起動と提供者。Vueエントリポイントの`src/main.ts`もこの責務に含める。
+- `pages/`: 画面全体のレイアウトと画面遷移。複数featureの画面上の組み合わせもここで行う。
+- `features/`: ユーザー操作単位のUI、状態、ユースケース、利用側が要求する外部入出力のport。
+- `domain/`: `Artwork`や`Template`など中心概念の型と、副作用を持たない純粋な規則。
+- `infrastructure/`: HTTP、カメラ、Canvas、Web Share、Cookieなど、アプリ外部との入出力の具体実装。
+- `shared/ui/`: 複数の画面またはfeatureで実際に再利用する汎用Vue部品。
+- `shared/lib/`: 複数の領域で実際に再利用する、Vueや外部入出力に依存しない純粋関数。
+
+クライアント設定は`app/config/`、型は原則として所有するdomain、feature、portの近くへ置く。用途が明確になる前に汎用の`utils/`、`shared/config/`、`shared/types/`を作らない。
+
+## フロントエンドの依存方向
+
+- `domain/`は他のアプリケーションディレクトリ、Vue、HTTP、ブラウザAPIへ依存しない。
+- `shared/lib/`はVue、domain、HTTP、ブラウザAPIへ依存しない。
+- `shared/ui/`はVueと`shared/lib/`だけに依存でき、domain固有の知識を持たない。
+- `pages/`は`features/`、`shared/ui/`、`shared/lib/`を利用できるが、`app/`や`infrastructure/`へ依存しない。
+- `features/`は`domain/`、`shared/`、同じfeature内のportを利用できるが、`infrastructure/`や別のfeatureへ依存しない。
+- `infrastructure/`はfeature内のport、`domain/`、`shared/lib/`を利用できるが、`app/`や`pages/`へ依存しない。
+- `app/`と`src/main.ts`はcomposition rootとして、画面、feature、port、具体的なinfrastructure実装を参照し、依存を結線できる。
+- 外部入出力は、利用するfeature内にportを定義し、`infrastructure/`で実装し、`app/`で結線する。利用するユースケースより先にport、mock、開発用実装を作らない。
+
+## テストコードの配置
+
+- 単一のモジュールやVueコンポーネントを対象とする単体テストは、対象ファイルと同じディレクトリへ配置する。
+- テストファイル名は対象と同じベース名の`<対象名>.test.ts`とする。
+- 複数モジュールをまたぐ統合テストやE2Eテストの配置は、そのテスト基盤を導入するchangeで定める。
+
 ## OpenSpecを開始する境界
 
 ### OpenSpec changeを作らずに行ってよい作業
