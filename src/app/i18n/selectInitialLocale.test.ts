@@ -3,10 +3,6 @@ import { describe, expect, it } from 'vitest'
 import { selectInitialLocale } from './selectInitialLocale'
 
 describe('selectInitialLocale', () => {
-  it('CI失敗時にデプロイしないことを検証する', () => {
-    expect(true).toBe(false)
-  })
-
   it.each([
     ['ja', 'ja'],
     ['ja-JP', 'ja'],
