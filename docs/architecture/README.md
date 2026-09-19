@@ -9,18 +9,20 @@
 ## 現在の資料
 
 - [`frontend-application.md`](frontend-application.md): Vueフロントエンドのソース構成、責務、依存規則、外部入出力の追加方針。
-- [`fs-preview-deployment.md`](fs-preview-deployment.md): F/S用SWAのMermaid構成図、外部仕様、固定したGitHub Actionの確認記録。
+- [`fs-preview-deployment.md`](fs-preview-deployment.md): 実装済みF/S用SWAのMermaid構成図、外部仕様、固定したGitHub Action、デプロイ・実機確認結果。
 - このREADME: Azureを含む初期構成案と、アーキテクチャ図の管理方針。
 
 ## F/S用SWAプレビュー構成
 
-現在のデプロイ対象は、後続の技術F/Sをモバイル実機で確認するためのAzure Static Web Apps Free一つだけである。[F/S用SWA暫定構成図](fs-preview-deployment.md#暫定構成図)は次の経路を示す。
+現在のデプロイ対象は、後続の技術F/Sをモバイル実機で確認するためのAzure Static Web Apps Free一つだけである。[F/S用SWA実装済み構成図](fs-preview-deployment.md#実装済み構成図)は次の経路を示す。
 
 - `main`へのpushは、SWA上の固定F/S環境へ配信する。
 - `main`向けの通常PRは、PR固有の一時環境へ配信する。
 - 固定環境とPR環境はいずれも公開HTTPS URLであり、機密情報や実ユーザーデータを置かない。
 - 外部forkとDependabot PRではrepository secretを利用せず、品質検査だけを行う。
 - Blob Storage、マネージドAPI、SAS URL、固定dev環境は今回構築しない。
+
+固定F/S URLは<https://icy-mushroom-0c0e42e00.5.azurestaticapps.net/>である。iPhone 15（iOS 26）のSafariとChromeで固定環境とPR環境を確認済みであり、Android Chromeの実機確認は端末を確保できるリリース後に行う。
 
 SWA上の「Production環境」はAzure側の名称であり、実サービス本番を意味しない。実サービスの環境分離とリリース戦略は、ロードマップのフェーズ6で決める。
 

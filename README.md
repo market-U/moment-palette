@@ -63,6 +63,17 @@ SWA CLIはローカルエミュレーターの`start`だけに使用し、`login
 
 この手順は、後続の技術F/Sをモバイル実機で確認するためのAzure Static Web Apps（SWA）Free環境を構築する。SWA上のProduction環境は`main`のマージ済み状態を置くF/S用固定環境であり、実サービス本番ではない。構成と外部仕様は[`docs/architecture/fs-preview-deployment.md`](docs/architecture/fs-preview-deployment.md)を参照する。
 
+### 実装済み環境
+
+- リソースグループ: `rg-moment-palette-fs`
+- SWA: `moment-palette-fs-market-u-20260918`（Free、East Asia）
+- 固定F/S URL: <https://icy-mushroom-0c0e42e00.5.azurestaticapps.net/>
+- `main`へのpushで固定環境を更新し、`main`向けの通常PRでは一時プレビュー環境を作成・更新・終了する。
+- PR #3のmerge時に、固定環境へのデプロイとPRプレビューの削除が成功した。
+- iPhone 15（iOS 26）のSafariとChromeで、PRプレビューおよび固定URLを証明書エラーなしで表示できることを確認した。任意のアプリ内URLへの直接アクセスでもアプリが起動し、現在のルーティング規則に従って固定URLへ戻る。
+- Android Chromeは今回利用できる実機がないため、端末を確保できるリリース後に確認する。
+- Dependabotは`github-actions`の週次設定を認識し、初回確認を実行済みである。
+
 ### 前提
 
 - Azure CLIを導入し、SWAを作成できるAzureアカウントでログインできること。

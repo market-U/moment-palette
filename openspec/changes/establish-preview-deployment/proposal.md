@@ -12,7 +12,7 @@
 - 外部GitHub Actionを検証済みcommitへ固定し、DependabotがActionの更新PRを週次で作成できる設定を追加する。
 - SPAのURLを直接開いた場合もアプリケーションを表示できる、最小限の`staticwebapp.config.json`を追加する。
 - HTTPSのSWA URLを利用可能なiPhone実機のSafariおよびChromeで開き、アプリケーションシェルを表示できることを確認する。Android Chromeの実機確認は、端末を確保できるリリース後のフォロー項目として記録する。
-- 検証環境のデプロイ経路とAzure構成を、編集可能なソースと確認用画像を持つ暫定アーキテクチャ図へ記録する。
+- 検証環境のデプロイ経路とAzure構成を、Markdown内のMermaidを正本兼表示形式とするアーキテクチャ図へ記録する。
 - Blob Storage、マネージドAPI、SAS URL、カスタムドメイン、本番向けキャッシュ・監視・リリース継続性はこのchangeの対象外とする。
 
 ## Capabilities
@@ -30,6 +30,6 @@
 - `.github/workflows/`へCI・デプロイワークフローを、`.github/dependabot.yml`へGitHub Actionsの更新設定を追加する。
 - Azureリソース定義、環境別パラメーター例、構築・認証・デプロイ手順をリポジトリへ追加する。
 - `staticwebapp.config.json`と、その設定を含むproduction build成果物を追加する。
-- `docs/architecture/`へ暫定構成図と説明を追加し、`README.md`へ必要な開発・運用手順を追記する。
+- `docs/architecture/`へF/S専用構成図と説明を追加し、`README.md`へ必要な開発・運用手順を追記する。
 - Azureサブスクリプション、検証用リソースグループ、SWA Freeリソース、およびGitHub Actionsのデプロイ用secretが必要になる。
 - アプリケーションの機能、公開API、Blob Storage、依存方向には変更を加えない。

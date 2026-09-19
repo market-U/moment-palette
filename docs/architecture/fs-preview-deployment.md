@@ -1,17 +1,18 @@
-# F/S用SWAデプロイ仕様の確認記録
+# F/S用SWAデプロイ仕様と実装確認記録
 
-この文書は、`establish-preview-deployment`で採用した外部仕様とGitHub Actionを記録する。確認日は2026-09-18である。Portal生成テンプレートは使用せず、次の公式ドキュメントおよび正規リポジトリを確認した。
+この文書は、`establish-preview-deployment`で採用した外部仕様、GitHub Action、実装・検証結果を記録する。外部仕様の確認日は2026-09-18、実装結果の更新日は2026-09-19である。Portal生成テンプレートは使用せず、次の公式ドキュメントおよび正規リポジトリを確認した。
 
-## 暫定構成図
+## 実装済み構成図
 
 - 対象環境: 技術F/S専用
-- 更新日: 2026-09-18
-- 構成状態: **提案**
+- 更新日: 2026-09-19
+- 構成状態: **実装済み**
 
 ```mermaid
 flowchart LR
   developer["開発者"]
-  devices["モバイル実機<br/>iPhone Safari / iPhone Chrome / Android Chrome"]
+  verifiedDevices["確認済み実機<br/>iPhone 15 / iOS 26<br/>Safari / Chrome"]
+  pendingDevice["リリース後に確認<br/>Android Chrome"]
   excluded["今回の対象外<br/>Blob Storage / マネージドAPI / 固定dev環境"]
 
   subgraph github["GitHub"]
@@ -30,19 +31,37 @@ flowchart LR
   repository -->|"main push / PRイベント"| actions
   actions -->|"main push: 生成済みdistを配信"| production
   actions -->|"通常PR: 配信・終了"| preview
-  production -->|"公開HTTPS URL"| devices
-  preview -->|"公開HTTPS URL"| devices
+  production -->|"公開HTTPS URL / 確認済み"| verifiedDevices
+  preview -->|"公開HTTPS URL / 確認済み"| verifiedDevices
+  production -.->|"端末確保後に確認"| pendingDevice
   production -.->|"構築しない"| excluded
 
   classDef azureService fill:#e6f6ff,stroke:#0078d4,color:#102a43
   classDef client fill:#fffbea,stroke:#b7791f,color:#102a43
   classDef outOfScope fill:#f5f5f5,stroke:#829ab1,color:#486581,stroke-dasharray:5 5
   class production,preview azureService
-  class devices client
+  class verifiedDevices client
+  class pendingDevice outOfScope
   class excluded outOfScope
 ```
 
 SWA上のProduction環境は、実サービス本番ではなくマージ済み状態を配信するF/S用固定環境である。外部forkとDependabot PRは品質検査だけを行い、SWAへはデプロイしない。
+
+## 実装・検証結果
+
+| 項目 | 結果 |
+|---|---|
+| リソースグループ | `rg-moment-palette-fs` |
+| SWA | `moment-palette-fs-market-u-20260918` / Free / East Asia |
+| 固定F/S URL | <https://icy-mushroom-0c0e42e00.5.azurestaticapps.net/> |
+| `main`デプロイ | PR #3のmerge commit `ad9c9fc`で品質検査、production build、生成済み`dist`のデプロイに成功 |
+| PRライフサイクル | PR #3で同じプレビューURLの更新とclose処理に成功。close後はAzureの`default`環境だけが残り、旧プレビューURLは404を返した |
+| SPA直接アクセス | ルートと任意のアプリ内URLが同じアプリシェルを返し、存在しない`/assets/*`は404を返すことを確認 |
+| 実機 | iPhone 15（iOS 26）のSafariとChromeでPR環境・固定環境とも証明書エラーなし。アプリ内URLは起動後に現在のルーティング規則で固定URLへ戻る |
+| Android | 利用できる実機がないため、端末を確保できるリリース後にChromeで確認する |
+| Dependabot | `github-actions`の週次監視を認識し、2026-09-19の初回version update jobは更新対象なしで完了 |
+
+復旧手順はリポジトリルートの[`README.md`](../../README.md#復旧)に記載している。
 
 図はGitHubがMarkdown内でネイティブ描画するMermaidを正本兼表示形式とする。Microsoftの[Azure Architecture Icons](https://learn.microsoft.com/azure/architecture/icons/)と[Architecture design diagrams](https://learn.microsoft.com/azure/well-architected/architect-role/design-diagrams)の方針を確認し、正式なAzureサービス名、方向付きでラベルのある経路、対象範囲、更新日、状態を明示した。今回の小さな提案図では、追加レンダラーや未登録のアイコンライブラリを必要としない再現性を優先して公式SVGを埋め込まない。より詳細な実サービス構成図を作る際は、最新の公式アイコンを使う。
 

@@ -61,10 +61,10 @@
 ## 8. 実機確認と完了記録
 
 - [x] 8.1 PRプレビューURLをiPhone 15（iOS 26）のSafariおよびChromeで開き、証明書エラーなしでアプリケーションシェルとアプリ内URLを表示できることを確認する。Android Chromeは端末を確保できるリリース後のフォロー項目とする
-- [ ] 8.2 PRをmergeして`main`の固定F/S URLへデプロイされ、PR一時環境が削除されることを確認する。最初のPRでclose処理を検証できない場合は、workflowが`main`へ入った後に確認用PRを作成して検証する
-- [ ] 8.3 `main`の固定F/S URLをiPhone 15（iOS 26）のSafariおよびChromeで開き、証明書エラーなしでアプリケーションシェルとアプリ内URLを表示できることを確認する
-- [ ] 8.4 実装済みリソース、固定URL、PRライフサイクル、iPhone実機確認結果、Android実機確認をリリース後に行う方針、復旧手順に合わせてREADMEと構成図を更新し、構成状態を「実装済み」に変更する
-- [ ] 8.5 Blob Storage、マネージドAPI、SAS URL、固定dev環境、長期devブランチ、カスタムドメインが追加されていないことを確認する
-- [ ] 8.6 mainへのmerge後、Dependabotが`github-actions`の週次更新設定を認識していることを確認する。更新PRが作成された場合は通常の品質検査だけが行われ、SWAデプロイがskipされることを確認する
-- [ ] 8.7 `openspec validate establish-preview-deployment`と実装全体の品質検査を実行し、proposal・design・specs・tasks・実装の整合を確認する
-- [ ] 8.8 `docs/development-roadmap.md`のフェーズ2の状態、現在地、「次のセッションで行うこと」を実際の完了結果に合わせて更新する
+- [x] 8.2 PRをmergeして`main`の固定F/S URLへデプロイされ、PR一時環境が削除されることを確認する。最初のPRでclose処理を検証できない場合は、workflowが`main`へ入った後に確認用PRを作成して検証する
+- [x] 8.3 `main`の固定F/S URLをiPhone 15（iOS 26）のSafariおよびChromeで開き、証明書エラーなしでアプリケーションシェルとアプリ内URLを表示できることを確認する
+- [x] 8.4 実装済みリソース、固定URL、PRライフサイクル、iPhone実機確認結果、Android実機確認をリリース後に行う方針、復旧手順に合わせてREADMEと構成図を更新し、構成状態を「実装済み」に変更する
+- [x] 8.5 Blob Storage、マネージドAPI、SAS URL、固定dev環境、長期devブランチ、カスタムドメインが追加されていないことを確認する
+- [x] 8.6 mainへのmerge後、Dependabotが`github-actions`の週次更新設定を認識していることを確認する。更新PRが作成された場合は通常の品質検査だけが行われ、SWAデプロイがskipされることを確認する
+- [x] 8.7 `openspec validate establish-preview-deployment`と実装全体の品質検査を実行し、proposal・design・specs・tasks・実装の整合を確認する
+- [x] 8.8 `docs/development-roadmap.md`のフェーズ2の状態、現在地、「次のセッションで行うこと」を実際の完了結果に合わせて更新する
