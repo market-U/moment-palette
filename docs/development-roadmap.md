@@ -22,7 +22,8 @@
 - 初期リリースには、カメラ撮影、端末内の写真、カラーパレットによる単色塗りの三つを含める方針に決定した。
 - F/S専用のAzure Static Web Apps Free、Bicep、GitHub Actions、SPA設定、PRプレビューを実装済みである。
 - `main`の固定F/S URLとPRプレビューをiPhone 15（iOS 26）のSafari・Chromeで確認済みである。Android Chromeは実機を確保できるリリース後に確認する。
-- 次は`establish-preview-deployment`をverify・archiveした後、フェーズ3の中核技術F/Sを開始する。
+- `establish-preview-deployment`はverifyとmain specsへの同期を完了し、archive済みである。
+- 次はフェーズ3の中核技術F/Sを開始する。
 
 ## 実行順序
 
@@ -243,10 +244,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ## 次のセッションで行うこと
 
-1. `finalize-preview-deployment`の完了記録PRを確認して`main`へmergeする。
-2. `establish-preview-deployment`の実装とアーティファクトの一致をverifyする。
-3. 検証結果に問題がなければ、delta specをmain specsへ同期してchangeをarchiveする。
-4. フェーズ3の最初のF/Sで扱う問いをexploreし、`validate-camera-compositing`または同等の責務へ絞ったchangeを開始する。
+1. フェーズ3の最初のF/Sで扱う問いをexploreし、`validate-camera-compositing`または同等の責務へ絞ったchangeを開始する。
 
 ## 更新ルール
 
