@@ -60,13 +60,15 @@ SWA CLIはルーティング設定のローカル確認だけに使用し、Azur
 |---|---|
 | 生成済み成果物の配信 | `action: upload` |
 | PR一時環境の終了 | `action: close` |
-| F/S用固定環境のブランチ | `production_branch: main` |
+| F/S用固定環境のブランチ | workflowのpush triggerを`main`だけに限定 |
 | Action内部のbuild | `skip_app_build: true` |
 | 配信する生成済み成果物 | `app_location: dist` |
 | `skip_app_build`時の出力先 | `output_location: ''` |
 | API | `api_location`を指定しない |
 
 `skip_app_build: true`の場合、`app_location`はソースではなく配信対象のbuild出力を指し、`output_location`は空にする。`staticwebapp.config.json`はbuild出力のルートに置く。
+
+実行ログで公式Actionの`action.yml`が`production_branch`を入力として公開していないことを確認したため、この無効な入力は指定しない。固定環境への配信元はworkflowのpush triggerを`main`だけに限定して保証し、`main`向けPRはGitHubのpull requestイベント情報から一時環境へ配信する。
 
 ## 固定したGitHub Action
 

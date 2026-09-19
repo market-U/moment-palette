@@ -38,7 +38,7 @@ Portalが生成するGitHub Actionsテンプレートは、生成時期によっ
 
 ### 2. `main`をF/S用SWAのProductionブランチにする
 
-GitHub ActionsとSWA Actionの`production_branch`には`main`を指定する。
+GitHub Actionsのpush triggerを`main`だけに限定する。現在のSWA Actionは`production_branch`を公開inputとして持たないため指定せず、pushイベントは固定環境、`main`向けpull requestイベントはPR一時環境へ配信する。
 
 ```text
 feature branch

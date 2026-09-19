@@ -13,12 +13,12 @@
 
 ## 3. GitHub Actionsと依存更新
 
-- [x] 3.1 Azure公式ドキュメントと`Azure/static-web-apps-deploy`の公式Action定義を確認し、upload、close、`production_branch`、`skip_app_build`、`app_location`、`output_location`の現行仕様を記録する
+- [x] 3.1 Azure公式ドキュメントと`Azure/static-web-apps-deploy`の公式Action定義を確認し、upload、close、GitHubイベントによる配信先、`skip_app_build`、`app_location`、`output_location`の現行仕様を記録する
 - [x] 3.2 checkout、Node.js、pnpm、SWA deployの各Actionについて正規リポジトリと現行リリースを確認し、完全長commit SHAと同一行のバージョンコメントを決定する
 - [x] 3.3 `.github/workflows/preview-deployment.yml`を追加し、`main`へのpushと`main`向けPRの作成・更新・再開・終了をtriggerにする
 - [x] 3.4 workflowでリポジトリ指定のNode.jsとpnpmを準備し、pnpm storeをcacheして`pnpm install --frozen-lockfile`を実行する
 - [x] 3.5 workflowで`typecheck`、`test:run`、`lint`、`format:check`、`build`を実行し、いずれかが失敗した場合はdeployへ進まない構成にする
-- [x] 3.6 品質検査成功後に生成済み`dist`を、`skip_app_build: true`、`production_branch: main`、空の`output_location`でSWAへuploadし、API buildを設定しない
+- [x] 3.6 品質検査成功後に生成済み`dist`を、`skip_app_build: true`、空の`output_location`でSWAへuploadし、push triggerを`main`だけに限定してAPI buildを設定しない
 - [x] 3.7 PR終了時はbuildせずSWA Actionのclose処理を実行し、PRまたはブランチ単位のconcurrencyと`cancel-in-progress`で古い成果物の競合を防ぐ
 - [x] 3.8 workflowへ`contents: read`を基本とする最小権限だけを設定し、デプロイトークンをF/S用repository secretから参照して値をログへ出力しない
 - [x] 3.9 `.github/dependabot.yml`へ`github-actions` ecosystemの週次更新を追加し、Action更新PRを自動mergeしない運用にする
