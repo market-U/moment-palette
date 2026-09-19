@@ -9,7 +9,22 @@
 ## 現在の資料
 
 - [`frontend-application.md`](frontend-application.md): Vueフロントエンドのソース構成、責務、依存規則、外部入出力の追加方針。
-- このREADME: Azureを含む初期構成案と、将来作成するアーキテクチャ図の管理方針。
+- [`fs-preview-deployment.md`](fs-preview-deployment.md): F/S用SWAのMermaid構成図、外部仕様、固定したGitHub Actionの確認記録。
+- このREADME: Azureを含む初期構成案と、アーキテクチャ図の管理方針。
+
+## F/S用SWAプレビュー構成
+
+現在のデプロイ対象は、後続の技術F/Sをモバイル実機で確認するためのAzure Static Web Apps Free一つだけである。[F/S用SWA暫定構成図](fs-preview-deployment.md#暫定構成図)は次の経路を示す。
+
+- `main`へのpushは、SWA上の固定F/S環境へ配信する。
+- `main`向けの通常PRは、PR固有の一時環境へ配信する。
+- 固定環境とPR環境はいずれも公開HTTPS URLであり、機密情報や実ユーザーデータを置かない。
+- 外部forkとDependabot PRではrepository secretを利用せず、品質検査だけを行う。
+- Blob Storage、マネージドAPI、SAS URL、固定dev環境は今回構築しない。
+
+SWA上の「Production環境」はAzure側の名称であり、実サービス本番を意味しない。実サービスの環境分離とリリース戦略は、ロードマップのフェーズ6で決める。
+
+Freeプランはサブスクリプションあたり最大10アプリ、アプリあたり最大3個のプレビュー環境という制限がある。Azureリソース作成前に対象サブスクリプションの既存数を再確認し、一人開発では同時に開くプレビュー対象PRを3件以内に保つ。
 
 ## 現在の初期構成案
 
@@ -58,104 +73,16 @@ Azure Static Web Apps Free
 
 ## 図の管理方針
 
-図の編集形式は未決定である。どの形式を選んでも、編集可能なソースを正本とし、GitHub、IDE、ブラウザで確認しやすいSVGを派生成果物として管理する。
+F/S用SWAの暫定図は、Markdown内のMermaidを正本兼表示形式とする。GitHubがMermaidをネイティブ描画するため、Java、ネイティブCLI、派生SVGを追加せず、テキスト差分だけで更新できる。
 
-```text
-編集可能なソース
-    │ レンダリングまたはエクスポート
-    ▼
-確認用SVG
-```
-
-- SVGを直接編集せず、正本となるソースを変更して再生成する。
-- 正本とSVGを同じコミットで更新する。
-- Microsoftが提供するAzure Architecture Iconsを使用する。
-- アイコンの近くにサービス名を記載し、公式の利用ガイドラインに従う。
-- 図には対象環境、更新日、構成の状態が「提案」「実装済み」のどちらかを明記する。
-- 計画対象外または比較用の構成を描く場合は、実装済みの構成と視覚的に区別する。
+- 図のソースを関連文書と同じリポジトリでversion管理する。
+- 対象環境、更新日、構成状態が「提案」「実装済み」のどちらかを明記する。
+- 方向付き矢印を使い、プロトコルやイベントなど意味が自明でない経路にラベルを付ける。
+- 計画対象外の要素を視覚的に区別し、図を過密にしない。
+- 色だけに意味を持たせず、ラベルと線種を併用する。
 - 画像だけで判断理由を表現せず、READMEまたはOpenSpec designへ補足を書く。
 
-## 図作成ツールの選択肢
-
-### Draw.ioとSVG
-
-```text
-azure-initial.drawio  ← 編集用の正本
-          │ diagrams.netでエクスポート
-          ▼
-azure-initial.svg     ← 確認用
-```
-
-- 人間がドラッグ操作で配置や見た目を細かく調整しやすい。
-- diagrams.netのAzure図形を利用するか、Microsoftが配布する公式SVGを取り込める。
-- AIはDraw.ioのXMLを直接生成・編集するか、ブラウザや対応ツールを操作して編集する。
-- XMLのGit差分が読みづらく、自動生成やAIによる部分修正では注意が必要である。
-- 現在のCodex環境には専用のDraw.ioプラグインを導入していない。採用時に、直接生成、ブラウザ操作、CLI、MCPまたは専用スキルのどれを使うか決める。
-
-### PlantUMLとSVG
-
-```text
-azure-initial.puml  ← テキスト形式の正本
-         │ PlantUMLでレンダリング
-         ▼
-azure-initial.svg   ← 確認用
-```
-
-- テキストとしてGit差分を確認しやすい。
-- AIによる生成・修正と、スクリプトやCIによるSVG再生成に向いている。
-- コミュニティ管理のAzure-PlantUMLを使うと、Azureサービスのアイコンとマクロを利用できる。
-- Azure-PlantUMLは公式アイコンを主な素材としているが、Microsoft公式のライブラリではない。採用時はバージョンを固定し、必要なincludeをリポジトリ内へ保持する。
-- 自動レイアウトが中心になるため、人間が位置を細かく調整する用途ではDraw.ioより自由度が低い。
-
-### FigmaとSVG
-
-```text
-Figmaファイル         ← 編集用の正本
-       │ Figmaからエクスポート
-       ▼
-azure-initial.svg     ← リポジトリ内の確認用
-```
-
-- UIデザインと同じツールで見た目を細かく整えられる。
-- Microsoftが配布する公式SVGアイコンを取り込める。
-- 編集用の正本がリポジトリ外に置かれるため、Figmaファイルへの参照、権限、履歴の管理が必要になる。
-- アーキテクチャの変更とGitコミットを自動的に対応付けにくい。
-
-### 比較
-
-| 方式 | 主な長所 | 主な注意点 | 適する運用 |
-|---|---|---|---|
-| Draw.io＋SVG | 人間が直感的に配置を調整できる | XML差分が読みづらい | 人間が図を頻繁に手動編集する |
-| PlantUML＋SVG | Git差分と自動生成に強い | レイアウト調整とアイコンライブラリの管理が必要 | AIとコード中心で継続更新する |
-| Figma＋SVG | 見た目を細かく整えやすい | 正本がリポジトリ外になる | UI資料と同じ環境で管理する |
-
-一人開発でAIが継続的に更新する現在の想定では、PlantUML＋SVGをやや優先する。ただし、開発者が図を手動で調整する頻度が高い場合はDraw.io＋SVGを選ぶ。最終決定は、Azure配信基盤のOpenSpec changeを開始する前に行う。
-
-## 想定するファイル構成
-
-Draw.ioを採用する場合:
-
-```text
-docs/architecture/
-├── README.md
-├── azure-initial.drawio
-└── azure-initial.svg
-```
-
-PlantUMLを採用する場合:
-
-```text
-docs/architecture/
-├── README.md
-├── azure-initial.puml
-├── azure-initial.svg
-└── vendor/
-    └── azure-plantuml/
-```
-
-Figmaを採用する場合は、編集用ファイルへの参照と権限上の注意を `docs/architecture/figma.md` に記録し、確認用SVGをこのディレクトリへ保存する。
-
-データフローやリリース継続性を一枚で表すと読みづらい場合は、`azure-template-flow.*` や `azure-release-flow.*` として図を分ける。
+MicrosoftのAzure Well-Architected Frameworkは、図の目的と閲覧者に合わせること、公式のサービス名とアイコン、明確な矢印・ラベル、メタデータ、version管理を推奨しており、特定の作図ツールは指定していない。今回の小さな提案図ではGitHub上の再現性を優先し、公式SVGアイコンは埋め込まない。実サービス向けにサービス数が増え、アイコンによる識別が読みやすさへ寄与する場合は、最新のMicrosoft公式Azure Architecture IconsをDraw.io、Visio、Figmaなどへ取り込み、編集可能な正本と確認用成果物を同じchangeで管理する。
 
 ## 現時点で構成に含めない要素
 
@@ -170,7 +97,8 @@ Figmaを採用する場合は、編集用ファイルへの参照と権限上の
 ## 参考資料
 
 - [Azure Architecture Icons](https://learn.microsoft.com/azure/architecture/icons/)
+- [Architecture design diagrams](https://learn.microsoft.com/azure/well-architected/architect-role/design-diagrams)
+- [GitHubでMermaid図を作成する](https://docs.github.com/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams)
 - [Azure Static Web Appsのホスティングプラン](https://learn.microsoft.com/azure/static-web-apps/plans)
 - [Azure Static Web AppsへAPIを追加する](https://learn.microsoft.com/azure/static-web-apps/add-api)
 - [Shared Access Signatureの概要](https://learn.microsoft.com/azure/storage/common/storage-sas-overview)
-- [Azure-PlantUML](https://github.com/plantuml-stdlib/Azure-PlantUML)

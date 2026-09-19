@@ -4,7 +4,7 @@ Moment Paletteは、後続のカメラ・画像処理F/SをiPhone Safari、iPhon
 
 今回作るAzure Static Web Apps（以下SWA）はF/S専用リソースであり、そのSWA内の「Production環境」は実サービスの本番環境を意味しない。実サービス向けの環境分離、リリースブランチ、デプロイ承認は、F/S結果を反映して本番配信基盤を構築するフェーズ6で決める。
 
-Azure公式仕様では、Productionブランチへのpull request（以下PR）ごとに一時的なプレビュー環境を作成できる。SWA Freeでは、一つのアプリにつきProduction環境とは別に最大3個のプレビュー環境を持てる。現在のサブスクリプションには4個のSWAがあり、Freeのサブスクリプション上限10個に対して今回の1個を追加できる見込みである。
+Azure公式仕様では、Productionブランチへのpull request（以下PR）ごとに一時的なプレビュー環境を作成できる。SWA Freeでは、一つのアプリにつきProduction環境とは別に最大3個のプレビュー環境を持てる。2026-09-18に対象サブスクリプションをAzure CLIで確認した時点では4個のSWAがすべてFreeであり、Freeのサブスクリプション上限10個に対して今回の1個を追加すると5個になる。
 
 Portalが生成するGitHub Actionsテンプレートは、生成時期によって利用Actionや設定例が古い可能性がある。ワークフローはリポジトリで明示的に管理し、実装時点のAzure公式ドキュメント、公式SWA Actionの入力定義、GitHub Actionsのセキュリティ推奨事項を確認してからActionと入力値を固定する。
 
@@ -84,7 +84,9 @@ CIとdeployを別ワークフローへ分けて`workflow_run`で接続する案�
 - `skip_app_build`使用時の`app_location`と`output_location`の解釈。
 - `staticwebapp.config.json`をbuild出力へ含める要件。
 
-各GitHub Actionは、公式リポジトリの正規commitであることを確認した完全長commit SHAへ固定し、同じ行のコメントに対応するリリース名を記載する。完全長SHAは参照先の意図しない変更を防ぐ一方、bug修正やセキュリティ修正を自動では受け取らない。そのため`.github/dependabot.yml`で`github-actions` ecosystemを週次監視し、利用可能な更新があればSHAとバージョンコメントを更新するPRを作成する。更新PRは自動mergeせず、通常の品質検査とSWAプレビューを確認してからmergeする。
+各GitHub Actionは、公式リポジトリの正規commitであることを確認した完全長commit SHAへ固定し、同じ行のコメントに対応するリリース名を記載する。完全長SHAは参照先の意図しない変更を防ぐ一方、bug修正やセキュリティ修正を自動では受け取らない。そのため`.github/dependabot.yml`で`github-actions` ecosystemを週次監視し、利用可能な更新があればSHAとバージョンコメントを更新するPRを作成する。更新PRは自動mergeしない。
+
+Dependabotが作成したPRのworkflowはfork由来と同等に扱われ、Actionsのrepository secretを受け取れない。更新PRでは通常の品質検査だけを行い、SWAへの自動プレビューは行わない。レビューした更新を通常の作業ブランチへ取り込んだ確認PRで実デプロイを検証する。デプロイトークンをDependabot専用secretへ複製せず、信頼されないコードへ強い権限を与え得る`pull_request_target`も利用しない。
 
 浮動major tagだけを参照する案は、互換性のある更新や一部の保護変更を自動的に受け取れる一方、同じtagが別commitへ移動するとレビューなしで実行コードが変わる。デプロイトークンを扱うworkflowでは供給網の変更をPRとして確認できる方を優先し、完全長SHAとDependabotを組み合わせる。
 
@@ -98,7 +100,7 @@ Azureネイティブで追加のstate管理を必要としないBicepを採用�
 
 リソースグループの作成は、対象サブスクリプションを明示した冪等な`az group create`手順として文書化する。リソースグループ自体までsubscriptionスコープのBicepで作成する案は、モジュール分割とサブスクリプションスコープ権限を必要とし、SWA一つを作る今回には複雑なため採用しない。
 
-SWAのリージョンは、実装時にAzure CLIで利用可能な候補を取得し、対象ユーザーに近いリージョンを選んで`.bicepparam`へ固定する。過去のリージョン一覧を設計へハードコードしない。リソース名はグローバルな重複を避けるsuffixをパラメーターで受け取る。
+SWAのリージョンは、2026-09-18にAzure CLIで取得した利用可能候補のうち対象ユーザーに近いEast Asiaを選び、Azure内部名`eastasia`を`.bicepparam`へ固定する。再構築時は最新の候補を取得して再確認する。リソース名はグローバルな重複を避けるsuffixをパラメーターで受け取る。
 
 Terraformは複数クラウドや既存stateとの統合に利点があるが、今回のAzure単独・単一リソースではproviderとstateの管理が追加負担になるため採用しない。Azure CLIだけでリソース作成を記述する案は、目標状態と変更差分をレビューしにくいため採用しない。
 
@@ -114,19 +116,23 @@ Azure OpenID Connectでの認証は長期secretを減らせる可能性がある
 
 設定ファイルは`public/staticwebapp.config.json`へ配置し、Vite buildによって`dist`直下へコピーする。`navigationFallback.rewrite`を`/index.html`とし、実在しないアセット要求へHTMLを返さないよう、少なくとも`/assets/*`をfallback対象から除外する。
 
+ローカル確認には公式の`@azure/static-web-apps-cli`を開発依存として固定し、production build後に`swa start dist --swa-config-location dist`で起動する。設定場所を明示してbuild成果物内の`staticwebapp.config.json`を必ず検証する。Vite Previewは同設定を解釈しないため、SWA固有のfallbackと除外設定の判定には使用しない。SWA CLIはローカルエミュレーターであり、Azureへのデプロイには使用しない。
+
 認証、ロール、独自header、API runtime、キャッシュ方針は今回設定しない。必要性が確認された設定だけを後続changeで追加する。
 
-### 8. 暫定構成図はPlantUMLを正本、SVGを確認用とする
+### 8. 暫定構成図はMarkdown内のMermaidを正本兼表示形式とする
 
-既存のアーキテクチャ管理方針に従い、Git差分と継続的な更新に向くPlantUMLを編集可能な正本とし、SVGを確認用成果物として同じコミットで管理する。図にはGitHub Actions、F/S用SWA、`main`の固定環境、PR一時環境、モバイル実機、HTTPS経路、対象外のBlob・APIを示す。
+Git差分とAIによる継続的な更新に向き、GitHub上で追加のレンダラーなしに表示できるMermaidを採用する。図にはGitHub Actions、F/S用SWA、`main`の固定環境、PR一時環境、モバイル実機、HTTPS経路、対象外のBlob・APIを示す。対象環境、更新日、構成状態も図と同じ文書へ明記する。
 
-AzureアイコンにはMicrosoft公式Azure Architecture Iconsを素材として使用する。Azure-PlantUMLなどの補助ライブラリを使う場合は、公式素材との関係、ライセンス、固定バージョンを確認し、必要最小限のファイルをリポジトリ内へ保持する。補助ライブラリの導入が図一枚に対して過剰な場合は、公式SVGをPlantUMLから参照できる形で保持する。
+Microsoft公式のAzure Architecture IconsとAzure Well-Architected Frameworkの作図方針は確認する。一方、今回の小さな提案図では、GitHubのMermaid描画へ公式SVGを安全かつ可搬に登録するための追加処理や、コミュニティ管理のアイコンライブラリを導入しない。正式なAzureサービス名、方向付きの矢印、経路ラベル、対象範囲を明示することで意図を伝える。実サービス向けの詳細な構成図で公式アイコンが必要になった場合は、その時点の公式素材を使う。
+
+PlantUMLと確認用SVGを管理する案は、ローカルレンダラーとJavaまたはネイティブ実行ファイルの準備が必要で、現状の図一枚に対して再現手順が重いため採用しない。
 
 ## Risks / Trade-offs
 
 - [SWA Freeではプレビュー環境が同時に3個まで] → 一人開発では同時PRを3個以内に保ち、PR終了時の`close`処理を必ず実行する。上限を超える運用が必要になった場合は、本番配信基盤changeでプランまたは環境戦略を見直す。
 - [PRプレビューURLはリポジトリが非公開でもURLを知る人からアクセスできる] → 機密情報、秘密設定、実ユーザーデータを配置せず、F/S用の公開可能なクライアントだけを配信する。
-- [完全長SHAへ固定したActionは修正を自動取得しない] → DependabotでGitHub Actionsを週次監視し、SHAとバージョンコメントを更新するPRを通常の品質検査とプレビュー確認後にmergeする。
+- [完全長SHAへ固定したActionは修正を自動取得しない] → DependabotでGitHub Actionsを週次監視し、SHAとバージョンコメントを更新するPRを作成する。Dependabot PRではsecretを使うプレビューを行わず、通常の品質検査とレビュー後、通常ブランチの確認PRで実デプロイを検証する。
 - [SWA ActionやGitHub Actionsの入力・推奨バージョンが変わる] → Portal生成例を流用せず、実装時と更新PRのレビュー時に公式仕様とAction定義を再確認する。
 - [SWA Actionの完全長SHAだけでは内部の`stable`コンテナとSWAサービスを固定できない] → 完全な実行環境固定とは扱わず、PR環境と固定F/S環境への実デプロイで互換性を確認する。
 - [デプロイトークンが漏えい・失効すると配信できない] → repository secretで管理し、ログへ出力せず、漏えいまたは失効時はAzure側で再発行してsecretを更新する。
@@ -134,7 +140,7 @@ AzureアイコンにはMicrosoft公式Azure Architecture Iconsを素材として
 - [F/S用SWAのProductionという名称が実サービス本番と誤認される] → リソース名、タグ、README、構成図でF/S専用と明示し、本番戦略はフェーズ6の判断として分離する。
 - [FreeプランにはSLAがない] → F/S用途として許容し、実サービス本番の可用性要件はフェーズ6で評価する。
 - [選択したリージョンが新規SWA作成時に利用できない] → デプロイ直前にAzure CLIで候補を取得し、パラメーターへ記録する。
-- [GitHub CLIは現在再認証が必要で、Azure CLIは未導入] → GitHub secret設定前にユーザーが`gh auth login -h github.com`を実行し、Azure操作前にAzure CLIの導入と`az login`を行う。標準の認証経路が利用できない場合は別経路へ迂回せず作業を停止する。
+- [GitHub CLIまたはAzure CLIの認証が失効するとクラウド操作を継続できない] → 操作前に`gh auth status -h github.com`と`az account show`で認証状態を確認する。標準の認証経路が利用できない場合は別経路へ迂回せず作業を停止する。
 
 ## Migration Plan
 
