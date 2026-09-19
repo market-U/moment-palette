@@ -51,12 +51,12 @@
 
 ## 7. GitHub ActionsとSWAプレビューの確認
 
-- [ ] 7.1 作業ブランチをpushして`main`向けPRを作成し、品質検査とproduction buildがGitHub Actionsで成功することを確認する
-- [ ] 7.2 PR固有のSWA HTTPS URLが通知され、生成済み`dist`が再buildなしでプレビュー環境へ配信されたことをworkflowログで確認する
-- [ ] 7.3 同じPRへ追加commitをpushし、同じプレビューURLが新しい成果物へ更新され、古いworkflow実行が競合しないことを確認する
-- [ ] 7.4 一時的な検証commitで品質検査を失敗させ、SWA uploadが実行されないことを確認した後、そのcommitを安全に取り消す
-- [ ] 7.5 PRプレビューでルートURLとアプリ内URLが表示でき、`/assets/`配下の存在しないファイルが`index.html`へrewriteされないことを確認する
-- [ ] 7.6 Dependabotが`github-actions`設定を認識して週次更新対象を確認でき、更新PRでは通常の品質検査だけが行われ、SWAデプロイがskipされることを確認する。Action更新の実デプロイは通常ブランチの確認PRで行う
+- [x] 7.1 作業ブランチをpushして`main`向けPRを作成し、品質検査とproduction buildがGitHub Actionsで成功することを確認する
+- [x] 7.2 PR固有のSWA HTTPS URLが通知され、生成済み`dist`が再buildなしでプレビュー環境へ配信されたことをworkflowログで確認する
+- [x] 7.3 同じPRへ追加commitをpushし、同じプレビューURLが新しい成果物へ更新され、古いworkflow実行が競合しないことを確認する
+- [x] 7.4 一時的な検証commitで品質検査を失敗させ、SWA uploadが実行されないことを確認した後、そのcommitを安全に取り消す
+- [x] 7.5 PRプレビューでルートURLとアプリ内URLが表示でき、`/assets/`配下の存在しないファイルが`index.html`へrewriteされないことを確認する
+- [x] 7.6 GitHub公式仕様と設定を照合し、`github-actions`の週次更新がデフォルトブランチへのmerge後に有効になることと、Dependabot PRでは通常の品質検査だけを行いSWAデプロイをskipする条件を静的に確認する。Action更新の実デプロイは通常ブランチの確認PRで行う
 
 ## 8. 実機確認と完了記録
 
@@ -65,5 +65,6 @@
 - [ ] 8.3 `main`の固定F/S URLをiPhone Safari、iPhone Chrome、Android Chromeで開き、証明書エラーなしでアプリケーションシェルとアプリ内URLを表示できることを確認する
 - [ ] 8.4 実装済みリソース、固定URL、PRライフサイクル、実機確認結果、復旧手順に合わせてREADMEと構成図を更新し、構成状態を「実装済み」に変更する
 - [ ] 8.5 Blob Storage、マネージドAPI、SAS URL、固定dev環境、長期devブランチ、カスタムドメインが追加されていないことを確認する
-- [ ] 8.6 `openspec validate establish-preview-deployment`と実装全体の品質検査を実行し、proposal・design・specs・tasks・実装の整合を確認する
-- [ ] 8.7 `docs/development-roadmap.md`のフェーズ2の状態、現在地、「次のセッションで行うこと」を実際の完了結果に合わせて更新する
+- [ ] 8.6 mainへのmerge後、Dependabotが`github-actions`の週次更新設定を認識していることを確認する。更新PRが作成された場合は通常の品質検査だけが行われ、SWAデプロイがskipされることを確認する
+- [ ] 8.7 `openspec validate establish-preview-deployment`と実装全体の品質検査を実行し、proposal・design・specs・tasks・実装の整合を確認する
+- [ ] 8.8 `docs/development-roadmap.md`のフェーズ2の状態、現在地、「次のセッションで行うこと」を実際の完了結果に合わせて更新する
