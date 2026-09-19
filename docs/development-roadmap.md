@@ -1,8 +1,8 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: フェーズ1 完了・フェーズ2 着手待ち
+> ステータス: フェーズ2 完了・フェーズ3 着手待ち
 >
-> 最終更新日: 2026-09-17
+> 最終更新日: 2026-09-19
 
 ## 目的
 
@@ -10,7 +10,7 @@
 
 ## 現在地
 
-- 最初のOpenSpec change `establish-frontend-foundation` は、計画した実装と完了確認をすべて終え、verifyとarchiveを行える状態である。
+- 最初のOpenSpec change `establish-frontend-foundation` は完了し、archive済みである。
 - Gitリポジトリは初期化済みである。
 - Vue 3、Vite、TypeScriptによるアプリケーションシェル、ルーティング、日本語・英語表示、モバイル向け基本レイアウトを実装済みである。
 - Node.jsとpnpmの固定、単体テスト、型検査、lint、format、production build、開発者向け文書を整備済みである。
@@ -20,7 +20,9 @@
 - Figma連携を導入済みで、画面ラフからデザインを検討できる状態である。
 - [MomentPaletteのFigma](https://www.figma.com/design/K2tfDw1Wj9pQJ2heFbh7FJ/MomentPalette?node-id=0-1&t=P4QjS9z2QLy0duFM-1)で、主要画面、画面遷移、エリア選択、カメラ、写真、単色塗り、完成・共有の操作案を作成済みである。
 - 初期リリースには、カメラ撮影、端末内の写真、カラーパレットによる単色塗りの三つを含める方針に決定した。
-- 次はフェーズ1のchangeをverify、archiveした後、フェーズ2として実機F/S用の最小デプロイ環境を構築する。
+- F/S専用のAzure Static Web Apps Free、Bicep、GitHub Actions、SPA設定、PRプレビューを実装済みである。
+- `main`の固定F/S URLとPRプレビューをiPhone 15（iOS 26）のSafari・Chromeで確認済みである。Android Chromeは実機を確保できるリリース後に確認する。
+- 次は`establish-preview-deployment`をverify・archiveした後、フェーズ3の中核技術F/Sを開始する。
 
 ## 実行順序
 
@@ -91,9 +93,9 @@ UIコンポーネントライブラリは、画面検討の結果が不足して
 
 ### 2. 実機F/S用の最小デプロイ環境を構築する
 
-ステータス: 未着手
+ステータス: 完了
 
-OpenSpec change候補: `establish-preview-deployment`
+対応OpenSpec change: `establish-preview-deployment`
 
 目的は、iPhoneやAndroidの実機からHTTPSでアクセスできる検証環境を、最小構成で早期に用意することである。本番用のBlob、マネージドAPI、SAS URL、キャッシュ、リリース継続性まではこのchangeで確定しない。
 
@@ -107,6 +109,15 @@ OpenSpec change候補: `establish-preview-deployment`
 - 暫定的なAzure構成図を `docs/architecture/` へ配置する。
 
 このchangeは通常changeとして扱う。F/S後にAzure構成が変わった場合は、フェーズ6の本番構築changeで設定、IaC、構成図を更新する。
+
+完了結果:
+
+- BicepからF/S専用SWA FreeをEast Asiaへ再現可能に構築した。
+- `main`の固定F/S環境と、`main`向けPRの一時プレビュー環境をGitHub Actionsから配信できる。
+- 固定F/S URLは<https://icy-mushroom-0c0e42e00.5.azurestaticapps.net/>である。
+- PRの作成・更新・終了、品質検査失敗時のデプロイ抑止、SPA直接アクセス、存在しない静的アセットの404を確認した。
+- iPhone 15（iOS 26）のSafari・ChromeでPR環境と固定環境を確認した。Android Chromeはリリース後のフォロー項目とした。
+- Blob Storage、マネージドAPI、SAS URL、固定dev環境、長期devブランチ、カスタムドメインは追加していない。
 
 ### 3. 中核技術のF/Sを行う
 
@@ -232,10 +243,10 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ## 次のセッションで行うこと
 
-1. `establish-frontend-foundation` の実装とアーティファクトの一致をverifyする。
-2. 検証結果に問題がなければ、delta specをmain specsへ同期してchangeをarchiveする。
-3. フェーズ2の最小デプロイ環境を一つの検証可能な成果へ絞り、OpenSpec changeを開始する。
-4. Azure Static Web Apps、GitHub Actions、最小限のIaC、暫定アーキテクチャ図の具体的な範囲をproposalで定める。
+1. `finalize-preview-deployment`の完了記録PRを確認して`main`へmergeする。
+2. `establish-preview-deployment`の実装とアーティファクトの一致をverifyする。
+3. 検証結果に問題がなければ、delta specをmain specsへ同期してchangeをarchiveする。
+4. フェーズ3の最初のF/Sで扱う問いをexploreし、`validate-camera-compositing`または同等の責務へ絞ったchangeを開始する。
 
 ## 更新ルール
 
