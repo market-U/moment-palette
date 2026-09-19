@@ -71,16 +71,16 @@
 - **WHEN** 開発者がproduction buildの成果物を検査する
 - **THEN** SWAデプロイトークンおよびAzure管理用の認証情報は含まれていない
 
-### Requirement: 正式対応予定実機からのHTTPS確認
-F/S用SWAは、iPhone Safari、iPhone Chrome、Android ChromeからHTTPSでアクセスでき、固定環境とPRプレビュー環境の両方でアプリケーションシェルを表示できなければならない（SHALL）。
+### Requirement: 利用可能な実機からのHTTPS確認
+F/S用SWAは、iPhone SafariおよびiPhone ChromeからHTTPSでアクセスでき、固定環境とPRプレビュー環境の両方でアプリケーションシェルを表示できなければならない（SHALL）。Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、このchangeの完了条件には含めない。
+
+#### Scenario: iPhoneからPR環境を確認する
+- **WHEN** 検証者がiPhone SafariおよびiPhone Chromeで開いているPRのプレビューHTTPS URLを開く
+- **THEN** 各ブラウザは証明書エラーなしでそのPRのアプリケーションシェルを表示する
 
 #### Scenario: iPhoneから固定環境を確認する
 - **WHEN** 検証者がiPhone SafariおよびiPhone Chromeで`main`の固定HTTPS URLを開く
 - **THEN** 各ブラウザは証明書エラーなしでアプリケーションシェルを表示する
-
-#### Scenario: AndroidからPR環境を確認する
-- **WHEN** 検証者がAndroid Chromeで開いているPRのプレビューHTTPS URLを開く
-- **THEN** ブラウザは証明書エラーなしでそのPRのアプリケーションシェルを表示する
 
 ### Requirement: F/Sデプロイ構成と運用手順の記録
 プロジェクトは、F/S用SWAの構成、GitHub Actionsからのデプロイ経路、IaCの検査・適用、secret設定、実機確認、再デプロイによる復旧の手順をリポジトリ内へ記録しなければならない（SHALL）。構成図は編集可能な正本と確認用SVGを持ち、F/S専用の提案構成または実装済み構成であることを明示しなければならない（MUST）。
@@ -92,4 +92,3 @@ F/S用SWAは、iPhone Safari、iPhone Chrome、Android ChromeからHTTPSでア�
 #### Scenario: デプロイ障害から復旧する
 - **WHEN** workflowまたは配信内容の変更によってF/S環境を利用できなくなる
 - **THEN** 開発者は記録された手順から正常なworkflowまたはcommitを再デプロイできる
-

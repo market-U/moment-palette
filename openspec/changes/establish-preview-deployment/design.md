@@ -1,6 +1,6 @@
 ## Context
 
-Moment Paletteは、後続のカメラ・画像処理F/SをiPhone Safari、iPhone Chrome、Android Chromeで実施するため、インターネットからHTTPSでアクセスできる固定URLと、変更をマージする前に実機確認できるURLを必要としている。現在はVueアプリケーションと非対話の品質検査コマンドが存在するが、CI、クラウドリソース、デプロイ設定は存在しない。
+Moment Paletteは、後続のカメラ・画像処理F/Sをモバイルブラウザで実施するため、インターネットからHTTPSでアクセスできる固定URLと、変更をマージする前に実機確認できるURLを必要としている。今回利用可能なiPhone実機ではSafariとChromeを確認し、端末を確保できないAndroid Chromeの実機確認はリリース後のフォロー項目とする。現在はVueアプリケーションと非対話の品質検査コマンドが存在するが、CI、クラウドリソース、デプロイ設定は存在しない。
 
 今回作るAzure Static Web Apps（以下SWA）はF/S専用リソースであり、そのSWA内の「Production環境」は実サービスの本番環境を意味しない。実サービス向けの環境分離、リリースブランチ、デプロイ承認は、F/S結果を反映して本番配信基盤を構築するフェーズ6で決める。
 
@@ -27,6 +27,7 @@ Portalが生成するGitHub Actionsテンプレートは、生成時期によっ
 - 制作中のデプロイをまたぐセッション継続性を確定すること。
 - PRプレビューへ機密データや実ユーザーデータを配置すること。
 - 外部forkからのPRをSWAへデプロイすること。
+- Android Chromeの実機確認を、このchangeの完了前に必須とすること。
 
 ## Decisions
 
@@ -141,6 +142,7 @@ PlantUMLと確認用SVGを管理する案は、ローカルレンダラーとJav
 - [FreeプランにはSLAがない] → F/S用途として許容し、実サービス本番の可用性要件はフェーズ6で評価する。
 - [選択したリージョンが新規SWA作成時に利用できない] → デプロイ直前にAzure CLIで候補を取得し、パラメーターへ記録する。
 - [GitHub CLIまたはAzure CLIの認証が失効するとクラウド操作を継続できない] → 操作前に`gh auth status -h github.com`と`az account show`で認証状態を確認する。標準の認証経路が利用できない場合は別経路へ迂回せず作業を停止する。
+- [Android実機を今回確保できず、Chromeでの確認が残る] → 今回はiPhone 15（iOS 26）のSafariとChromeでPR環境および固定環境を確認し、Android Chromeはリリース後に知人などの協力を得て確認結果を記録する。
 
 ## Migration Plan
 
@@ -150,9 +152,11 @@ PlantUMLと確認用SVGを管理する案は、ローカルレンダラーとJav
 4. F/S用リソースグループを作成し、Bicepを適用してSWA Freeを作成する。
 5. SWAデプロイトークンをGitHub Actions repository secretへ登録する。
 6. workflow、Dependabot設定、`staticwebapp.config.json`、構成図、手順書を含むPRを作成し、PR一時環境への配信とURL通知を確認する。
-7. PR URLをiPhoneおよびAndroidで開き、ルートURLとアプリ内URLの直接アクセスを確認する。
+7. PR URLをiPhone 15（iOS 26）のSafariおよびChromeで開き、ルートURLとアプリ内URLの直接アクセスを確認する。
 8. PRをmergeし、`main`の固定F/S URLが更新されることを確認する。
 9. 実装と確認結果に合わせて構成図および手順書を更新する。
+
+Android Chromeの実機確認は端末を確保できるリリース後に行い、結果を運用記録へ追記する。
 
 workflowの不具合は変更をrevertして直前の正常なworkflowへ戻す。配信内容の不具合は正常なcommitを再デプロイする。SWAリソースやリソースグループの削除は自動ロールバックに含めず、不要と確認してから明示的に行う。
 
