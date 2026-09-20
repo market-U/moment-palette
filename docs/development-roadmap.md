@@ -24,6 +24,7 @@
 - `main`の固定F/S URLとPRプレビューをiPhone 15（iOS 26）のSafari・Chromeで確認済みである。Android Chromeは実機を確保できるリリース後に確認する。
 - `establish-preview-deployment`はverifyとmain specsへの同期を完了し、archive済みである。
 - フェーズ3の先行change `validate-camera-compositing`は実装とiPhone実機確認を完了し、delta specを同期せずarchive済みである。
+- 写真選択、標準APIによるdecode、EXIF Orientation、高解像度縮小、位置・倍率調整、mask合成を検証する`validate-photo-import`を開始した。iPhone 15（iOS 26）のSafari・Chromeでの完了を合否条件とする。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序

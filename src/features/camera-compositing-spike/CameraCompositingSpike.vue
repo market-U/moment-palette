@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import {
+  clientPointToLogical,
+  createCenteredCoverTransform,
+} from '@/shared/lib/mediaTransform'
+import { PointerGestureTracker } from '@/shared/lib/pointerGesture'
+
+import {
   computed,
   nextTick,
   onBeforeUnmount,
@@ -11,8 +17,6 @@ import {
 
 import type { CameraFailure, CameraStreamFactory } from './cameraPort'
 import type { CameraCompositorFactory, CapturedFrames } from './compositorPort'
-import { clientPointToLogical, createCenteredCoverTransform } from './geometry'
-import { PointerGestureTracker } from './pointerGesture'
 import { cameraAreas, cameraSpikeTemplate } from './template'
 import {
   ARTWORK_SIZE,

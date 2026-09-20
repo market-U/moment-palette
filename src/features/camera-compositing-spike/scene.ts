@@ -1,4 +1,4 @@
-import { clamp } from './geometry'
+import { clamp } from '@/shared/lib/mediaTransform'
 
 export interface SceneAlphas {
   source: number

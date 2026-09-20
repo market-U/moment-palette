@@ -1,22 +1,14 @@
+import type { Rect, Size } from '@/shared/lib/mediaTransform'
+
 export const ARTWORK_SIZE = 1080
 
-export interface Size {
-  width: number
-  height: number
-}
-
-export interface Point {
-  x: number
-  y: number
-}
-
-export interface Rect extends Point, Size {}
-
-export interface MediaTransform {
-  scale: number
-  offsetX: number
-  offsetY: number
-}
+// 既存のカメラF/Sの公開型を保ち、共有化による利用側の破壊を避ける。
+export type {
+  MediaTransform,
+  Point,
+  Rect,
+  Size,
+} from '@/shared/lib/mediaTransform'
 
 export type CameraFacing = 'environment' | 'user'
 
