@@ -1,6 +1,6 @@
 # 端末内写真取り込みF/S
 
-> ステータス: 実機確認中
+> ステータス: F/S完了
 >
 > 対応OpenSpec change: `validate-photo-import`
 >
@@ -22,6 +22,18 @@
 ## 固定fixture
 
 `public/spikes/photo-import/fixtures/`に、人工的なSVG原稿から生成したOrientation 1・3・6・8 JPEG、alpha PNG、破損画像、縮小品質確認JPEGを置く。内容、格納寸法、期待方向、再生成手順は同ディレクトリのREADMEに記録する。実機由来写真はリポジトリへ追加しない。
+
+## 成功条件と判定
+
+| 成功条件 | 判定 |
+| --- | --- |
+| 写真ライブラリ、OSカメラ、ファイル選択が同じ処理へ合流し、キャンセル後も継続できる | 成功 |
+| HEIC・HEIF由来写真、JPEG、alpha PNGを標準APIで扱い、入口による形式差を把握できる | 成功。写真ライブラリではHEIF由来写真がJPEG化され、ファイルではHEICのままdecodeできた |
+| Orientation fixtureと実機写真が正しい向きでプレビュー、mask合成、確定される | 成功 |
+| 4096px・12MP候補と2160px候補を比較し、初期リリースの保持上限を判断できる | 成功。4096px・12MP候補を採用する |
+| pan、pinch、余白を残した確定、透過PNG、選び直し、失敗後の再試行が成立する | 成功 |
+| Safari・Chromeで30秒以上かつ10回以上操作し、クラッシュ、継続的な悪化、古い画像の再表示がない | 成功 |
+| 画像や機微情報を送信・保存・外部ログ出力しない | 成功 |
 
 ## PRプレビュー共通チェックリスト
 
@@ -77,9 +89,9 @@ Safariでは表示比率、pan、pinch、余白を残した確定、重なるエ
 
 Android Chromeは今回の合否から除外し、実機を確保できるリリース後のフォロー項目とする。
 
-### 高解像度比較（Safari）
+### 高解像度比較（Safari・Chrome）
 
-カメラで撮影した3024×4032の写真を同じ条件で比較した。正規化時間の`0.0ms`は処理がなかったことではなく、診断表示の精度では差を計測できないほど短かったことを表す。
+カメラで撮影した3024×4032の写真を両ブラウザで同じ条件により比較し、SafariとChromeで差はなかった。正規化時間の`0.0ms`は処理がなかったことではなく、診断表示の精度では差を計測できないほど短かったことを表す。
 
 | 正規化候補 | 正規化後寸法 | decode時間 | 正規化時間 | 最大4倍表示 | 色味 |
 | --- | ---: | ---: | ---: | --- | --- |
@@ -114,8 +126,50 @@ Android Chromeは今回の合否から除外し、実機を確保できるリリ
 | ファイル | alpha PNG | png | `image/png` | 未記録 | 未記録 | 未記録 | `image-bitmap` / 未記録 | 未記録 | Safariとの差なし。成功、透過を保持 |
 | ファイル | Orientation 1・3・6・8 | jpg | `image/jpeg` | 補正後480×320相当 | 対象外 | 対象外 | 未記録 | 未記録 | Safariとの差なし。全fixtureが上向きで、確定後も維持 |
 
-## 採否とコードの扱い
+## 採否
 
-実機確認後に、標準decoderとfallback、4096px・12MPまたは2160pxの上限、一回のCanvas縮小、共有座標・gesture、cleanup方式を採用・不採用に分類する。追加・移動ファイルは、本実装へ昇格、設計を保って再実装、削除のいずれかをファイル単位で記録する。
+| 対象 | 判断 | 理由・条件 |
+| --- | --- | --- |
+| `accept="image/*"`かつ`capture`なしの単一file input | 採用 | iOSの写真ライブラリ、OSカメラ、ファイル選択が提示され、同じ処理へ合流した |
+| 拡張子・MIME typeだけで拒否せず、実decodeを正本にする | 採用 | 同じHEIF由来写真でも、写真ライブラリではJPEG、ファイルではHEICとして返却された |
+| `createImageBitmap({ imageOrientation: 'from-image' })` | 第一経路として採用 | Safari・ChromeともJPEG、HEIC、PNGをdecodeでき、Orientationも正しく反映された |
+| object URLと`HTMLImageElement.decode()` | fallbackとして採用 | 実機入力では第一経路が成功したため発動しなかったが、自動テストで切替とcleanupを確認済み |
+| 独自HEIC decoder・EXIF parser | 不採用 | 正式確認したiPhone環境では標準APIだけで成立した |
+| 長辺4096px以下かつ12MP以下 | 本実装の初期上限として採用 | 2160px候補と操作性能・処理時間に実用上の差がなく、最大4倍ではわずかに良好だった |
+| 長辺2160px | 既定値には不採用 | メモリ不足時の将来候補にはできるが、今回の実機では4096px・12MP候補を下げる根拠がなかった |
+| Canvas 2Dによる一回の縮小 | 採用 | 通常写真の色差を認識せず、追加の多段縮小を必要とする画質問題も確認されなかった |
+| 共有座標・gesture処理 | 採用 | カメラ・写真の両F/Sでpan、pinch、境界制御が成立した |
+| `requestAnimationFrame`への描画集約と前後の静的レイヤーキャッシュ | 採用 | 4096px・12MP候補と4エリア確定後の置換でも操作が滑らかになった |
+| 正規化後の元資源破棄と冪等な`dispose()` | 採用 | 10回以上の選び直しで悪化や古い画像の再表示がなく、自動テストでも解放経路を確認した |
+| 画像形式ごとに異なる配置モードを設ける | 不採用 | すべて同じ操作でcover状態から縮小し、余白を残して確定できる方が要件に合う |
 
-このF/Sのdelta specはmain specsへ同期しない。検証完了後は`openspec archive validate-photo-import --skip-specs`でarchiveする。
+## コードの扱い
+
+| 対象ファイル | 扱い | 理由 |
+| --- | --- | --- |
+| `src/shared/lib/mediaTransform.ts`、`pointerGesture.ts`と各テスト | 本実装へ昇格 | ブラウザAPIに依存せず、カメラ・写真の両方から利用されている |
+| `src/features/photo-import-spike/normalization.ts`、`photoPlacement.ts`、`latestSelection.ts`、`photoFailure.ts`、`frameRenderScheduler.ts`と各テスト | 設計とテストを保って本実装featureへ移す | 純粋ロジックは再利用できるが、spike名と本実装の状態・責務へ合わせた配置変更が必要 |
+| `src/features/photo-import-spike/photoDecoderPort.ts`、`photoCompositorPort.ts`、`photoScene.ts`、`types.ts` | 設計を保って再実装 | 本実装の作品状態、template domain、画面遷移に合わせて契約を確定する必要がある |
+| `src/infrastructure/photo-import/browserPhotoDecoder.ts`、`canvasPhotoCompositor.ts`と各テスト | 設計と主要処理を保って本実装へ昇格 | 標準decoder、正規化、cleanup、Canvas合成は成立したが、本実装portへ結線し直す必要がある |
+| `src/app/spikes/PhotoImportSpikeRoute.vue`、`src/pages/PhotoImportSpikePage.vue`、`src/features/photo-import-spike/PhotoImportSpike.vue`とrouter追加 | 本実装完了後に削除 | F/S専用route、操作部品、診断表示であり、製品UIへは昇格しない |
+| `src/features/photo-import-spike/template.ts`、`src/infrastructure/photo-import/browserPhotoAssetLoader.ts` | 本実装完了後に削除 | `文鳥01`固定の検証用定義であり、本番のtemplate取得契約を先取りしない |
+| `public/spikes/photo-import/fixtures/`、`fixtureAssets.test.ts`、`scripts/generate-photo-import-fixtures.sh`、`scripts/set-jpeg-orientation.mjs` | 必要なものをテストfixtureへ再配置後、公開F/S資産を削除 | Orientation・alpha・破損画像の回帰価値はあるが、製品の公開静的資産には含めない |
+| カメラF/Sの共有module参照変更 | 維持 | 共有化後も既存カメラF/Sの動作とテストを維持できた |
+
+## 制約と未解決事項
+
+- 写真アプリ経由のalpha PNGは、写真アプリへ保存した時点で透過を失うサンプルが多く、有効な入力を用意できなかった。ファイル経由ではalphaを保持して成功している。
+- 広色域・HDRの色保持、細線・文字・斜線の専用fixtureによる厳密な画質比較は行っていない。通常の実機写真では許容できない色差を認識せず、初期リリースの完了条件にはしない。
+- `HTMLImageElement.decode()` fallbackは実機では発動せず、自動テストでのみ確認した。
+- Android Chromeは今回の合否から除外した。正式リリース前または端末を確保できた時点で、picker、HEIC、Orientation、操作性能をフォロー確認する。
+- 現在の実機templateは4レイヤーである。6レイヤーの前後キャッシュ分割は自動テスト済みだが、6レイヤー実機templateが確定した時点で保持メモリとキャッシュ再構築時間を再計測する。
+
+## 後続changeへの反映
+
+- 写真取り込み本実装changeでは、この文書の採用事項を正式なdelta specへ記述し、F/S用の固定templateや診断UIではなく、製品の作品状態と画面遷移へ結線する。
+- `docs/vision.md`と`docs/design/figma.md`は、写真形式によらず余白を残して配置できる要件へ更新した。`docs/development-roadmap.md`にはF/Sの完了結果と後続確認事項を反映した。
+- `validate-image-sharing`の検証範囲は変更しない。写真は共有処理より前に1080×1080の作品へ統合されるため、共有F/Sは写真の元形式ではなく、統合済みPNGの長押し保存、Web Share、再利用、破棄を対象とする。
+
+## 完了方針
+
+このF/Sのdelta specは製品の正式要件ではないためmain specsへ同期しない。後続の写真取り込み本実装changeで採用事項を正式なspecへ記述し、このchangeは`openspec archive validate-photo-import --skip-specs`でarchiveする。

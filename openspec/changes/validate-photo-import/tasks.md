@@ -82,15 +82,15 @@
 - [x] 9.4 Safariで高解像度写真を4096px・12MP候補と2160px候補へ正規化し、処理時間、最大4倍表示の画質、細線・文字・斜線、広色域・HDR写真の色差を可能な範囲で比較する
 - [x] 9.5 Safariで表示比率、pan、pinch、余白を残した確定、重なるエリア間の透過PNG合成、同じ写真の再選択、別写真への選び直し、破損・未対応画像の案内と再試行を確認する
 - [x] 9.6 Safariで30秒以上かつ10回以上の写真選択・調整・選び直しを行い、クラッシュ、操作不能、継続的な処理時間悪化、古い画像の再表示がないことを確認する
-- [ ] 9.7 iPhone 15（iOS 26）のChromeで9.1〜9.6と同じ確認を行い、Safariとの差異を記録する
+- [x] 9.7 iPhone 15（iOS 26）のChromeで9.1〜9.6と同じ確認を行い、Safariとの差異を記録する
 - [x] 9.8 Android Chromeを今回の合否から除外し、確認端末を確保できるリリース後のフォロー項目として残す
 - [x] 9.9 Safari・Chromeで最初のpinch・panと継続操作の滑らかさを再確認し、4096px・12MP候補と2160px候補の差、確定済み4レイヤー時の差、静的キャッシュ方式を6レイヤー程度へ拡張できる見込みを記録する
 
 ## 10. 結果・採否・完了
 
-- [ ] 10.1 `docs/spikes/photo-import.md`へ検証する問い、対象環境、成功条件、実施内容、入口・形式・向き・処理時間・寸法・画質の定量結果、Safari・Chrome別結果、制約、未解決事項を記録する
-- [ ] 10.2 `accept="image/*"`、標準decoderとfallback、EXIF Orientation、4096px・12MPまたは2160pxの上限、一回のCanvas縮小、共有座標・gesture、cleanup方式の採否を記録する
-- [ ] 10.3 追加・移動ファイル単位で本実装へ昇格、設計を保って再実装、削除のいずれにするかを決め、F/S専用route・UI・fixture・診断表示と既存カメラF/Sコードの扱いを記録する
-- [ ] 10.4 F/S結果に合わせて`docs/vision.md`、`docs/design/`、`docs/development-roadmap.md`の更新要否と、写真取り込み本実装および`validate-image-sharing`への反映を判断する
-- [ ] 10.5 `openspec validate validate-photo-import`と全品質検査を再実行し、proposal・spec・design・tasks・実装・日本語コメント・結果記録の整合を確認する
-- [ ] 10.6 F/Sのdelta specをmain specsへ同期しないことを確認し、完了後は`openspec archive validate-photo-import --skip-specs`でarchiveする方針を結果へ記録する
+- [x] 10.1 `docs/spikes/photo-import.md`へ検証する問い、対象環境、成功条件、実施内容、入口・形式・向き・処理時間・寸法・画質の定量結果、Safari・Chrome別結果、制約、未解決事項を記録する
+- [x] 10.2 `accept="image/*"`、標準decoderとfallback、EXIF Orientation、4096px・12MPまたは2160pxの上限、一回のCanvas縮小、共有座標・gesture、cleanup方式の採否を記録する
+- [x] 10.3 追加・移動ファイル単位で本実装へ昇格、設計を保って再実装、削除のいずれにするかを決め、F/S専用route・UI・fixture・診断表示と既存カメラF/Sコードの扱いを記録する
+- [x] 10.4 F/S結果に合わせて`docs/vision.md`、`docs/design/`、`docs/development-roadmap.md`の更新要否と、写真取り込み本実装および`validate-image-sharing`への反映を判断する
+- [x] 10.5 `openspec validate validate-photo-import`と全品質検査を再実行し、proposal・spec・design・tasks・実装・日本語コメント・結果記録の整合を確認する
+- [x] 10.6 F/Sのdelta specをmain specsへ同期しないことを確認し、完了後は`openspec archive validate-photo-import --skip-specs`でarchiveする方針を結果へ記録する

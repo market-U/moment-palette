@@ -2,7 +2,7 @@
 
 > ステータス: フェーズ3 進行中
 >
-> 最終更新日: 2026-09-20
+> 最終更新日: 2026-09-21
 
 ## 目的
 
@@ -24,7 +24,7 @@
 - `main`の固定F/S URLとPRプレビューをiPhone 15（iOS 26）のSafari・Chromeで確認済みである。Android Chromeは実機を確保できるリリース後に確認する。
 - `establish-preview-deployment`はverifyとmain specsへの同期を完了し、archive済みである。
 - フェーズ3の先行change `validate-camera-compositing`は実装とiPhone実機確認を完了し、delta specを同期せずarchive済みである。
-- 写真選択、標準APIによるdecode、EXIF Orientation、高解像度縮小、位置・倍率調整、mask合成を検証する`validate-photo-import`を開始した。iPhone 15（iOS 26）のSafari・Chromeでの完了を合否条件とする。
+- 写真選択、標準APIによるdecode、EXIF Orientation、高解像度縮小、位置・倍率調整、mask合成を検証する`validate-photo-import`は、iPhone 15（iOS 26）のSafari・Chromeで実装と実機確認を完了した。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序
@@ -129,7 +129,7 @@ UIコンポーネントライブラリは、画面検討の結果が不足して
 OpenSpec change候補:
 
 - `validate-camera-compositing`（完了・archive済み）
-- `validate-photo-import`
+- `validate-photo-import`（完了・archive準備中）
 - `validate-image-sharing`
 - `validate-azure-template-delivery`
 
@@ -186,6 +186,15 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 - 前面カメラはプレビューと撮影結果をともに鏡像とし、表示比率の中間値でも選択中映像を薄くしない合成方式を採用した。
 - ブラウザ非依存の座標・ジェスチャー・scene処理とcamera port・browser adapterは本実装への昇格候補とし、F/S専用UI、route、固定アセット、診断表示は削除対象とした。
 - 写真取り込み、画像保存・共有、Android実機、Azureからのテンプレート配信は後続changeで検証する。
+
+`validate-photo-import`の完了結果:
+
+- iPhone 15（iOS 26）のSafari・Chromeで、写真ライブラリ、OSカメラ、ファイル選択、JPEG、HEIC、alpha PNG、EXIF Orientation、pan、pinch、余白を残した確定、選び直し、破損画像からの再試行を確認した。
+- HEIF由来写真は写真ライブラリではJPEGへ変換され、ファイルではHEICのまま返却された。どちらも`createImageBitmap()`でdecodeできたため、拡張子やMIME typeだけで拒否せず実decodeを正本とする。
+- 3024×4032の写真は4096px・12MP候補で3000×4000、2160px候補で1620×2160となった。処理時間と操作性能に実用上の差がなく、最大4倍でわずかに画質が良い4096px・12MP候補を本実装の初期上限とする。
+- pointer描画の画面更新周期への集約と、選択中エリアの前後に分けた静的レイヤーキャッシュにより、4エリア確定後の置換を含めて滑らかに操作できた。6レイヤー分割は自動テストで確認済みとし、実際の6レイヤーtemplateで後日再計測する。
+- 写真形式によって配置モードを分けず、すべての写真をcover状態から縮小して余白を残せる方式を採用する。透過部分と余白には対象エリアの初期カラーを表示する。
+- Android Chrome、広色域・HDRの厳密な色保持、6レイヤー実機templateは後続の確認項目とする。
 
 ### 4. F/S結果を要求とデザインへ反映する
 
