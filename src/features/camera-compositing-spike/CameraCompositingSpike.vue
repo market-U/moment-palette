@@ -112,7 +112,8 @@ const cameraFailureMessage = computed(() => {
   const messages: Record<CameraFailure['code'], string> = {
     'permission-denied':
       'カメラが拒否されています。ブラウザまたは端末のサイト設定を確認してから再試行してください。',
-    'not-found': '利用できるカメラが見つかりませんでした。',
+    'not-found':
+      '利用できるカメラが見つかりませんでした。カメラが搭載または接続され、OSとブラウザで認識されているか確認してください。',
     'not-readable':
       'カメラを読み取れませんでした。他のアプリが使用していないか確認してください。',
     'constraint-failed':
@@ -166,6 +167,7 @@ const renderOnce = () => {
       selectedAreaId: selectedAreaId.value,
       blend: blendPercent.value / 100,
       transform: transform.value,
+      mirrorSource: facing.value === 'user',
       captures,
     },
   )
@@ -277,7 +279,9 @@ const applySession = async (
   canSwitch.value = session.canSwitch
   facing.value = session.facing
   diagnostics.video = `${String(target.videoWidth)}×${String(target.videoHeight)}`
-  diagnostics.facing = session.settings.facingMode ?? session.facing
+  diagnostics.facing = `${session.settings.facingMode ?? session.facing}${
+    session.facing === 'user' ? '（鏡像）' : ''
+  }`
   status.value = 'live'
   diagnosticNote.value = `${selectedArea.value?.label ?? ''}を調整して撮影できます。`
   startRenderLoop()
@@ -336,7 +340,11 @@ const capture = () => {
   operationError.value = undefined
 
   try {
-    const result = compositor.captureFrame(video.value, transform.value)
+    const result = compositor.captureFrame(
+      video.value,
+      transform.value,
+      facing.value === 'user',
+    )
     const previous = captures[selectedAreaId.value]
 
     if (previous) {

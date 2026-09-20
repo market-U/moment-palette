@@ -15,6 +15,7 @@ export interface PreviewRenderState {
   selectedAreaId: CameraAreaId
   blend: number
   transform: MediaTransform
+  mirrorSource: boolean
   captures: CapturedFrames
 }
 
@@ -45,6 +46,7 @@ export interface CameraCompositorPort {
   captureFrame(
     video: HTMLVideoElement,
     transform: MediaTransform,
+    mirrorSource: boolean,
   ): CaptureResult
   releaseFrame(frame: CapturedFrame): void
   generatePng(captures: CapturedFrames): Promise<GeneratedPng>

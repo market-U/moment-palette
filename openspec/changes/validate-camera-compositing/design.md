@@ -97,7 +97,11 @@ feature側に、開始、向き切替、停止、現在設定取得を要求す�
 
 初回は`audio: false`と`facingMode: { ideal: 'environment' }`を指定する。権限取得後に`enumerateDevices()`とtrack settingsを記録し、複数video inputを識別できる場合だけ切替操作を有効にする。iPhoneで向きを切り替える際は、既存trackを停止してから反対の`facingMode`で新しいstreamを要求する。個別レンズの選択やdevice labelの永続利用は行わない。
 
+track settingsの`facingMode`が`user`の場合は、前面カメラと判定して映像sourceを水平反転する。settingsが向きを返さないブラウザでは要求した向きをfallbackにする。構図と生成PNGを一致させるため、ライブプレビューだけでなく撮影用detached canvasにも同じ鏡像変換を適用する。ブラウザが実際の向きと異なるsettingsを返す端末は未解決の制約とする。
+
 Permissions APIによる事前照会はブラウザ差があるため、利用可能な場合の診断補助に留める。状態判定の正本は`getUserMedia()`の成否と例外名にし、`NotAllowedError`、`NotFoundError`、`NotReadableError`、`OverconstrainedError`、その他へ大別して画面に表示する。
+
+カメラの有無を権限取得前に確実に判定できないブラウザがあるため、`enumerateDevices()`の事前結果だけで開始操作を無効化しない。`getUserMedia()`が`NotFoundError`を返した場合に、搭載・接続とOS・ブラウザの認識状態を確認する案内を表示する。本実装では、写真取り込みを代替導線として併記する。
 
 ### 7. 撮影frameはエリアごとのdetached canvasとして保持する
 

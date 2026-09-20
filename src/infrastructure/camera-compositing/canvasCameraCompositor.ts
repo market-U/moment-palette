@@ -65,6 +65,38 @@ const decodeBlobDimensions = async (blob: Blob) => {
   }
 }
 
+export const drawTransformedSource = (
+  context: CanvasRenderingContext2D,
+  source: CanvasImageSource,
+  sourceWidth: number,
+  sourceHeight: number,
+  transform: MediaTransform,
+  mirrorSource = false,
+) => {
+  const drawWidth = sourceWidth * transform.scale
+  const drawHeight = sourceHeight * transform.scale
+
+  context.save()
+
+  try {
+    if (mirrorSource) {
+      context.translate(transform.offsetX + drawWidth, transform.offsetY)
+      context.scale(-1, 1)
+      context.drawImage(source, 0, 0, drawWidth, drawHeight)
+    } else {
+      context.drawImage(
+        source,
+        transform.offsetX,
+        transform.offsetY,
+        drawWidth,
+        drawHeight,
+      )
+    }
+  } finally {
+    context.restore()
+  }
+}
+
 export const createCanvasCameraCompositor = (
   template: CameraSpikeTemplate,
 ): CameraCompositorPort => {
@@ -79,22 +111,6 @@ export const createCanvasCameraCompositor = (
     }
 
     return assets
-  }
-
-  const drawTransformedSource = (
-    context: CanvasRenderingContext2D,
-    source: CanvasImageSource,
-    sourceWidth: number,
-    sourceHeight: number,
-    transform: MediaTransform,
-  ) => {
-    context.drawImage(
-      source,
-      transform.offsetX,
-      transform.offsetY,
-      sourceWidth * transform.scale,
-      sourceHeight * transform.scale,
-    )
   }
 
   const drawMaskedArea = (
@@ -127,6 +143,7 @@ export const createCanvasCameraCompositor = (
     selectedAreaId?: string,
     liveSource?: HTMLVideoElement,
     transform?: MediaTransform,
+    mirrorSource = false,
   ) => {
     context.clearRect(0, 0, template.size.width, template.size.height)
 
@@ -147,6 +164,7 @@ export const createCanvasCameraCompositor = (
             liveSource.videoWidth,
             liveSource.videoHeight,
             transform,
+            mirrorSource,
           )
         } else if (captured) {
           areaContext.drawImage(
@@ -210,6 +228,7 @@ export const createCanvasCameraCompositor = (
           video.videoWidth,
           video.videoHeight,
           state.transform,
+          state.mirrorSource,
         )
       }
 
@@ -219,6 +238,7 @@ export const createCanvasCameraCompositor = (
         hasLiveSource ? state.selectedAreaId : undefined,
         hasLiveSource ? video : undefined,
         hasLiveSource ? state.transform : undefined,
+        state.mirrorSource,
       )
 
       const context = getContext(canvas)
@@ -239,7 +259,7 @@ export const createCanvasCameraCompositor = (
       context.restore()
     },
 
-    captureFrame(video, transform) {
+    captureFrame(video, transform, mirrorSource) {
       if (video.videoWidth <= 0 || video.videoHeight <= 0) {
         throw new Error('撮影可能なvideo frameがありません。')
       }
@@ -253,6 +273,7 @@ export const createCanvasCameraCompositor = (
         video.videoWidth,
         video.videoHeight,
         transform,
+        mirrorSource,
       )
 
       return {
