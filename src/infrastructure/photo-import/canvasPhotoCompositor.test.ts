@@ -1,9 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import {
+  drawPreparedPhotoArtwork,
   drawPhotoAreaContent,
   drawPhotoPreviewPlanes,
   drawPhotoSource,
+  splitPhotoAreasAroundEditing,
 } from './canvasPhotoCompositor'
 
 describe('drawPhotoSource', () => {
@@ -85,5 +87,43 @@ describe('drawPhotoPreviewPlanes', () => {
     )
 
     expect(calls).toEqual(['source:1', 'artwork:0.5', 'line-art:1'])
+  })
+})
+
+describe('drawPreparedPhotoArtwork', () => {
+  it('確定レイヤー数に関係なく前キャッシュ・編集中エリア・後キャッシュの固定順で描く', () => {
+    const calls: string[] = []
+    const before = { id: 'before' } as unknown as HTMLCanvasElement
+    const after = { id: 'after' } as unknown as HTMLCanvasElement
+    const context = {
+      drawImage: vi.fn((source: HTMLCanvasElement) => {
+        calls.push((source as unknown as { id: string }).id)
+      }),
+    } as unknown as CanvasRenderingContext2D
+
+    drawPreparedPhotoArtwork(context, before, after, () => {
+      calls.push('editing')
+    })
+
+    expect(calls).toEqual(['before', 'editing', 'after'])
+    expect(context.drawImage).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('splitPhotoAreasAroundEditing', () => {
+  it('6レイヤーでも編集中レイヤーの前後を一度のキャッシュ構築用に分ける', () => {
+    const areas = Array.from({ length: 6 }, (_, index) => ({
+      id: `area-${String(index + 1)}`,
+    }))
+
+    const split = splitPhotoAreasAroundEditing(areas, 'area-4')
+
+    expect(split.before.map((area) => area.id)).toEqual([
+      'area-1',
+      'area-2',
+      'area-3',
+    ])
+    expect(split.editing?.id).toBe('area-4')
+    expect(split.after.map((area) => area.id)).toEqual(['area-5', 'area-6'])
   })
 })

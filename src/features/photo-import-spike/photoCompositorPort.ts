@@ -14,7 +14,6 @@ export interface PhotoPreviewState {
   selectedAreaId: PhotoAreaId
   blend: number
   transform: MediaTransform
-  confirmed: ConfirmedPhotoFrames
 }
 
 export interface PhotoCompositorPort {
@@ -24,6 +23,10 @@ export interface PhotoCompositorPort {
     cssPixels: number,
     pixelRatio: number,
   ): Size
+  prepareArtwork(
+    confirmed: ConfirmedPhotoFrames,
+    editingAreaId?: PhotoAreaId,
+  ): void
   renderPreview(
     canvas: HTMLCanvasElement,
     source: HTMLCanvasElement | undefined,

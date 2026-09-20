@@ -78,13 +78,63 @@ export const drawPhotoPreviewPlanes = (
   drawLineArt(context)
 }
 
+export const drawPreparedPhotoArtwork = (
+  context: CanvasRenderingContext2D,
+  beforeEditingPlane: HTMLCanvasElement,
+  afterEditingPlane: HTMLCanvasElement,
+  drawEditingArea?: (context: CanvasRenderingContext2D) => void,
+) => {
+  // 前後を別平面にすることで、選択中エリアだけを更新しても元の重なり順を維持する。
+  context.drawImage(beforeEditingPlane, 0, 0)
+  drawEditingArea?.(context)
+  context.drawImage(afterEditingPlane, 0, 0)
+}
+
+export const splitPhotoAreasAroundEditing = <
+  Area extends { readonly id: string },
+>(
+  areas: readonly Area[],
+  editingAreaId?: string,
+): {
+  before: readonly Area[]
+  editing: Area | undefined
+  after: readonly Area[]
+} => {
+  if (!editingAreaId) {
+    return { before: areas, editing: undefined, after: [] }
+  }
+
+  const editingIndex = areas.findIndex((area) => area.id === editingAreaId)
+
+  if (editingIndex < 0) {
+    throw new Error('編集対象のエリアがテンプレートに存在しません。')
+  }
+
+  return {
+    before: areas.slice(0, editingIndex),
+    editing: areas[editingIndex],
+    after: areas.slice(editingIndex + 1),
+  }
+}
+
 export const createCanvasPhotoCompositor = (
   template: PhotoSpikeTemplate,
 ): PhotoCompositorPort => {
   const sourcePlane = createCanvas(template.size.width, template.size.height)
   const artworkPlane = createCanvas(template.size.width, template.size.height)
+  const beforeEditingPlane = createCanvas(
+    template.size.width,
+    template.size.height,
+  )
+  const afterEditingPlane = createCanvas(
+    template.size.width,
+    template.size.height,
+  )
   const areaPlane = createCanvas(template.size.width, template.size.height)
   let assets: LoadedPhotoSpikeAssets | undefined
+  let preparedEditingAreaId: string | undefined
+  let preparedEditingArea: PhotoAreaDefinition | undefined
+  let artworkPrepared = false
 
   const requireAssets = () => {
     if (!assets) {
@@ -118,34 +168,39 @@ export const createCanvasPhotoCompositor = (
     destination.drawImage(areaPlane, 0, 0)
   }
 
-  const drawArtwork = (
-    context: CanvasRenderingContext2D,
+  const prepareArtwork = (
     confirmed: ConfirmedPhotoFrames,
-    selectedAreaId?: string,
-    source?: HTMLCanvasElement,
-    transform?: MediaTransform,
+    editingAreaId?: string,
   ) => {
-    context.clearRect(0, 0, template.size.width, template.size.height)
+    const beforeContext = getContext(beforeEditingPlane)
+    const afterContext = getContext(afterEditingPlane)
+    beforeContext.clearRect(0, 0, template.size.width, template.size.height)
+    afterContext.clearRect(0, 0, template.size.width, template.size.height)
 
-    for (const area of template.areas) {
-      const frame = confirmed[area.id]
+    const split = splitPhotoAreasAroundEditing(template.areas, editingAreaId)
+    const drawCachedAreas = (
+      destination: CanvasRenderingContext2D,
+      areas: readonly PhotoAreaDefinition[],
+    ) => {
+      for (const area of areas) {
+        const frame = confirmed[area.id]
 
-      drawMaskedArea(context, area, (areaContext) => {
-        drawPhotoAreaContent(areaContext, area, template.size, () => {
-          if (selectedAreaId === area.id && source && transform) {
-            drawPhotoSource(
-              areaContext,
-              source,
-              source.width,
-              source.height,
-              transform,
-            )
-          } else if (frame) {
-            areaContext.drawImage(frame.canvas, 0, 0)
-          }
+        drawMaskedArea(destination, area, (areaContext) => {
+          drawPhotoAreaContent(areaContext, area, template.size, () => {
+            if (frame) {
+              areaContext.drawImage(frame.canvas, 0, 0)
+            }
+          })
         })
-      })
+      }
     }
+
+    drawCachedAreas(beforeContext, split.before)
+    drawCachedAreas(afterContext, split.after)
+
+    preparedEditingAreaId = editingAreaId
+    preparedEditingArea = split.editing
+    artworkPrepared = true
   }
 
   const drawLineArt = (context: CanvasRenderingContext2D) => {
@@ -178,8 +233,22 @@ export const createCanvasPhotoCompositor = (
       return { width: resolution, height: resolution }
     },
 
+    prepareArtwork(confirmed, editingAreaId) {
+      prepareArtwork(confirmed, editingAreaId)
+    },
+
     renderPreview(canvas, source, state: PhotoPreviewState) {
       const hasSource = Boolean(source && source.width > 0 && source.height > 0)
+
+      if (
+        !artworkPrepared ||
+        (hasSource
+          ? preparedEditingAreaId !== state.selectedAreaId
+          : preparedEditingAreaId !== undefined)
+      ) {
+        throw new Error('作品キャッシュが現在の編集状態に合っていません。')
+      }
+
       const alphas = getPhotoSceneAlphas(state.blend, hasSource)
       const sourceContext = getContext(sourcePlane)
       const artworkContext = getContext(artworkPlane)
@@ -196,12 +265,34 @@ export const createCanvasPhotoCompositor = (
         )
       }
 
-      drawArtwork(
+      // 前後キャッシュと編集中エリアを不透明な作品平面へまとめてから、
+      // 表示比率を一度だけ適用する。個別にalphaを掛けると重なり部分だけ濃くなる。
+      artworkContext.clearRect(0, 0, template.size.width, template.size.height)
+      drawPreparedPhotoArtwork(
         artworkContext,
-        state.confirmed,
-        hasSource ? state.selectedAreaId : undefined,
-        hasSource ? source : undefined,
-        hasSource ? state.transform : undefined,
+        beforeEditingPlane,
+        afterEditingPlane,
+        hasSource && source
+          ? (destination) => {
+              const area = preparedEditingArea
+
+              if (!area) {
+                throw new Error('選択中エリアがテンプレートに存在しません。')
+              }
+
+              drawMaskedArea(destination, area, (areaContext) => {
+                drawPhotoAreaContent(areaContext, area, template.size, () => {
+                  drawPhotoSource(
+                    areaContext,
+                    source,
+                    source.width,
+                    source.height,
+                    state.transform,
+                  )
+                })
+              })
+            }
+          : undefined,
       )
 
       const context = getContext(canvas)
@@ -246,9 +337,16 @@ export const createCanvasPhotoCompositor = (
       sourcePlane.height = 0
       artworkPlane.width = 0
       artworkPlane.height = 0
+      beforeEditingPlane.width = 0
+      beforeEditingPlane.height = 0
+      afterEditingPlane.width = 0
+      afterEditingPlane.height = 0
       areaPlane.width = 0
       areaPlane.height = 0
       assets = undefined
+      artworkPrepared = false
+      preparedEditingAreaId = undefined
+      preparedEditingArea = undefined
     },
   }
 }

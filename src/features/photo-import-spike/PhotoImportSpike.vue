@@ -18,6 +18,7 @@ import {
 } from '@/shared/lib/mediaTransform'
 import { PointerGestureTracker } from '@/shared/lib/pointerGesture'
 
+import { FrameRenderScheduler } from './frameRenderScheduler'
 import { LatestSelection } from './latestSelection'
 import type {
   ConfirmedPhotoFrames,
@@ -69,6 +70,7 @@ const diagnostics = reactive({
 })
 
 let resizeObserver: ResizeObserver | undefined
+let renderScheduler: FrameRenderScheduler | undefined
 let disposed = false
 
 const selectedArea = computed(() =>
@@ -122,8 +124,21 @@ const render = () => {
     selectedAreaId: selectedAreaId.value,
     blend: blendPercent.value / 100,
     transform: transform.value,
-    confirmed,
   })
+}
+
+const renderImmediately = () => {
+  renderScheduler?.cancel()
+  render()
+}
+
+const requestRender = () => {
+  if (renderScheduler) {
+    renderScheduler.request()
+    return
+  }
+
+  render()
 }
 
 const updateDiagnostics = (photo: DecodedPhoto) => {
@@ -167,10 +182,12 @@ const processFile = async (file: File) => {
       photoSpikeTemplate.size,
     )
     updateDiagnostics(decoded)
+    // 全確定レイヤーの再合成は編集開始時に一度だけ行い、pointer操作中は再利用する。
+    compositor.prepareArtwork(confirmed, selectedAreaId.value)
     status.value = 'adjusting'
     note.value = '正方形内を1本指で移動、2本指でピンチできます。'
     await nextTick()
-    render()
+    renderImmediately()
   } catch (error) {
     if (!latestSelection.isCurrent(generation) || disposed) {
       return
@@ -241,7 +258,11 @@ const selectArea = (areaId: PhotoAreaId) => {
     note.value = `${selectedArea.value?.label ?? '選択エリア'}へ切り替えたため、未確定の写真を破棄しました。`
   }
 
-  render()
+  if (abandonedEditing) {
+    compositor.prepareArtwork(confirmed)
+  }
+
+  renderImmediately()
 }
 
 const confirmPhoto = () => {
@@ -261,18 +282,20 @@ const confirmPhoto = () => {
   }
 
   discardActiveEditing()
+  compositor.prepareArtwork(confirmed)
   status.value = 'confirmed'
   note.value = `${selectedArea.value?.label ?? '選択エリア'}へ写真を確定しました。選び直すと置換できます。`
-  render()
+  renderImmediately()
 }
 
 const cancelSelection = () => {
   discardActiveEditing()
+  compositor.prepareArtwork(confirmed)
   failure.value = undefined
   status.value = confirmedCount.value > 0 ? 'confirmed' : 'idle'
   note.value =
     '編集中の写真だけを破棄しました。確定済みエリアは保持しています。'
-  render()
+  renderImmediately()
 }
 
 const logicalPointer = (event: PointerEvent) => {
@@ -320,7 +343,8 @@ const handlePointerMove = (event: PointerEvent) => {
 
   if (next) {
     transform.value = next
-    render()
+    // pointer eventが画面更新より多く届いても、最新transformだけを次の一回で描く。
+    requestRender()
   }
 }
 
@@ -335,6 +359,7 @@ const handlePointerEnd = (event: PointerEvent) => {
 const cleanup = () => {
   disposed = true
   resizeObserver?.disconnect()
+  renderScheduler?.dispose()
   discardActiveEditing()
 
   for (const area of photoAreas) {
@@ -349,6 +374,12 @@ const cleanup = () => {
 }
 
 onMounted(async () => {
+  renderScheduler = new FrameRenderScheduler(
+    render,
+    (callback) => window.requestAnimationFrame(callback),
+    (frameId) => window.cancelAnimationFrame(frameId),
+  )
+
   try {
     await compositor.load()
 
@@ -358,14 +389,15 @@ onMounted(async () => {
     }
 
     status.value = 'idle'
+    compositor.prepareArtwork(confirmed)
     await nextTick()
     resizePreview()
-    render()
+    renderImmediately()
 
     if (preview.value) {
       resizeObserver = new ResizeObserver(() => {
         resizePreview()
-        render()
+        requestRender()
       })
       resizeObserver.observe(preview.value)
     }
@@ -459,7 +491,7 @@ onBeforeUnmount(cleanup)
             min="0"
             max="100"
             step="1"
-            @input="render"
+            @input="requestRender"
           />
         </label>
 
