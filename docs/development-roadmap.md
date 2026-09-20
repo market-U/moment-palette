@@ -23,7 +23,7 @@
 - F/S専用のAzure Static Web Apps Free、Bicep、GitHub Actions、SPA設定、PRプレビューを実装済みである。
 - `main`の固定F/S URLとPRプレビューをiPhone 15（iOS 26）のSafari・Chromeで確認済みである。Android Chromeは実機を確保できるリリース後に確認する。
 - `establish-preview-deployment`はverifyとmain specsへの同期を完了し、archive済みである。
-- フェーズ3の先行change `validate-camera-compositing`は実装とiPhone実機確認を完了し、verifyとarchiveを残している。
+- フェーズ3の先行change `validate-camera-compositing`は実装とiPhone実機確認を完了し、delta specを同期せずarchive済みである。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序
@@ -127,7 +127,7 @@ UIコンポーネントライブラリは、画面検討の結果が不足して
 
 OpenSpec change候補:
 
-- `validate-camera-compositing`（実装・実機確認完了、verify・archive待ち）
+- `validate-camera-compositing`（完了・archive済み）
 - `validate-photo-import`
 - `validate-image-sharing`
 - `validate-azure-template-delivery`
@@ -255,9 +255,8 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ## 次のセッションで行うこと
 
-1. `validate-camera-compositing`をverifyし、delta specを同期せずarchiveする。
-2. `validate-photo-import`で写真形式、向き、縮小、メモリと一時リソース解放を検証する。
-3. `validate-image-sharing`と`validate-azure-template-delivery`を、それぞれ独立したchangeとして進める。
+1. `validate-photo-import`で写真形式、向き、縮小、メモリと一時リソース解放を検証する。
+2. `validate-image-sharing`と`validate-azure-template-delivery`を、それぞれ独立したchangeとして進める。
 
 ## 更新ルール
 
