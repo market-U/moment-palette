@@ -60,8 +60,8 @@
 - [x] 8.1 `pnpm typecheck`、`pnpm test:run`、`pnpm lint`、`pnpm format:check`、`pnpm build`を実行して成功を確認する
 - [x] 8.2 SWA CLIでproduction buildを起動し、F/S routeの直接アクセス、通常タイトル画面、固定アセット、SPA fallbackを確認する
 - [ ] 8.3 デスクトップの利用可能なブラウザとカメラで、許可・拒否・再試行、mask、pan、pinch相当、撮影、上書き、PNG寸法、cleanupの基本動作を確認する
-- [ ] 8.4 作業ブランチをpushして`main`向けPRを作成し、GitHub Actionsの品質検査とSWAプレビューデプロイが成功することを確認する
-- [ ] 8.5 PRプレビューURLのF/S routeへHTTPSで直接アクセスでき、通常画面と既存の固定F/S環境に回帰がないことを確認する
+- [x] 8.4 作業ブランチをpushして`main`向けPRを作成し、GitHub Actionsの品質検査とSWAプレビューデプロイが成功することを確認する
+- [x] 8.5 PRプレビューURLのF/S routeへHTTPSで直接アクセスでき、通常画面と既存の固定F/S環境に回帰がないことを確認する
 
 ## 9. iPhone 15実機確認
 

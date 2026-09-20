@@ -62,6 +62,12 @@
 - タイトル画面は200、線画PNGは`image/png`の200で、配信byteが原本と一致した。
 - 存在しないdeep linkは`index.html`へfallbackし、200を返した。
 
+### PRプレビュ
+
+- [PR #6](https://github.com/market-U/moment-palette/pull/6)でGitHub Actionsの品質検査とSWAプレビューデプロイが成功した。
+- F/S直接URL、通常画面、線画PNGがHTTPSで200を返し、線画の配信byteが原本と一致した。
+- 既存の固定F/S環境のタイトル画面も引き続きHTTPSで200を返した。
+
 ### iPhone Safari
 
 PRプレビュ作成後に追記する。
