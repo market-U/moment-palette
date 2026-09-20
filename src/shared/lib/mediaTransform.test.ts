@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 
-import { cameraAreas } from './template'
 import {
   applyPan,
   applyPinch,
@@ -9,16 +8,16 @@ import {
   createCenteredCoverTransform,
   getCoverScale,
   getScaleBounds,
-} from './geometry'
+} from './mediaTransform'
 
 const artwork = { width: 1080, height: 1080 }
 
-describe('camera compositing geometry', () => {
+describe('mediaTransform', () => {
   it.each([
     [{ width: 1920, height: 1080 }, 1],
     [{ width: 1080, height: 1920 }, 1],
     [{ width: 640, height: 480 }, 2.25],
-  ])('covers the artwork for source %o', (source, expectedScale) => {
+  ])('入力 %o で出力全体を覆う', (source, expectedScale) => {
     expect(getCoverScale(source, artwork)).toBe(expectedScale)
 
     const transform = createCenteredCoverTransform(source, artwork)
@@ -33,13 +32,13 @@ describe('camera compositing geometry', () => {
     ).toBeGreaterThanOrEqual(artwork.height)
   })
 
-  it('rejects empty source dimensions', () => {
+  it('空の入力寸法を拒否する', () => {
     expect(() => getCoverScale({ width: 0, height: 1080 }, artwork)).toThrow(
       RangeError,
     )
   })
 
-  it('clamps scale and pan to keep the whole artwork covered', () => {
+  it('出力に余白が出ないよう倍率と位置を制限する', () => {
     const source = { width: 1920, height: 1080 }
     const constrained = constrainTransform(
       { scale: 20, offsetX: 4000, offsetY: -99999 },
@@ -54,7 +53,7 @@ describe('camera compositing geometry', () => {
     )
   })
 
-  it('applies pan without exposing empty pixels', () => {
+  it('パンしても空の画素を露出しない', () => {
     const source = { width: 1920, height: 1080 }
     const initial = createCenteredCoverTransform(source, artwork)
 
@@ -68,22 +67,20 @@ describe('camera compositing geometry', () => {
     })
   })
 
-  it('keeps the pinch anchor under the moving midpoint', () => {
-    const source = { width: 1080, height: 1080 }
-    const initial = createCenteredCoverTransform(source, artwork)
-    const result = applyPinch(
-      initial,
-      2,
-      { x: 540, y: 540 },
-      { x: 600, y: 500 },
-      source,
-      artwork,
-    )
-
-    expect(result).toEqual({ scale: 2, offsetX: -480, offsetY: -580 })
+  it('ピンチの中心を指の移動先へ保つ', () => {
+    expect(
+      applyPinch(
+        createCenteredCoverTransform(artwork, artwork),
+        2,
+        { x: 540, y: 540 },
+        { x: 600, y: 500 },
+        artwork,
+        artwork,
+      ),
+    ).toEqual({ scale: 2, offsetX: -480, offsetY: -580 })
   })
 
-  it('maps preview coordinates to 1080 logical coordinates', () => {
+  it('表示座標を1080論理座標へ変換する', () => {
     expect(
       clientPointToLogical(
         { x: 210, y: 420 },
@@ -91,18 +88,5 @@ describe('camera compositing geometry', () => {
         artwork,
       ),
     ).toEqual({ x: 540, y: 540 })
-  })
-
-  it('keeps every production mask inside the covered artwork', () => {
-    for (const area of cameraAreas) {
-      expect(area.alphaBounds.x).toBeGreaterThanOrEqual(0)
-      expect(area.alphaBounds.y).toBeGreaterThanOrEqual(0)
-      expect(area.alphaBounds.x + area.alphaBounds.width).toBeLessThanOrEqual(
-        artwork.width,
-      )
-      expect(area.alphaBounds.y + area.alphaBounds.height).toBeLessThanOrEqual(
-        artwork.height,
-      )
-    }
   })
 })

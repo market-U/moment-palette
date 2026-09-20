@@ -1,5 +1,10 @@
-import { applyPan, applyPinch } from './geometry'
-import type { MediaTransform, Point, Size } from './types'
+import { applyPan, applyPinch } from './mediaTransform'
+import type {
+  MediaTransform,
+  MediaTransformPolicy,
+  Point,
+  Size,
+} from './mediaTransform'
 
 type GestureBaseline =
   | {
@@ -22,6 +27,10 @@ const midpoint = (first: Point, second: Point): Point => ({
   y: (first.y + second.y) / 2,
 })
 
+/**
+ * Pointer Eventの並びを、画像変換だけを返すパン・ピンチ操作へ変換する。
+ * DOMを保持しないため、カメラ入力と写真入力の双方で安全に再利用できる。
+ */
 export class PointerGestureTracker {
   private readonly pointers = new Map<number, Point>()
   private baseline: GestureBaseline | undefined
@@ -40,6 +49,7 @@ export class PointerGestureTracker {
     point: Point,
     source: Size,
     target: Size,
+    policy?: MediaTransformPolicy,
   ): MediaTransform | undefined {
     if (!this.pointers.has(pointerId) || !this.baseline) {
       return undefined
@@ -62,6 +72,7 @@ export class PointerGestureTracker {
         },
         source,
         target,
+        policy,
       )
     }
 
@@ -89,6 +100,7 @@ export class PointerGestureTracker {
         midpoint(first, second),
         source,
         target,
+        policy,
       )
     }
 
@@ -97,6 +109,7 @@ export class PointerGestureTracker {
 
   end(pointerId: number, transform: MediaTransform) {
     this.pointers.delete(pointerId)
+    // 2本指から1本指へ移る瞬間を新しい基準にして、位置の飛びを防ぐ。
     this.rebase(transform)
   }
 

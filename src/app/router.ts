@@ -16,6 +16,11 @@ export const router = createRouter({
       component: () => import('./spikes/CameraCompositingSpikeRoute.vue'),
     },
     {
+      path: '/spikes/photo-import',
+      name: 'photo-import-spike',
+      component: () => import('./spikes/PhotoImportSpikeRoute.vue'),
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: { name: 'title' },
     },

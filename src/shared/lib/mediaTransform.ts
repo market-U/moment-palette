@@ -1,4 +1,48 @@
-import type { MediaTransform, Point, Size } from './types'
+/** 入力画像または1080px作品領域の幅と高さを表す。 */
+export interface Size {
+  width: number
+  height: number
+}
+
+/** Pointer EventとCanvasで共通利用する2次元座標を表す。 */
+export interface Point {
+  x: number
+  y: number
+}
+
+/** PNG maskの不透明画素範囲など、位置と寸法を持つ矩形を表す。 */
+export interface Rect extends Point, Size {}
+
+/** 元画像を作品座標へ配置する倍率と左上位置を表す。 */
+export interface MediaTransform {
+  scale: number
+  offsetX: number
+  offsetY: number
+}
+
+/** pan・pinchで許可する倍率と位置を入力方式ごとに差し替える境界。 */
+export interface MediaTransformPolicy {
+  getScaleBounds(
+    source: Size,
+    target: Size,
+  ): {
+    minimum: number
+    maximum: number
+  }
+  constrain(
+    transform: MediaTransform,
+    source: Size,
+    target: Size,
+  ): MediaTransform
+}
+
+/** DOMRectへ依存せず、表示領域から必要な値だけを受け取る境界型。 */
+export interface DisplayBounds {
+  left: number
+  top: number
+  width: number
+  height: number
+}
 
 const MAX_SCALE_MULTIPLIER = 4
 
@@ -11,6 +55,10 @@ const assertPositiveSize = (size: Size, name: string) => {
 export const clamp = (value: number, minimum: number, maximum: number) =>
   Math.min(maximum, Math.max(minimum, value))
 
+/**
+ * 出力領域に余白を出さず、画像全体を可能な限り残す cover 倍率を返す。
+ * カメラと写真選択で同じ計算を共有し、入力方式による操作感の差を防ぐ。
+ */
 export const getCoverScale = (source: Size, target: Size) => {
   assertPositiveSize(source, 'source')
   assertPositiveSize(target, 'target')
@@ -27,6 +75,9 @@ export const getScaleBounds = (source: Size, target: Size) => {
   }
 }
 
+/**
+ * パン・拡大後も出力領域に透明な隙間が見えない範囲へ変換を収める。
+ */
 export const constrainTransform = (
   transform: MediaTransform,
   source: Size,
@@ -42,6 +93,12 @@ export const constrainTransform = (
     offsetX: clamp(transform.offsetX, target.width - renderedWidth, 0),
     offsetY: clamp(transform.offsetY, target.height - renderedHeight, 0),
   }
+}
+
+/** 制約を明示しない呼び出し側で使う、出力全体を常に覆う既定の方針。 */
+export const coverTransformPolicy: MediaTransformPolicy = {
+  getScaleBounds,
+  constrain: constrainTransform,
 }
 
 export const createCenteredCoverTransform = (
@@ -62,8 +119,9 @@ export const applyPan = (
   delta: Point,
   source: Size,
   target: Size,
+  policy: MediaTransformPolicy = coverTransformPolicy,
 ) =>
-  constrainTransform(
+  policy.constrain(
     {
       ...transform,
       offsetX: transform.offsetX + delta.x,
@@ -80,8 +138,9 @@ export const applyPinch = (
   currentAnchor: Point,
   source: Size,
   target: Size,
+  policy: MediaTransformPolicy = coverTransformPolicy,
 ) => {
-  const bounds = getScaleBounds(source, target)
+  const bounds = policy.getScaleBounds(source, target)
   const scale = clamp(
     transform.scale * scaleFactor,
     bounds.minimum,
@@ -92,7 +151,7 @@ export const applyPinch = (
     y: (startAnchor.y - transform.offsetY) / transform.scale,
   }
 
-  return constrainTransform(
+  return policy.constrain(
     {
       scale,
       offsetX: currentAnchor.x - sourceAnchor.x * scale,
@@ -103,9 +162,13 @@ export const applyPinch = (
   )
 }
 
+/**
+ * CSSピクセルで届くPointer Eventを、Canvas描画で使う論理座標へ変換する。
+ * devicePixelRatioには依存させず、表示サイズが変わっても同じ操作量にする。
+ */
 export const clientPointToLogical = (
   point: Point,
-  bounds: Pick<DOMRect, 'left' | 'top' | 'width' | 'height'>,
+  bounds: DisplayBounds,
   logicalSize: Size,
 ): Point => {
   if (bounds.width <= 0 || bounds.height <= 0) {
