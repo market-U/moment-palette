@@ -11,17 +11,17 @@ describe('getSceneAlphas', () => {
     })
   })
 
-  it('shows only the artwork plane at one', () => {
+  it('covers the source plane with the artwork plane at one', () => {
     expect(getSceneAlphas(1, true)).toEqual({
-      source: 0,
+      source: 1,
       artwork: 1,
       lineArt: 1,
     })
   })
 
-  it('blends both image planes but keeps line art opaque', () => {
+  it('keeps the source opaque and overlays artwork by the blend ratio', () => {
     expect(getSceneAlphas(0.35, true)).toEqual({
-      source: 0.65,
+      source: 1,
       artwork: 0.35,
       lineArt: 1,
     })

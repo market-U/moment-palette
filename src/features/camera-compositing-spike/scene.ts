@@ -13,7 +13,7 @@ export const getSceneAlphas = (
   const artwork = hasLiveSource ? clamp(blend, 0, 1) : 1
 
   return {
-    source: hasLiveSource ? 1 - artwork : 0,
+    source: hasLiveSource ? 1 : 0,
     artwork,
     lineArt: 1,
   }

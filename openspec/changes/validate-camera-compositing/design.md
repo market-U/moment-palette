@@ -46,7 +46,7 @@ F/S画面はURLを知る人がアクセスできる公開プレビューであ�
 
 1. `source plane`: 調整中のカメラ映像を正方形全体へ描く。
 2. `artwork plane`: 未撮影エリアの初期色、撮影済みエリア、選択中マスク内のライブ映像を描く。
-3. `source plane`を`1 - r`、`artwork plane`を`r`のalphaで合成する。
+3. `source plane`を不透明で描き、`artwork plane`を`r`のalphaでsource-over合成する。選択中エリアは両面で同じカメラ映像となるため、中間値でも透過させない。
 4. 線画を不透明で描く。
 
 各エリアは一時canvasへ映像または撮影済みframeを描き、`globalCompositeOperation = 'destination-in'`でPNGマスクを適用してから作品canvasへ転送する。一つのマスクに離れた複数形状があってもalpha全体をそのまま利用する。
@@ -88,6 +88,8 @@ mask境界には中間alphaが含まれるため、二値化せず原本のalpha
 編集canvasへ`touch-action: none`を静的に指定し、active pointerを`pointerId`ごとのMapで管理する。最初のpointerではpan、二つ目が加わった時点でpinch開始時の距離、中点、変換を保存し、pointer moveごとに純粋関数から新しい変換を得る。各pointerは`setPointerCapture()`し、`pointerup`、`pointercancel`、`lostpointercapture`で必ず破棄する。
 
 `touch-action`は編集canvasだけに適用し、スライダー、シャッター、切替、画面全体の通常スクロールには適用しない。Touch Eventsを直接扱う案は、mouse入力との二重実装になり、pointer capture相当の継続処理も別途必要になるため採用しない。
+
+モバイルではカメラ表示中だけシャッターをviewport下部に固定し、プレビュを見たまま撮影できるようにする。これはF/S画面固有の配置であり、本番UIのレイアウト決定とは分離する。
 
 ### 6. カメラportとtrack所有者を一つにする
 

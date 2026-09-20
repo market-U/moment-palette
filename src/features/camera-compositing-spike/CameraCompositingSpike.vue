@@ -536,6 +536,17 @@ onBeforeUnmount(cleanup)
           @lostpointercapture="handlePointerEnd"
         />
 
+        <div v-if="cameraActive" class="spike__shutter-dock">
+          <button
+            class="spike__primary spike__shutter"
+            type="button"
+            aria-label="現在の映像を選択中エリアへ撮影"
+            @click="capture"
+          >
+            シャッター
+          </button>
+        </div>
+
         <fieldset class="spike__areas" :disabled="busy">
           <legend>編集するエリア（{{ captureCount }}/4 撮影済み）</legend>
           <button
@@ -580,14 +591,6 @@ onBeforeUnmount(cleanup)
             @click="switchCamera"
           >
             前面・背面を切替
-          </button>
-          <button
-            class="spike__primary"
-            type="button"
-            :disabled="!cameraActive || busy"
-            @click="capture"
-          >
-            シャッター
           </button>
           <button
             type="button"
@@ -835,6 +838,19 @@ onBeforeUnmount(cleanup)
   margin-top: 0.75rem;
 }
 
+.spike__shutter-dock {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
+.spike button.spike__shutter {
+  min-width: 9rem;
+  min-height: 3.25rem;
+  font-weight: 800;
+  box-shadow: 0 0.5rem 1.4rem rgb(61 44 67 / 22%);
+}
+
 .spike button.spike__primary {
   color: #fff;
   background: #8b4961;
@@ -903,6 +919,22 @@ onBeforeUnmount(cleanup)
 
   .spike__areas {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .spike__shutter-dock {
+    position: fixed;
+    z-index: 10;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 0.7rem 1rem calc(env(safe-area-inset-bottom) + 0.7rem);
+    margin: 0;
+    pointer-events: none;
+    background: linear-gradient(transparent, rgb(255 249 238 / 88%) 35%);
+  }
+
+  .spike__shutter-dock button {
+    pointer-events: auto;
   }
 }
 </style>
