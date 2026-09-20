@@ -1,8 +1,8 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: フェーズ2 完了・フェーズ3 着手待ち
+> ステータス: フェーズ3 進行中
 >
-> 最終更新日: 2026-09-19
+> 最終更新日: 2026-09-20
 
 ## 目的
 
@@ -23,7 +23,8 @@
 - F/S専用のAzure Static Web Apps Free、Bicep、GitHub Actions、SPA設定、PRプレビューを実装済みである。
 - `main`の固定F/S URLとPRプレビューをiPhone 15（iOS 26）のSafari・Chromeで確認済みである。Android Chromeは実機を確保できるリリース後に確認する。
 - `establish-preview-deployment`はverifyとmain specsへの同期を完了し、archive済みである。
-- 次はフェーズ3の中核技術F/Sを開始する。
+- フェーズ3の先行change `validate-camera-compositing`を開始し、カメラ取得、PNGマスク、Pointer Events、Canvas合成、1080×1080 PNG生成のF/Sを進めている。
+- Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序
 
@@ -122,11 +123,11 @@ UIコンポーネントライブラリは、画面検討の結果が不足して
 
 ### 3. 中核技術のF/Sを行う
 
-ステータス: 未着手
+ステータス: 進行中
 
 OpenSpec change候補:
 
-- `validate-camera-compositing`
+- `validate-camera-compositing`（進行中）
 - `validate-azure-template-delivery`
 
 カメラ・画像処理の検証候補:
@@ -244,7 +245,8 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ## 次のセッションで行うこと
 
-1. フェーズ3の最初のF/Sで扱う問いをexploreし、`validate-camera-compositing`または同等の責務へ絞ったchangeを開始する。
+1. `validate-camera-compositing`でカメラからPNG生成までの縦断経路を実装し、iPhone Safari・Chromeで実機確認する。
+2. 結果を`docs/spikes/`へ記録し、クライアント側の追加F/Sと`validate-azure-template-delivery`の範囲・順序を決める。
 
 ## 更新ルール
 
