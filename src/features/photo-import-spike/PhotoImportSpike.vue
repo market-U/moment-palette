@@ -14,6 +14,7 @@ import {
   clientPointToLogical,
   createCenteredCoverTransform,
   type MediaTransform,
+  type MediaTransformPolicy,
 } from '@/shared/lib/mediaTransform'
 import { PointerGestureTracker } from '@/shared/lib/pointerGesture'
 
@@ -28,6 +29,7 @@ import type {
   PhotoNormalizationPreset,
 } from './photoDecoderPort'
 import { classifyPhotoFailure, type PhotoFailure } from './photoFailure'
+import { createLooseTransformPolicy } from './photoPlacement'
 import { photoAreas, photoSpikeTemplate } from './template'
 import type { PhotoAreaId } from './types'
 
@@ -86,6 +88,16 @@ const statusLabel = computed(() => {
   }
   return labels[status.value]
 })
+
+const getPlacementPolicy = (): MediaTransformPolicy => {
+  const area = selectedArea.value
+
+  if (!area) {
+    throw new Error('選択中エリアの配置制約を取得できませんでした。')
+  }
+
+  return createLooseTransformPolicy(area.alphaBounds)
+}
 
 const resizePreview = () => {
   if (!preview.value) {
@@ -303,6 +315,7 @@ const handlePointerMove = (event: PointerEvent) => {
     point,
     photo.diagnostics.normalizedSize,
     photoSpikeTemplate.size,
+    getPlacementPolicy(),
   )
 
   if (next) {
@@ -497,7 +510,7 @@ onBeforeUnmount(cleanup)
         </details>
 
         <p class="spike__help">
-          編集中は正方形内だけで1本指pan・2本指pinchを使用します。候補切替後は同じ画像を再選択して比較してください。
+          編集中は正方形内だけで1本指pan・2本指pinchを使用します。すべての画像は縮小して余白を残したまま確定できます。候補切替後は同じ画像を再選択して比較してください。
         </p>
       </section>
 

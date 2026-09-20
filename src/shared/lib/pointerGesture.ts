@@ -1,5 +1,10 @@
 import { applyPan, applyPinch } from './mediaTransform'
-import type { MediaTransform, Point, Size } from './mediaTransform'
+import type {
+  MediaTransform,
+  MediaTransformPolicy,
+  Point,
+  Size,
+} from './mediaTransform'
 
 type GestureBaseline =
   | {
@@ -44,6 +49,7 @@ export class PointerGestureTracker {
     point: Point,
     source: Size,
     target: Size,
+    policy?: MediaTransformPolicy,
   ): MediaTransform | undefined {
     if (!this.pointers.has(pointerId) || !this.baseline) {
       return undefined
@@ -66,6 +72,7 @@ export class PointerGestureTracker {
         },
         source,
         target,
+        policy,
       )
     }
 
@@ -93,6 +100,7 @@ export class PointerGestureTracker {
         midpoint(first, second),
         source,
         target,
+        policy,
       )
     }
 

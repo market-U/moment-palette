@@ -20,6 +20,22 @@ export interface MediaTransform {
   offsetY: number
 }
 
+/** pan・pinchで許可する倍率と位置を入力方式ごとに差し替える境界。 */
+export interface MediaTransformPolicy {
+  getScaleBounds(
+    source: Size,
+    target: Size,
+  ): {
+    minimum: number
+    maximum: number
+  }
+  constrain(
+    transform: MediaTransform,
+    source: Size,
+    target: Size,
+  ): MediaTransform
+}
+
 /** DOMRectへ依存せず、表示領域から必要な値だけを受け取る境界型。 */
 export interface DisplayBounds {
   left: number
@@ -79,6 +95,12 @@ export const constrainTransform = (
   }
 }
 
+/** 制約を明示しない呼び出し側で使う、出力全体を常に覆う既定の方針。 */
+export const coverTransformPolicy: MediaTransformPolicy = {
+  getScaleBounds,
+  constrain: constrainTransform,
+}
+
 export const createCenteredCoverTransform = (
   source: Size,
   target: Size,
@@ -97,8 +119,9 @@ export const applyPan = (
   delta: Point,
   source: Size,
   target: Size,
+  policy: MediaTransformPolicy = coverTransformPolicy,
 ) =>
-  constrainTransform(
+  policy.constrain(
     {
       ...transform,
       offsetX: transform.offsetX + delta.x,
@@ -115,8 +138,9 @@ export const applyPinch = (
   currentAnchor: Point,
   source: Size,
   target: Size,
+  policy: MediaTransformPolicy = coverTransformPolicy,
 ) => {
-  const bounds = getScaleBounds(source, target)
+  const bounds = policy.getScaleBounds(source, target)
   const scale = clamp(
     transform.scale * scaleFactor,
     bounds.minimum,
@@ -127,7 +151,7 @@ export const applyPinch = (
     y: (startAnchor.y - transform.offsetY) / transform.scale,
   }
 
-  return constrainTransform(
+  return policy.constrain(
     {
       scale,
       offsetX: currentAnchor.x - sourceAnchor.x * scale,

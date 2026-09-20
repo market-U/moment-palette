@@ -49,6 +49,19 @@ export const drawPhotoSource = (
   )
 }
 
+export const drawPhotoAreaContent = (
+  context: CanvasRenderingContext2D,
+  area: PhotoAreaDefinition,
+  size: { width: number; height: number },
+  drawOverlay?: (context: CanvasRenderingContext2D) => void,
+) => {
+  // 透過画像はエリアの初期色へ重ねる。他エリアを下地にすると透明画素から
+  // 後で編集・確定した写真が見え、エリア同士が独立しなくなるため避ける。
+  context.fillStyle = area.initialColor
+  context.fillRect(0, 0, size.width, size.height)
+  drawOverlay?.(context)
+}
+
 export const drawPhotoPreviewPlanes = (
   context: CanvasRenderingContext2D,
   sourcePlane: HTMLCanvasElement,
@@ -118,20 +131,19 @@ export const createCanvasPhotoCompositor = (
       const frame = confirmed[area.id]
 
       drawMaskedArea(context, area, (areaContext) => {
-        if (selectedAreaId === area.id && source && transform) {
-          drawPhotoSource(
-            areaContext,
-            source,
-            source.width,
-            source.height,
-            transform,
-          )
-        } else if (frame) {
-          areaContext.drawImage(frame.canvas, 0, 0)
-        } else {
-          areaContext.fillStyle = area.initialColor
-          areaContext.fillRect(0, 0, template.size.width, template.size.height)
-        }
+        drawPhotoAreaContent(areaContext, area, template.size, () => {
+          if (selectedAreaId === area.id && source && transform) {
+            drawPhotoSource(
+              areaContext,
+              source,
+              source.width,
+              source.height,
+              transform,
+            )
+          } else if (frame) {
+            areaContext.drawImage(frame.canvas, 0, 0)
+          }
+        })
       })
     }
   }
