@@ -65,8 +65,8 @@
 
 ## 8. PRプレビュー配信
 
-- [ ] 8.1 作業ブランチをpushして`main`向けPRを作成し、GitHub Actionsの全品質検査とSWAプレビューデプロイが成功することを確認する
-- [ ] 8.2 PRプレビューURLの`/spikes/photo-import`へHTTPSで直接アクセスでき、通常画面、既存カメラF/S、固定F/S環境に回帰がないことを確認する
+- [x] 8.1 作業ブランチをpushして`main`向けPRを作成し、GitHub Actionsの全品質検査とSWAプレビューデプロイが成功することを確認する
+- [x] 8.2 PRプレビューURLの`/spikes/photo-import`へHTTPSで直接アクセスでき、通常画面、既存カメラF/S、固定F/S環境に回帰がないことを確認する
 - [x] 8.3 実機確認に使うSafari・Chrome共通チェックリストと、入口・返却形式・MIME type・寸法・処理時間・画質を記録する表を`docs/spikes/photo-import.md`へ用意する
 
 ## 9. iPhone Safari・Chrome実機確認
