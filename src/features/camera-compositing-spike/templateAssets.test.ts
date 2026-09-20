@@ -16,7 +16,7 @@ interface DecodedMask {
 
 const sourceRoot = fileURLToPath(
   new URL(
-    '../../../openspec/changes/validate-camera-compositing/文鳥01/',
+    '../../../openspec/changes/archive/2026-09-20-validate-camera-compositing/文鳥01/',
     import.meta.url,
   ),
 )
