@@ -11,6 +11,11 @@ export const router = createRouter({
       component: TitlePage,
     },
     {
+      path: '/spikes/camera-compositing',
+      name: 'camera-compositing-spike',
+      component: () => import('./spikes/CameraCompositingSpikeRoute.vue'),
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: { name: 'title' },
     },
