@@ -539,6 +539,8 @@ onBeforeUnmount(cleanup)
 
 <style scoped>
 .spike {
+  /* 親pageの固定高を引き継ぎ、iOSでもこの要素自身を縦スクロール領域にする。 */
+  height: 100%;
   min-height: 100%;
   padding: calc(env(safe-area-inset-top) + 1rem)
     calc(env(safe-area-inset-right) + 1rem)
