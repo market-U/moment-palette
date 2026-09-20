@@ -199,8 +199,36 @@ const loadFixture = async (name: string, mimeType: string) => {
   }
 }
 
+const discardActiveEditing = () => {
+  // 編集sourceは選択中エリアだけに属する。確定・キャンセル・エリア切替で
+  // 必ず解放し、別エリアへ最後の写真や遅れて完了したdecodeを持ち越さない。
+  latestSelection.invalidate()
+  pointerTracker.clear()
+  const photo = activePhoto.value
+  activePhoto.value = undefined
+  photo?.dispose()
+}
+
 const selectArea = (areaId: PhotoAreaId) => {
+  if (selectedAreaId.value === areaId) {
+    return
+  }
+
+  const abandonedEditing =
+    Boolean(activePhoto.value) || status.value === 'decoding'
+
+  if (abandonedEditing) {
+    discardActiveEditing()
+    failure.value = undefined
+    status.value = confirmedCount.value > 0 ? 'confirmed' : 'idle'
+  }
+
   selectedAreaId.value = areaId
+
+  if (abandonedEditing) {
+    note.value = `${selectedArea.value?.label ?? '選択エリア'}へ切り替えたため、未確定の写真を破棄しました。`
+  }
+
   render()
 }
 
@@ -211,26 +239,23 @@ const confirmPhoto = () => {
     return
   }
 
+  // 確定frameは編集sourceから独立したCanvasなので、生成後は元sourceを解放できる。
+  const next = compositor.confirmSource(photo.source, transform.value)
   const previous = confirmed[selectedAreaId.value]
+  confirmed[selectedAreaId.value] = next
 
   if (previous) {
     compositor.releaseFrame(previous)
   }
 
-  confirmed[selectedAreaId.value] = compositor.confirmSource(
-    photo.source,
-    transform.value,
-  )
+  discardActiveEditing()
   status.value = 'confirmed'
   note.value = `${selectedArea.value?.label ?? '選択エリア'}へ写真を確定しました。選び直すと置換できます。`
   render()
 }
 
 const cancelSelection = () => {
-  latestSelection.invalidate()
-  pointerTracker.clear()
-  activePhoto.value?.dispose()
-  activePhoto.value = undefined
+  discardActiveEditing()
   failure.value = undefined
   status.value = confirmedCount.value > 0 ? 'confirmed' : 'idle'
   note.value =
@@ -296,11 +321,8 @@ const handlePointerEnd = (event: PointerEvent) => {
 
 const cleanup = () => {
   disposed = true
-  latestSelection.invalidate()
   resizeObserver?.disconnect()
-  pointerTracker.clear()
-  activePhoto.value?.dispose()
-  activePhoto.value = undefined
+  discardActiveEditing()
 
   for (const area of photoAreas) {
     const frame = confirmed[area.id]
@@ -383,12 +405,16 @@ onBeforeUnmount(cleanup)
               "
             />
           </label>
-          <button type="button" :disabled="!activePhoto" @click="confirmPhoto">
+          <button
+            type="button"
+            :disabled="!activePhoto || status === 'decoding'"
+            @click="confirmPhoto"
+          >
             選択エリアへ確定
           </button>
           <button
             type="button"
-            :disabled="!activePhoto"
+            :disabled="!activePhoto && status !== 'decoding'"
             @click="cancelSelection"
           >
             編集中の写真をキャンセル
