@@ -23,7 +23,7 @@
 - F/S専用のAzure Static Web Apps Free、Bicep、GitHub Actions、SPA設定、PRプレビューを実装済みである。
 - `main`の固定F/S URLとPRプレビューをiPhone 15（iOS 26）のSafari・Chromeで確認済みである。Android Chromeは実機を確保できるリリース後に確認する。
 - `establish-preview-deployment`はverifyとmain specsへの同期を完了し、archive済みである。
-- フェーズ3の先行change `validate-camera-compositing`を開始し、カメラ取得、PNGマスク、Pointer Events、Canvas合成、1080×1080 PNG生成のF/Sを進めている。
+- フェーズ3の先行change `validate-camera-compositing`は実装とiPhone実機確認を完了し、verifyとarchiveを残している。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序
@@ -127,7 +127,9 @@ UIコンポーネントライブラリは、画面検討の結果が不足して
 
 OpenSpec change候補:
 
-- `validate-camera-compositing`（進行中）
+- `validate-camera-compositing`（実装・実機確認完了、verify・archive待ち）
+- `validate-photo-import`
+- `validate-image-sharing`
 - `validate-azure-template-delivery`
 
 カメラ・画像処理の検証候補:
@@ -175,6 +177,14 @@ Azureテンプレート配信とリリースの検証候補:
 - コード分割や遅延読み込みによって、制作中に削除済みの旧ビルドアセットを要求しない構成にできること。
 
 F/Sコードは本番コードから隔離する。完了時にはファイルまたはモジュール単位で、後続の通常changeへ昇格するか、設計だけを採用して再実装するか、削除するかを記録する。
+
+`validate-camera-compositing`の完了結果:
+
+- iPhone 15（iOS 26）のSafari・Chromeで、カメラ取得、前面・背面切替、4エリアのマスク合成、pan、pinch、撮影、撮り直し、1080×1080 PNG生成、権限拒否、再試行、track停止を確認した。
+- Canvas 2Dで両ブラウザとも概算60fps、撮影0〜4.0ms、PNG生成約100msとなり、WebGLを追加せず本実装へ進められると判断した。
+- 前面カメラはプレビューと撮影結果をともに鏡像とし、表示比率の中間値でも選択中映像を薄くしない合成方式を採用した。
+- ブラウザ非依存の座標・ジェスチャー・scene処理とcamera port・browser adapterは本実装への昇格候補とし、F/S専用UI、route、固定アセット、診断表示は削除対象とした。
+- 写真取り込み、画像保存・共有、Android実機、Azureからのテンプレート配信は後続changeで検証する。
 
 ### 4. F/S結果を要求とデザインへ反映する
 
@@ -245,8 +255,9 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ## 次のセッションで行うこと
 
-1. `validate-camera-compositing`でカメラからPNG生成までの縦断経路を実装し、iPhone Safari・Chromeで実機確認する。
-2. 結果を`docs/spikes/`へ記録し、クライアント側の追加F/Sと`validate-azure-template-delivery`の範囲・順序を決める。
+1. `validate-camera-compositing`をverifyし、delta specを同期せずarchiveする。
+2. `validate-photo-import`で写真形式、向き、縮小、メモリと一時リソース解放を検証する。
+3. `validate-image-sharing`と`validate-azure-template-delivery`を、それぞれ独立したchangeとして進める。
 
 ## 更新ルール
 

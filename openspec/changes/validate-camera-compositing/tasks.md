@@ -74,9 +74,9 @@
 
 ## 10. 結果・採否・完了
 
-- [ ] 10.1 `docs/spikes/camera-compositing.md`へ検証する問い、対象環境、成功条件、実施内容、定量値、Safari・Chrome別結果、制約、未解決事項を記録する
-- [ ] 10.2 Canvas 2D、mask合成、Pointer Events、カメラ切替、track lifecycle、1080px PNGの採否と、写真取り込み・共有・Android・Azure配信へ残る問いを記録する
-- [ ] 10.3 追加ファイルを単位として、本実装へ昇格、設計を保って再実装、削除のいずれにするかを決定し、F/S専用route・UI・実行用アセットコピー・診断表示の扱いを記録する。change内の`文鳥01`原本は検証時点の入力として保持する
-- [ ] 10.4 F/S結果に合わせて`docs/vision.md`、`docs/design/`、`docs/development-roadmap.md`の更新要否と、後続OpenSpec changeの分割を判断する
-- [ ] 10.5 `openspec validate validate-camera-compositing`と全品質検査を再実行し、proposal・spec・design・tasks・実装・結果記録の整合を確認する
+- [x] 10.1 `docs/spikes/camera-compositing.md`へ検証する問い、対象環境、成功条件、実施内容、定量値、Safari・Chrome別結果、制約、未解決事項を記録する
+- [x] 10.2 Canvas 2D、mask合成、Pointer Events、カメラ切替、track lifecycle、1080px PNGの採否と、写真取り込み・共有・Android・Azure配信へ残る問いを記録する
+- [x] 10.3 追加ファイルを単位として、本実装へ昇格、設計を保って再実装、削除のいずれにするかを決定し、F/S専用route・UI・実行用アセットコピー・診断表示の扱いを記録する。change内の`文鳥01`原本は検証時点の入力として保持する
+- [x] 10.4 F/S結果に合わせて`docs/vision.md`、`docs/design/`、`docs/development-roadmap.md`の更新要否と、後続OpenSpec changeの分割を判断する
+- [x] 10.5 `openspec validate validate-camera-compositing`と全品質検査を再実行し、proposal・spec・design・tasks・実装・結果記録の整合を確認する
 - [x] 10.6 F/Sのdelta specをmain specsへ同期しないことを確認し、完了後は`--skip-specs`でarchiveする方針を記録する

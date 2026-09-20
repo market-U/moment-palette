@@ -18,8 +18,8 @@
 | Node.js 24.14.0 / pnpm 12.4.2 | 自動検査とproduction build | 完了 |
 | Azure Static Web Apps CLI 2.0.10 | ローカル配信とSPA設定 | 完了 |
 | Mac / Chrome / Webカメラ1台 | 基本操作とカメラの事前確認 | 完了 |
-| iPhone 15 / iOS 26 / Safari | 主要な実機判定 | 完了（前面カメラ鏡像化の再確認だけ残る） |
-| iPhone 15 / iOS 26 / Chrome | Safariとの差分確認 | 完了（前面カメラ鏡像化の再確認だけ残る） |
+| iPhone 15 / iOS 26 / Safari | 主要な実機判定 | 完了 |
+| iPhone 15 / iOS 26 / Chrome | Safariとの差分確認 | 完了 |
 | Android Chrome | ブラウザ・端末差の確認 | 今回の合否から除外し、リリース後に実施 |
 
 ## 成功条件
@@ -73,15 +73,15 @@
 - カメラ開始、前面・背面切替、4mask、表示比率、pan、pinch、4エリア撮影、撮り直し、1080×1080 PNG生成は成功した。
 - 30秒以上の連続操作と10回の撮影・撮り直しを完了し、致命的な停止、継続的な性能劣化、映像漏れは確認されなかった。
 - キャンセル、バックグラウンド移行、画面離脱後にcamera indicatorが消灯し、権限拒否時の案内と再試行も正常に動作した。
-- 診断欄のvideo寸法、向き、render FPS、撮影時間、PNG生成時間、生成画像寸法は表示・更新された。代表値は未記録である。
+- 診断欄のvideo寸法、向き、render FPS、撮影時間、PNG生成時間、生成画像寸法は表示・更新された。renderは概算60fps、撮影は0〜4.0ms、PNG生成は約100ms、生成画像は1080×1080であった。
 - 初回確認で、表示比率の中間値で選択中エリアも薄くなることと、シャッターとプレビューが離れて同時に見づらいことを確認した。合成方式とシャッター配置を修正し、両方の解消を実機で確認した。
-- 前面カメラが鏡像でなく直感に反したため、facing modeが`user`の場合はプレビューと撮影結果の両方を左右反転するよう修正した。修正後の鏡像は再確認待ちである。
+- 前面カメラが鏡像でなく直感に反したため、facing modeが`user`の場合はプレビューと撮影結果の両方を左右反転するよう修正した。修正後は両方が同じ鏡像となることを確認した。
 
 ### iPhone Chrome
 
 - Safariと同じ必須操作、30秒以上の連続操作、10回の撮影・撮り直し、リソース解放、権限拒否と再試行に成功した。Safariとの機能差は確認されなかった。
-- 診断欄の各値は表示・更新され、生成PNGは1080×1080であった。代表値は未記録である。
-- 前面カメラ鏡像化の修正後確認だけが残っている。
+- renderは概算60fps、撮影は0〜4.0ms、PNG生成は約100ms、生成PNGは1080×1080であった。
+- 前面カメラのプレビューと撮影結果はどちらも同じ鏡像となり、問題は確認されなかった。
 
 ### Mac Chrome
 
@@ -96,12 +96,29 @@
 
 ## 採否判断
 
-iPhone SafariとChromeの実機結果を得てから確定する。
+- Canvas 2Dによるライブプレビューと最終合成を採用する。両ブラウザで概算60fpsを維持したため、現時点でWebGLは不要である。
+- PNG maskの中間alpha、離れた複数形状、線画の最前面描画、領域間の描画順を採用する。実機で目立つ映像漏れやhaloは確認されなかった。
+- Pointer Events、pointer capture、編集領域だけの`touch-action: none`を採用する。pan、pinch、通常スクロールがSafariとChromeで成立した。
+- `facingMode`による背面優先と前面・背面切替を採用する。前面はプレビューと撮影結果をともに鏡像化する。
+- trackの所有をbrowser adapterへ集約し、撮影、キャンセル、バックグラウンド移行、route離脱で明示停止する方式を採用する。
+- 1080×1080のdetached canvasへ撮影frameを保持し、完成時に`image/png` Blobを生成する方式を採用する。撮影0〜4.0ms、PNG生成約100msで、初期要件に対して十分である。
+- 写真取り込みの形式・向き・メモリ、長押し保存とWeb Share、Android実機、Azure配信アセットのCORSは未検証であり、後続changeで扱う。
 
 ## コードの扱い
 
-iPhone SafariとChromeの実機結果を得てから、追加ファイル単位で「本実装へ昇格」「設計を保って再実装」「削除」のいずれかを記録する。F/S専用route、UI、実行用アセットコピー、診断表示は原則として本実装に残さない。
+| 扱い | 対象 | 理由 |
+| --- | --- | --- |
+| 本実装へ昇格 | `geometry.ts`、`pointerGesture.ts`、`scene.ts`と各単体テスト | ブラウザ非依存の計算と状態処理で、実機結果と単体テストの両方が成立したため。本実装の所有featureに合わせて配置と名称は調整する。 |
+| 本実装へ昇格 | `cameraPort.ts`、`browserCameraStream.ts`と単体テスト | portとtrack所有の境界が明確で、エラー分類と冪等cleanupを自動検査できるため。UI文言は本実装のi18nへ移す。 |
+| 設計を保って再実装 | `canvasCameraCompositor.ts`、`browserAssetLoader.ts`、`compositorPort.ts` | 本実装では写真・単色とリモートテンプレートを同じ作品状態へ統合し、読み込み失敗とCORSを扱う必要があるため。Canvas 2D、mask、描画順、鏡像、解放の設計は引き継ぐ。 |
+| 削除 | `CameraCompositingSpike.vue`、F/S用page・route・composition root | 診断と検証操作を一画面に集めたF/S専用UIであり、本番画面デザインと状態遷移は別途実装するため。 |
+| 削除 | `template.ts`、`public/spikes/camera-compositing/`、`templateAssets.test.ts` | 固定テンプレートとF/S用コピーであり、本実装ではカタログとテンプレート配信へ置き換えるため。 |
+| 保持 | change内の`文鳥01/`原本、この結果レポート、archive済みchange | 検証時点の入力、結果、判断根拠を後続changeから参照できるようにするため。 |
 
 ## vision・design・本実装changeへの反映
 
-実機結果を得てから追記する。このF/Sのdelta specはmain specsへ同期せず、完了時は`openspec archive validate-camera-compositing --skip-specs`でarchiveする。
+- `docs/vision.md`へ、表示比率の中間値で選択中映像を薄くしないことと、前面カメラの鏡像をプレビューと撮影結果で揃えることを反映する。
+- `docs/design/figma.md`へ同じ操作仕様を反映する。Figmaのレイアウト自体は今回のF/S用シャッター配置に合わせて更新せず、本実装changeで確定する。
+- 後続changeは、写真形式・向き・メモリを扱う`validate-photo-import`、長押し保存とWeb Shareを扱う`validate-image-sharing`、Blob・SAS URL・CORSを扱う`validate-azure-template-delivery`に分ける。
+- 本実装changeでは、このF/Sで採用した方式を正式specへ記載し、カメラ非搭載時は写真選択または単色塗りを代替導線とする。
+- このF/Sのdelta specはmain specsへ同期せず、完了時は`openspec archive validate-camera-compositing --skip-specs`でarchiveする。
