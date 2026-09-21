@@ -21,6 +21,11 @@ export const router = createRouter({
       component: () => import('./spikes/PhotoImportSpikeRoute.vue'),
     },
     {
+      path: '/spikes/image-sharing',
+      name: 'image-sharing-spike',
+      component: () => import('./spikes/ImageSharingSpikeRoute.vue'),
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: { name: 'title' },
     },
