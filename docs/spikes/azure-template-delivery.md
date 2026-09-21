@@ -126,7 +126,7 @@ Portal生成テンプレートは使用せず、Microsoft Learn、Azure公式Git
 | Web Share | 成功 | 成功 | |
 | version/build三者一致 | 成功 | 成功 | Build A |
 | 不一致時のreload案内 | 未実施 | 未実施 | |
-| Build A旧tabの完遂 | 未実施 | 未実施 | |
+| Build A旧tabの完遂 | 成功 | 成功 | Build B配信後も保存・共有まで完遂 |
 | Start後の対象request | すべて0件 | すべて0件 | API/release/Blob/JS/CSS |
 | SAS期限後の取得済みbytes利用 | 未実施 | 未実施 | |
 
@@ -202,6 +202,19 @@ iPhoneでは固定高page内のF/S rootがscroll containerになっておらず�
 | Start後request | Safari・ChromeともAPI / release / Blob / JS / CSSが0件 |
 
 Safari・Chromeとも、スクロール、公開中template表示、Start、全asset decode、1080×1080 PNG生成、長押し保存、Web Shareに成功した。操作後もStart後requestはすべて0件で、browser間の差異はなかった。両browserのStart済みBuild A tabを残した状態で、同じPRへこの結果をpushしてBuild Bへ更新する。
+
+## PRプレビュー Build Bと旧tab継続結果
+
+| 項目 | 結果 |
+| --- | --- |
+| source commit | `68ad9f4b4ccef1388f98968b6b059729fa3a1249` |
+| deployed build ID | `1c9c0cc26448af6a4ccee48139b2e17fc59baed5` |
+| workflow | `F/S preview deployment` / 成功 / 2分11秒 |
+| 新規tab | Safari・Chromeともfrontend / API / releaseがBuild Bで一致 |
+| Build A旧tab | Safari・ChromeともBuild A snapshotを維持してPNG生成・保存・共有に成功 |
+| 旧tabの追加request | Safari・ChromeともAPI / release / Blob / JS / CSSが0件 |
+
+Build B配信後も、Safari・ChromeのStart済みBuild A旧tabはpageを再読み込みせず状態を保持した。background復帰後を含め、取得済みassetと読込済みcodeだけでPNG生成、長押し保存、Web Shareを完遂し、Start後requestはすべて0件だった。新しいtabはBuild Bを取得し、frontend、API、`release.json`のapp versionとbuild IDが一致した。browser間の差異やpage破棄はなかった。SAS期限後確認のため、Build A旧tabを少なくとも一つ保持する。
 
 ## 秘密値・asset運用
 

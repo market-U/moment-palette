@@ -117,12 +117,12 @@
 - [x] 11.2 SafariでStart後のsession snapshotとrequest基準値を記録し、操作とbackground復帰の可能な範囲でAPI、release、Blobの再取得がないことを確認する
 - [x] 11.3 iPhone 15（iOS 26）のChromeで11.1〜11.2と同じ確認を行い、Safariとの差異を記録する
 - [x] 11.4 Build Aの確認結果を結果文書へ追加して同じPR branchへpushし、同じプレビューURLをBuild Bへ更新する
-- [ ] 11.5 SafariのBuild A旧tabでBuild B配信後も状態を保持し、旧JS・CSS・release・API・Blobへの追加requestなしで編集、PNG生成、保存、共有まで完遂する
-- [ ] 11.6 ChromeのBuild A旧tabでも11.5と同じ確認を行い、browser差とbackground中のpage破棄有無を記録する
-- [ ] 11.7 Build B配信後に新しいtabで同じURLを開き、Build Bのフロント、API、`release.json`が新しい同一build IDで一致することをSafari・Chromeで確認する
+- [x] 11.5 SafariのBuild A旧tabでBuild B配信後も状態を保持し、旧JS・CSS・release・API・Blobへの追加requestなしで編集、PNG生成、保存、共有まで完遂する
+- [x] 11.6 ChromeのBuild A旧tabでも11.5と同じ確認を行い、browser差とbackground中のpage破棄有無を記録する
+- [x] 11.7 Build B配信後に新しいtabで同じURLを開き、Build Bのフロント、API、`release.json`が新しい同一build IDで一致することをSafari・Chromeで確認する
 - [ ] 11.8 version/buildを意図的に不一致にした確認用状態ではStart前にreload案内が出て、制作中sessionへ強制reloadが発生しないことを可能な範囲で実機確認する
 - [ ] 11.9 SAS発行から60分を超える、または同等の期限切れ条件を再現したStart済みsessionで、SAS更新なしに取得済みbytesからPNG生成・保存・共有できることを確認する
-- [ ] 11.10 Android Chromeを今回の合否から除外し、端末確保後に11章相当を実施するリリース後フォロー項目として記録する
+- [x] 11.10 Android Chromeを今回の合否から除外し、端末確保後に11章相当を実施するリリース後フォロー項目として記録する
 
 ## 12. 結果・採否・完了
 
