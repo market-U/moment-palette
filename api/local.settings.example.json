@@ -1,0 +1,10 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "AZURE_STORAGE_CONNECTION_STRING": "<set-locally>",
+    "TEMPLATE_CONTAINER_NAME": "moment-palette-templates",
+    "TEMPLATE_CATALOG_BLOB": "catalog/catalog.json"
+  }
+}

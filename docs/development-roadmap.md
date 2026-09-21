@@ -1,6 +1,6 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: フェーズ3 進行中
+> ステータス: フェーズ3 完了・フェーズ4着手待ち
 >
 > 最終更新日: 2026-09-21
 
@@ -25,6 +25,8 @@
 - `establish-preview-deployment`はverifyとmain specsへの同期を完了し、archive済みである。
 - フェーズ3の先行change `validate-camera-compositing`は実装とiPhone実機確認を完了し、delta specを同期せずarchive済みである。
 - 写真選択、標準APIによるdecode、EXIF Orientation、高解像度縮小、位置・倍率調整、mask合成を検証する`validate-photo-import`は、iPhone 15（iOS 26）のSafari・Chromeで実装と実機確認を完了し、delta specを同期せずarchive済みである。
+- 画像保存と共有を検証する`validate-image-sharing`は、iPhone 15（iOS 26）のSafari・Chromeで実装と実機確認を完了し、delta specを同期せずarchive済みである。
+- Azureテンプレート配信とリリース継続性を検証する`validate-azure-template-delivery`は、実装、iPhone実機確認、verifyを完了し、delta specを同期せずarchive済みである。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序
@@ -124,14 +126,14 @@ UIコンポーネントライブラリは、画面検討の結果が不足して
 
 ### 3. 中核技術のF/Sを行う
 
-ステータス: 進行中
+ステータス: 完了
 
 OpenSpec change候補:
 
 - `validate-camera-compositing`（完了・archive済み）
 - `validate-photo-import`（完了・archive済み）
 - `validate-image-sharing`（完了・archive済み）
-- `validate-azure-template-delivery`
+- `validate-azure-template-delivery`（完了・archive済み）
 
 カメラ・画像処理の検証候補:
 
@@ -205,6 +207,15 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 - 通常の画像要素による長押し保存、共有文のClipboard fallback、一つのPNG Blobを表示と再共有へ使い、再生成・画面離脱時にobject URLを破棄する方式を本実装へ引き継ぐ。
 - 共有結果分類、resource所有権、portとbrowser adapterは本実装への昇格・再実装候補とし、F/S専用route、Canvas fixture、三経路比較UI、診断表示は削除対象とする。Android ChromeでのMoment Palette固有の確認は、端末を確保した後の回帰項目とする。
 
+`validate-azure-template-delivery`の完了結果:
+
+- F/S用SWAへprivate Blob StorageとNode.js 22のマネージドAPIを追加し、公開中templateの個別assetへ読み取り専用・HTTPS限定・60分のService SASを発行できた。匿名取得とSASによる書き込みは拒否された。
+- Blob CORSは動的なPRプレビューに対応するためorigin `*`、methodを`GET`・`HEAD`・`OPTIONS`だけとする。制作開始時に選択templateの線画と全maskを並列取得・decodeし、以後はSASを再利用しない。
+- iPhone 15（iOS 26）のSafari・Chromeで、Build B配信後もStart済みBuild A旧tabが追加requestなしでPNG生成、長押し保存、共有を完遂した。新規tabではfrontend、API、`release.json`のapp versionとbuild IDが一致した。
+- 未開始の旧build tabではStart前にbuild不一致を検出して再読み込みを案内し、Start済みsessionは強制再読み込みしなかった。SAS期限後も取得済みbytesからPNG生成、保存、共有を完遂した。
+- `index.html`は`no-cache`、APIと`release.json`は`no-store`、hash付きJavaScript・CSSとrevision付きtemplate assetは1年`immutable`とする。旧assetはcatalogから除外して24時間後に削除し、14日のsoft deleteとversioningを復旧手段とする。
+- API契約・公開判定・SAS発行・build metadata・IaC・workflowは本実装への昇格候補、フロントのportとsession所有権は設計を保った再実装候補、F/S専用route・診断UI・手動compositorは削除対象とする。Android Chromeは端末確保後の回帰項目とする。
+
 ### 4. F/S結果を要求とデザインへ反映する
 
 ステータス: 未着手
@@ -274,7 +285,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ## 次のセッションで行うこと
 
-1. `validate-azure-template-delivery`でBlob、マネージドAPI、SAS URL、キャッシュ、デプロイをまたぐ制作継続性を検証する。
+1. フェーズ4として、4件のF/S結果を本実装用の要求、画面仕様、アーキテクチャへ整理する。
 
 ## 更新ルール
 

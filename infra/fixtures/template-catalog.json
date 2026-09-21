@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "catalogRevision": "fs-2026-09-21-r1",
+  "templates": [
+    {
+      "id": "buncho-01",
+      "assetRevision": "r1",
+      "name": {
+        "ja": "文鳥01",
+        "en": "Java sparrow 01"
+      },
+      "published": true,
+      "publishFrom": "2026-01-01T00:00:00.000Z",
+      "publishUntil": null,
+      "thumbnail": {
+        "path": "templates/buncho-01/r1/thumbnail.png",
+        "mimeType": "image/png"
+      },
+      "lineArt": {
+        "path": "templates/buncho-01/r1/line-art.png",
+        "mimeType": "image/png"
+      },
+      "masks": [
+        {
+          "id": "background",
+          "label": { "ja": "背景", "en": "Background" },
+          "path": "templates/buncho-01/r1/masks/background.png",
+          "mimeType": "image/png"
+        },
+        {
+          "id": "body",
+          "label": { "ja": "ボディ", "en": "Body" },
+          "path": "templates/buncho-01/r1/masks/body.png",
+          "mimeType": "image/png"
+        },
+        {
+          "id": "beak",
+          "label": { "ja": "くちばし", "en": "Beak" },
+          "path": "templates/buncho-01/r1/masks/beak.png",
+          "mimeType": "image/png"
+        },
+        {
+          "id": "mouth",
+          "label": { "ja": "口の中", "en": "Mouth" },
+          "path": "templates/buncho-01/r1/masks/mouth.png",
+          "mimeType": "image/png"
+        }
+      ]
+    },
+    {
+      "id": "buncho-unpublished",
+      "assetRevision": "r1",
+      "name": { "ja": "非公開fixture", "en": "Unpublished fixture" },
+      "published": false,
+      "publishFrom": null,
+      "publishUntil": null,
+      "thumbnail": {
+        "path": "fixtures/unpublished/thumbnail.png",
+        "mimeType": "image/png"
+      },
+      "lineArt": {
+        "path": "fixtures/unpublished/line-art.png",
+        "mimeType": "image/png"
+      },
+      "masks": []
+    },
+    {
+      "id": "buncho-scheduled",
+      "assetRevision": "r1",
+      "name": { "ja": "公開前fixture", "en": "Scheduled fixture" },
+      "published": true,
+      "publishFrom": "2099-01-01T00:00:00.000Z",
+      "publishUntil": null,
+      "thumbnail": {
+        "path": "fixtures/scheduled/thumbnail.png",
+        "mimeType": "image/png"
+      },
+      "lineArt": {
+        "path": "fixtures/scheduled/line-art.png",
+        "mimeType": "image/png"
+      },
+      "masks": []
+    },
+    {
+      "id": "buncho-expired",
+      "assetRevision": "r1",
+      "name": { "ja": "公開終了fixture", "en": "Expired fixture" },
+      "published": true,
+      "publishFrom": "2020-01-01T00:00:00.000Z",
+      "publishUntil": "2021-01-01T00:00:00.000Z",
+      "thumbnail": {
+        "path": "fixtures/expired/thumbnail.png",
+        "mimeType": "image/png"
+      },
+      "lineArt": {
+        "path": "fixtures/expired/line-art.png",
+        "mimeType": "image/png"
+      },
+      "masks": []
+    }
+  ]
+}

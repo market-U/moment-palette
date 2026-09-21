@@ -4,7 +4,7 @@ import { vueTsConfigs, withVueTs } from '@vue/eslint-config-typescript'
 
 export default withVueTs(
   {
-    ignores: ['dist/**', 'coverage/**'],
+    ignores: ['dist/**', 'api/dist/**', 'coverage/**'],
   },
   pluginVue.configs['flat/essential'],
   vueTsConfigs.recommended,

@@ -5,6 +5,7 @@ docs/vision-input.md
 .env
 .env.*
 !.env.example
+api/local.settings.json
 .npmrc
 !.npmrc.example
 *.pem
@@ -14,6 +15,7 @@ docs/vision-input.md
 
 # Dependencies and build outputs
 node_modules/
+api/dist/
 dist/
 coverage/
 .vite/
