@@ -130,7 +130,7 @@ OpenSpec change候補:
 
 - `validate-camera-compositing`（完了・archive済み）
 - `validate-photo-import`（完了・archive済み）
-- `validate-image-sharing`（実装・実機確認完了、verify/archive待ち）
+- `validate-image-sharing`（完了・archive済み）
 - `validate-azure-template-delivery`
 
 カメラ・画像処理の検証候補:
@@ -274,8 +274,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ## 次のセッションで行うこと
 
-1. `validate-image-sharing`をverifyし、delta specを同期せずarchiveする。
-2. `validate-azure-template-delivery`でBlob、マネージドAPI、SAS URL、キャッシュ、デプロイをまたぐ制作継続性を検証する。
+1. `validate-azure-template-delivery`でBlob、マネージドAPI、SAS URL、キャッシュ、デプロイをまたぐ制作継続性を検証する。
 
 ## 更新ルール
 
