@@ -119,15 +119,15 @@ Portal生成テンプレートは使用せず、Microsoft Learn、Azure公式Git
 
 | 項目 | Safari | Chrome | 備考 |
 | --- | --- | --- | --- |
-| 公開中templateだけを表示 | 未実施 | 未実施 | |
-| SAS assetのCORS取得 | 未実施 | 未実施 | |
-| 1080×1080 PNG生成 | 未実施 | 未実施 | |
-| 長押し保存 | 未実施 | 未実施 | |
-| Web Share | 未実施 | 未実施 | |
-| version/build三者一致 | 未実施 | 未実施 | |
+| 公開中templateだけを表示 | 成功 | 成功 | 文鳥01だけを表示 |
+| SAS assetのCORS取得 | 成功 | 成功 | Startで全asset decode完了 |
+| 1080×1080 PNG生成 | 成功 | 成功 | `image/png` |
+| 長押し保存 | 成功 | 成功 | |
+| Web Share | 成功 | 成功 | |
+| version/build三者一致 | 成功 | 成功 | Build A |
 | 不一致時のreload案内 | 未実施 | 未実施 | |
 | Build A旧tabの完遂 | 未実施 | 未実施 | |
-| Start後の対象request | 未実施 | 未実施 | API/release/Blob/JS/CSS |
+| Start後の対象request | すべて0件 | すべて0件 | API/release/Blob/JS/CSS |
 | SAS期限後の取得済みbytes利用 | 未実施 | 未実施 | |
 
 ## 定量値
@@ -153,7 +153,7 @@ Azure認証ユーザーには作成直後のStorage data plane roleがなく、`
 
 その後、対象ユーザーへStorage Account scopeの`Storage Blob Data Contributor`を付与して再開した。文鳥01の6 assetを`templates/buncho-01/r1/`へ先に配置し、すべて`image/png`、`public, max-age=31536000, immutable`であることを確認した後、`catalog/catalog.json`を`application/json`、`no-cache`で最後に配置した。Azure認証ではcatalogとassetを読み取れ、匿名要求は引き続き409で拒否された。SAS付きassetは200、SASなしは409、同じSASによるPUTは403となった。
 
-SWA ProductionのApplication Settingsへ`AZURE_STORAGE_CONNECTION_STRING`、`TEMPLATE_CONTAINER_NAME`、`TEMPLATE_CATALOG_BLOB`を値を表示せず設定し、設定名だけを確認した。PR previewでの適用確認はプレビューデプロイ後に行う。
+SWA ProductionのApplication Settingsへ`AZURE_STORAGE_CONNECTION_STRING`、`TEMPLATE_CONTAINER_NAME`、`TEMPLATE_CATALOG_BLOB`を値を表示せず設定し、設定名だけを確認した。PR previewのManaged APIでも同じ設定からcatalogを読み、SASを発行できることを確認した。
 
 ## ローカル統合結果
 
@@ -190,6 +190,18 @@ PRの`pull_request`実行では、GitHub Actionsの`GITHUB_SHA`がhead commitで
 - iPhone Safari・Chromeの保存・共有とBuild A/B継続性は次の実機確認で判定する。
 
 iPhoneでは固定高page内のF/S rootがscroll containerになっておらず、初期表示より下へ移動できなかった。このデプロイはBuild A/B継続確認の基準から除外し、F/S rootへ`height: 100%`を追加した次のデプロイをBuild Aとして扱う。
+
+## PRプレビュー Build A実機結果
+
+| 項目 | 結果 |
+| --- | --- |
+| source commit | `8187cb2e635254f57e9aba86b185ac004904a177` |
+| deployed build ID | `ceddb02903291448382bca149b882ae773a1cabc` |
+| Safari / Chrome | iPhone 15 / iOS 26 |
+| session snapshot | app `0.0.0` / build `ceddb02903291448382bca149b882ae773a1cabc` / catalog `fs-2026-09-21-r1` / template `r1` |
+| Start後request | Safari・ChromeともAPI / release / Blob / JS / CSSが0件 |
+
+Safari・Chromeとも、スクロール、公開中template表示、Start、全asset decode、1080×1080 PNG生成、長押し保存、Web Shareに成功した。操作後もStart後requestはすべて0件で、browser間の差異はなかった。両browserのStart済みBuild A tabを残した状態で、同じPRへこの結果をpushしてBuild Bへ更新する。
 
 ## 秘密値・asset運用
 
