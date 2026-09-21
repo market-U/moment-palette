@@ -89,6 +89,22 @@ Moment Palette固有のPNG、共有文、buildをAndroid Chromeで新規確認�
 - 読み込まれた画面resourceは同一originのJavaScript/CSSだけで、生成画像の`img`は`blob:` URLを参照した。consoleのwarning/errorは0件だった。
 - F/S codeの検索では、`fetch`、XHR、`sendBeacon`、Web Storage、IndexedDB、外部ログ処理を検出しなかった。外部HTTPS URLは共有文へ含める固定URLだけだった。
 
+## PRプレビュー確認結果
+
+- PR: [#8 画像共有F/Sを追加](https://github.com/market-U/moment-palette/pull/8)
+- プレビュー: `https://icy-mushroom-0c0e42e00-8.eastasia.5.azurestaticapps.net/`
+- GitHub Actionsの品質検査とSWAプレビューデプロイは成功した。
+- HTTPSの直接アクセスで通常画面、カメラF/S、写真F/S、画像共有F/Sがすべて200で応答した。固定F/S環境の通常画面も200で応答した。
+- プレビュー上で1080×1080の`image/png`を生成でき、三経路はいずれも`canShare({ files })`が`true`、consoleのwarning/errorは0件だった。
+
+## Androidの扱い
+
+| 項目 | 記録 |
+| --- | --- |
+| 既存の根拠 | 複数の既存アプリで基準の`text/plain`方式をiPhone・Android共通に3年以上継続運用中 |
+| 今回の確認 | Android端末を確保できないため、Moment Palette固有のbuild、PNG、共有文では未確認。今回の合否から除外する |
+| 将来の回帰確認 | Android Chromeで三経路の`canShare()`、画像認識、文・ハッシュタグ・URLの受信、保存寸法を同じF/S routeから比較する |
+
 ## 経路・ブラウザ別結果
 
 | ブラウザ | 経路 | File type | `canShare()` | 画像認識 | 固定文 | ハッシュタグ | URL | 結果・制約 |

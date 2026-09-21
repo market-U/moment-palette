@@ -61,8 +61,8 @@
 
 ## 7. PRプレビュー配信
 
-- [ ] 7.1 作業ブランチをpushして`main`向けPRを作成し、GitHub Actionsの全品質検査とSWAプレビューデプロイが成功することを確認する
-- [ ] 7.2 PRプレビューURLの`/spikes/image-sharing`へHTTPSで直接アクセスでき、通常画面、既存カメラF/S、既存写真F/S、固定F/S環境に回帰がないことを確認する
+- [x] 7.1 作業ブランチをpushして`main`向けPRを作成し、GitHub Actionsの全品質検査とSWAプレビューデプロイが成功することを確認する
+- [x] 7.2 PRプレビューURLの`/spikes/image-sharing`へHTTPSで直接アクセスでき、通常画面、既存カメラF/S、既存写真F/S、固定F/S環境に回帰がないことを確認する
 - [x] 7.3 Safari・Chrome共通チェックリストと、方式・File type・`canShare()`・共有先・画像・文・ハッシュタグ・URL・保存寸法を記録する表を`docs/spikes/image-sharing.md`へ整える
 
 ## 8. iPhone Safari・Chrome実機確認
@@ -75,7 +75,7 @@
 - [ ] 8.6 Safariで完成PNGを再生成し、版番号が変わり、以前の画像ではなく新しいBlobだけが表示・共有されることを確認する
 - [ ] 8.7 iPhone 15（iOS 26）のChromeで8.1〜8.6と同じ確認を行い、Safariとの差異を記録する
 - [ ] 8.8 Safari・Chromeで少なくとも10回の共有・キャンセル・再共有を行い、操作不能、古い画像の再表示、継続的な劣化がないことを確認する
-- [ ] 8.9 Androidの新規実機確認を今回の合否から除外し、既存運用実績と、Moment Palette固有の将来回帰項目を結果表へ分けて記録する
+- [x] 8.9 Androidの新規実機確認を今回の合否から除外し、既存運用実績と、Moment Palette固有の将来回帰項目を結果表へ分けて記録する
 
 ## 9. 結果・採否・完了
 
@@ -84,4 +84,4 @@
 - [ ] 9.3 Fileまたはmodule単位で本実装へ昇格、設計を保って再実装、削除のいずれにするかを決め、F/S route、fixture、比較UI、診断表示の扱いを記録する
 - [ ] 9.4 F/S結果に合わせて`docs/vision.md`、`docs/design/`、`docs/development-roadmap.md`の更新要否と、完成確認画面の本実装changeへの反映を判断する
 - [ ] 9.5 `openspec validate validate-image-sharing`と全品質検査を再実行し、proposal・spec・design・tasks・実装・日本語コメント・結果記録の整合を確認する
-- [ ] 9.6 F/Sのdelta specをmain specsへ同期しないことを確認し、完了後は`openspec archive validate-image-sharing --skip-specs`でarchiveする方針を結果へ記録する
+- [x] 9.6 F/Sのdelta specをmain specsへ同期しないことを確認し、完了後は`openspec archive validate-image-sharing --skip-specs`でarchiveする方針を結果へ記録する
