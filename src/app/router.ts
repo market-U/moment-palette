@@ -26,6 +26,11 @@ export const router = createRouter({
       component: () => import('./spikes/ImageSharingSpikeRoute.vue'),
     },
     {
+      path: '/spikes/azure-template-delivery',
+      name: 'azure-template-delivery-spike',
+      component: () => import('./spikes/AzureTemplateDeliverySpikeRoute.vue'),
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: { name: 'title' },
     },

@@ -1,5 +1,16 @@
 # Moment Palette
 
+## Azureテンプレート配信F/Sのローカル起動
+
+本番相当のruntime差を確認するため、APIとSWA CLIを別terminalで起動する。
+
+1. Node.js 24で`pnpm build`を実行する。
+2. Node.js 22へ切り替え、`pnpm api:install`、`pnpm api:build`、`pnpm api:start`を実行する。秘密値はgitignore済みの`api/local.settings.json`へだけ設定する。
+3. 別terminalをNode.js 24にし、`pnpm preview:swa`を実行する。
+4. `http://localhost:4280/spikes/azure-template-delivery`と`http://localhost:4280/api/templates`を確認する。
+
+SWA CLIはproduction build済み`dist`を配信し、`--api-devserver-url http://localhost:7071`でNode.js 22のFunctions hostを同一originの`/api`へproxyする。SWA CLIの`--api-location`による自動起動はruntime分離を保証しないため、このF/Sの合否確認には使わない。
+
 Moment Paletteは、カメラ、端末内の写真、単色を組み合わせて作品を作るモバイル向けWebアプリケーションです。
 
 ## 必要な環境

@@ -1,6 +1,6 @@
 # F/S用SWAデプロイ仕様と実装確認記録
 
-この文書は、`establish-preview-deployment`で採用した外部仕様、GitHub Action、実装・検証結果を記録する。外部仕様の確認日は2026-09-18、実装結果の更新日は2026-09-19である。Portal生成テンプレートは使用せず、次の公式ドキュメントおよび正規リポジトリを確認した。
+この文書は、`establish-preview-deployment`で採用した外部仕様、GitHub Action、実装・検証結果を記録する。外部仕様の確認日は2026-09-18、実装結果の更新日は2026-09-19である。2026-09-21の`validate-azure-template-delivery`でmanaged APIとprivate Blobを追加した現在構成は[`azure-template-delivery.md`](azure-template-delivery.md)を正本とし、この文書の「API対象外」という初期状態を置き換える。
 
 ## 実装済み構成図
 
@@ -67,7 +67,7 @@ SWA上のProduction環境は、実サービス本番ではなくマージ済み�
 
 ## ローカルSWAエミュレーター
 
-2026-09-18時点の公式[`@azure/static-web-apps-cli`](https://www.npmjs.com/package/@azure/static-web-apps-cli) `2.0.10`を開発依存へ固定した。[SWA CLIの公式リファレンス](https://learn.microsoft.com/azure/static-web-apps/static-web-apps-cli)と[runtime configの探索規則](https://azure.github.io/static-web-apps-cli/docs/use/config/)に基づき、`swa start dist --swa-config-location dist`でbuild成果物とその`staticwebapp.config.json`を明示的に指定する。
+2026-09-21時点の公式[`@azure/static-web-apps-cli`](https://www.npmjs.com/package/@azure/static-web-apps-cli) `2.0.10`を開発依存へ固定した。[SWA CLIの公式リファレンス](https://learn.microsoft.com/azure/static-web-apps/static-web-apps-cli)と[runtime configの探索規則](https://azure.github.io/static-web-apps-cli/docs/use/config/)に基づき、`swa start dist --swa-config-location dist --api-devserver-url http://localhost:7071`でbuild成果物と別processのFunctions hostを同一originへ束ねる。
 
 SWA CLIはルーティング設定のローカル確認だけに使用し、Azureへのログインやデプロイには使用しない。Vite PreviewはSWA固有設定を解釈しないため、この確認の代替にはしない。
 
@@ -83,7 +83,7 @@ SWA CLIはルーティング設定のローカル確認だけに使用し、Azur
 | Action内部のbuild | `skip_app_build: true` |
 | 配信する生成済み成果物 | `app_location: dist` |
 | `skip_app_build`時の出力先 | `output_location: ''` |
-| API | `api_location`を指定しない |
+| API | `api_location: api`を指定し、ActionがNode.js 22 packageをbuild |
 
 `skip_app_build: true`の場合、`app_location`はソースではなく配信対象のbuild出力を指し、`output_location`は空にする。`staticwebapp.config.json`はbuild出力のルートに置く。
 
@@ -96,7 +96,7 @@ SWA CLIはルーティング設定のローカル確認だけに使用し、Azur
 | [`actions/checkout`](https://github.com/actions/checkout/releases/tag/v7.0.1) | `v7.0.1` | `3d3c42e5aac5ba805825da76410c181273ba90b1` |
 | [`actions/setup-node`](https://github.com/actions/setup-node/releases/tag/v7.0.0) | `v7.0.0` | `820762786026740c76f36085b0efc47a31fe5020` |
 | [`pnpm/setup`](https://github.com/pnpm/setup/releases/tag/v2.1.0) | `v2.1.0` | `703c52620218391530e48b9e8870d5c0082e1b9b` |
-| [`Azure/static-web-apps-deploy`](https://github.com/Azure/static-web-apps-deploy/releases/tag/v1) | `v1` | `1a947af9992250f3bc2e68ad0754c0b0c11566c9` |
+| [`Azure/static-web-apps-deploy`](https://github.com/Azure/static-web-apps-deploy) | `v1` branch（2026-09-21再確認） | `4d27395796ac319302594769cfe812bd207490b1` |
 
 workflow内では完全長SHAと同じ行にリリース名をコメントで残す。`.github/dependabot.yml`がGitHub Actionsを週次監視するが、更新PRは自動mergeしない。
 

@@ -50,6 +50,9 @@ jobs:
       - name: 依存関係をインストール
         run: pnpm install --frozen-lockfile
 
+      - name: commit固有のbuild metadataを生成
+        run: pnpm metadata:ci
+
       - name: 型を検査
         run: pnpm typecheck
 
@@ -63,7 +66,31 @@ jobs:
         run: pnpm format:check
 
       - name: production buildを生成
-        run: pnpm build
+        run: pnpm build:prepared
+
+      - name: Node.js 22をAPI用に準備
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: API依存関係を凍結install
+        run: npm --prefix api ci
+
+      - name: APIの型を検査
+        run: npm --prefix api run typecheck
+
+      - name: APIの単体テストを実行
+        run: npm --prefix api test
+
+      - name: APIをbuild
+        run: npm --prefix api run build
+
+      - name: build metadataの三者一致を検査
+        run: pnpm metadata:verify
+
+      - name: build成果物の秘密値を検査
+        run: pnpm security:artifacts
 
       # 外部forkとDependabot PRにはrepository secretを渡さず、品質検査だけを行う。
       - name: 生成済み成果物をSWAへデプロイ
@@ -71,12 +98,14 @@ jobs:
           github.event_name == 'push' ||
           (github.event.pull_request.head.repo.full_name == github.repository &&
           github.event.pull_request.user.login != 'dependabot[bot]')
-        uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9 # v1
+        uses: Azure/static-web-apps-deploy@4d27395796ac319302594769cfe812bd207490b1 # v1 (2026-09-21確認)
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_FS }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: upload
           app_location: dist
+          api_location: api
+          api_build_command: npm run build
           output_location: ''
           skip_app_build: true
 
@@ -93,7 +122,7 @@ jobs:
       pull-requests: write
     steps:
       - name: SWAのPRプレビューを閉じる
-        uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9 # v1
+        uses: Azure/static-web-apps-deploy@4d27395796ac319302594769cfe812bd207490b1 # v1 (2026-09-21確認)
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_FS }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
