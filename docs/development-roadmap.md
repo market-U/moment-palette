@@ -1,6 +1,6 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: フェーズ3 進行中
+> ステータス: フェーズ3 完了・フェーズ4着手待ち
 >
 > 最終更新日: 2026-09-21
 
@@ -26,7 +26,7 @@
 - フェーズ3の先行change `validate-camera-compositing`は実装とiPhone実機確認を完了し、delta specを同期せずarchive済みである。
 - 写真選択、標準APIによるdecode、EXIF Orientation、高解像度縮小、位置・倍率調整、mask合成を検証する`validate-photo-import`は、iPhone 15（iOS 26）のSafari・Chromeで実装と実機確認を完了し、delta specを同期せずarchive済みである。
 - 画像保存と共有を検証する`validate-image-sharing`は、iPhone 15（iOS 26）のSafari・Chromeで実装と実機確認を完了し、delta specを同期せずarchive済みである。
-- Azureテンプレート配信とリリース継続性を検証する`validate-azure-template-delivery`は、実装とiPhone実機確認を完了し、verifyとarchiveを残す状態である。
+- Azureテンプレート配信とリリース継続性を検証する`validate-azure-template-delivery`は、実装、iPhone実機確認、verifyを完了し、delta specを同期せずarchive済みである。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序
@@ -126,14 +126,14 @@ UIコンポーネントライブラリは、画面検討の結果が不足して
 
 ### 3. 中核技術のF/Sを行う
 
-ステータス: 進行中
+ステータス: 完了
 
 OpenSpec change候補:
 
 - `validate-camera-compositing`（完了・archive済み）
 - `validate-photo-import`（完了・archive済み）
 - `validate-image-sharing`（完了・archive済み）
-- `validate-azure-template-delivery`（実装・実機確認完了、verify・archive待ち）
+- `validate-azure-template-delivery`（完了・archive済み）
 
 カメラ・画像処理の検証候補:
 
@@ -285,8 +285,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ## 次のセッションで行うこと
 
-1. `validate-azure-template-delivery`をverifyし、F/S delta specを同期せずarchiveする。
-2. フェーズ4として、4件のF/S結果を本実装用の要求、画面仕様、アーキテクチャへ整理する。
+1. フェーズ4として、4件のF/S結果を本実装用の要求、画面仕様、アーキテクチャへ整理する。
 
 ## 更新ルール
 
