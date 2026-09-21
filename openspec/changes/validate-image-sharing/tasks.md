@@ -67,21 +67,21 @@
 
 ## 8. iPhone Safari・Chrome実機確認
 
-- [ ] 8.1 iPhone 15（iOS 26）のSafariで完成PNGを生成し、`image/png`、1080×1080、generation id、生成回数、画像表示を確認する
-- [ ] 8.2 Safariで画像を長押しして写真へ保存し、写真アプリで見た目と1080×1080の寸法を確認する
-- [ ] 8.3 Safariで基準の`text/plain`方式を共有し、共有シート表示、画像としての認識、利用可能な共有先で受信した画像・文・ハッシュタグ・URLを送信確定前に確認する
-- [ ] 8.4 Safariで`image/png`方式と画像のみ方式を同じBlobから共有し、`canShare()`、画像認識、受信項目を基準方式と比較する
-- [ ] 8.5 Safariで共有シートからの画像保存、共有キャンセル、共有文コピー、連続する複数回共有を確認し、キャンセルがエラーにならずPNG生成回数が増えないことを確認する
-- [ ] 8.6 Safariで完成PNGを再生成し、版番号が変わり、以前の画像ではなく新しいBlobだけが表示・共有されることを確認する
-- [ ] 8.7 iPhone 15（iOS 26）のChromeで8.1〜8.6と同じ確認を行い、Safariとの差異を記録する
-- [ ] 8.8 Safari・Chromeで少なくとも10回の共有・キャンセル・再共有を行い、操作不能、古い画像の再表示、継続的な劣化がないことを確認する
+- [x] 8.1 iPhone 15（iOS 26）のSafariで完成PNGを生成し、`image/png`、1080×1080、generation id、生成回数、画像表示を確認する
+- [x] 8.2 Safariで画像を長押しして写真へ保存し、写真アプリで見た目と1080×1080の寸法を確認する
+- [x] 8.3 Safariで基準の`text/plain`方式を共有し、共有シート表示、画像としての認識、利用可能な共有先で受信した画像・文・ハッシュタグ・URLを送信確定前に確認する
+- [x] 8.4 Safariで`image/png`方式と画像のみ方式を同じBlobから共有し、`canShare()`、画像認識、受信項目を基準方式と比較する
+- [x] 8.5 Safariで共有シートからの画像保存、共有キャンセル、共有文コピー、連続する複数回共有を確認し、キャンセルがエラーにならずPNG生成回数が増えないことを確認する
+- [x] 8.6 Safariで完成PNGを再生成し、版番号が変わり、以前の画像ではなく新しいBlobだけが表示・共有されることを確認する
+- [x] 8.7 iPhone 15（iOS 26）のChromeで8.1〜8.6と同じ確認を行い、Safariとの差異を記録する
+- [x] 8.8 Safari・Chromeで少なくとも10回の共有・キャンセル・再共有を行い、操作不能、古い画像の再表示、継続的な劣化がないことを確認する
 - [x] 8.9 Androidの新規実機確認を今回の合否から除外し、既存運用実績と、Moment Palette固有の将来回帰項目を結果表へ分けて記録する
 
 ## 9. 結果・採否・完了
 
-- [ ] 9.1 `docs/spikes/image-sharing.md`へ検証した問い、対象環境、成功条件、定量値、経路別・ブラウザ別・共有先別結果、制約、未解決事項を記録する
-- [ ] 9.2 基準の`text/plain`方式、`image/png`方式、画像のみ方式、長押し保存、共有シート保存、Clipboard fallback、resource破棄方式の採否と理由を記録する
-- [ ] 9.3 Fileまたはmodule単位で本実装へ昇格、設計を保って再実装、削除のいずれにするかを決め、F/S route、fixture、比較UI、診断表示の扱いを記録する
-- [ ] 9.4 F/S結果に合わせて`docs/vision.md`、`docs/design/`、`docs/development-roadmap.md`の更新要否と、完成確認画面の本実装changeへの反映を判断する
-- [ ] 9.5 `openspec validate validate-image-sharing`と全品質検査を再実行し、proposal・spec・design・tasks・実装・日本語コメント・結果記録の整合を確認する
+- [x] 9.1 `docs/spikes/image-sharing.md`へ検証した問い、対象環境、成功条件、定量値、経路別・ブラウザ別・共有先別結果、制約、未解決事項を記録する
+- [x] 9.2 基準の`text/plain`方式、`image/png`方式、画像のみ方式、長押し保存、共有シート保存、Clipboard fallback、resource破棄方式の採否と理由を記録する
+- [x] 9.3 Fileまたはmodule単位で本実装へ昇格、設計を保って再実装、削除のいずれにするかを決め、F/S route、fixture、比較UI、診断表示の扱いを記録する
+- [x] 9.4 F/S結果に合わせて`docs/vision.md`、`docs/design/`、`docs/development-roadmap.md`の更新要否と、完成確認画面の本実装changeへの反映を判断する
+- [x] 9.5 `openspec validate validate-image-sharing`と全品質検査を再実行し、proposal・spec・design・tasks・実装・日本語コメント・結果記録の整合を確認する
 - [x] 9.6 F/Sのdelta specをmain specsへ同期しないことを確認し、完了後は`openspec archive validate-image-sharing --skip-specs`でarchiveする方針を結果へ記録する
