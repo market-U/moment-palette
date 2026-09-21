@@ -76,6 +76,9 @@ resource templateContainer 'Microsoft.Storage/storageAccounts/blobServices/conta
   parent: blobService
   name: templateContainerName
   properties: {
+    // Azureが作成時に設定する既定値も宣言し、what-ifで削除差分として扱われないようにする。
+    defaultEncryptionScope: '$account-encryption-key'
+    denyEncryptionScopeOverride: false
     publicAccess: 'None'
   }
 }

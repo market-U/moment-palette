@@ -22,7 +22,7 @@
 - `main`向けの通常PRは、PR固有の一時環境へ配信する。
 - 固定環境とPR環境はいずれも公開HTTPS URLであり、機密情報や実ユーザーデータを置かない。
 - 外部forkとDependabot PRではrepository secretを利用せず、品質検査だけを行う。
-- Blob Storage、マネージドAPI、SAS URL、固定dev環境は今回構築しない。
+- このchangeではBlob Storage、マネージドAPI、SAS URL、固定dev環境を構築しない。後続のAzureテンプレート配信F/Sで、同じSWAへprivate BlobとマネージドAPIを追加済みである。
 
 固定F/S URLは<https://icy-mushroom-0c0e42e00.5.azurestaticapps.net/>である。iPhone 15（iOS 26）のSafariとChromeで固定環境とPR環境を確認済みであり、Android Chromeの実機確認は端末を確保できるリリース後に行う。
 
@@ -64,7 +64,9 @@ Azure Static Web Apps Free
 - Cosmos DBは使用せず、Blob上のJSONをカタログの正本とする。
 - 撮影画像、制作状態、完成画像はサーバーへ送信しない。
 - ログイン、作品のクラウド保存、テンプレート管理画面は計画対象外とする。
-- 制作中のデプロイをまたいでも保存・共有まで完遂できる方式を、技術F/Sで検証する。
+- 制作開始前にapp versionとbuild IDを照合し、必要なcodeとtemplate assetを読み切る。制作中は配信中buildへ再アクセスせず、デプロイをまたいでも保存・共有まで完遂する。
+
+この構成は[`Azureテンプレート配信F/S構成`](azure-template-delivery.md)として実装・実機検証済みである。Blob単位・読み取り専用・HTTPS限定・60分のSAS、Start時の全asset取得、hash付きcode、revision付きasset、旧assetの24時間削除猶予を初期方針とする。
 
 ## 初期アーキテクチャ図を作成するタイミング
 

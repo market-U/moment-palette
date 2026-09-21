@@ -120,16 +120,16 @@
 - [x] 11.5 SafariのBuild A旧tabでBuild B配信後も状態を保持し、旧JS・CSS・release・API・Blobへの追加requestなしで編集、PNG生成、保存、共有まで完遂する
 - [x] 11.6 ChromeのBuild A旧tabでも11.5と同じ確認を行い、browser差とbackground中のpage破棄有無を記録する
 - [x] 11.7 Build B配信後に新しいtabで同じURLを開き、Build Bのフロント、API、`release.json`が新しい同一build IDで一致することをSafari・Chromeで確認する
-- [ ] 11.8 version/buildを意図的に不一致にした確認用状態ではStart前にreload案内が出て、制作中sessionへ強制reloadが発生しないことを可能な範囲で実機確認する
-- [ ] 11.9 SAS発行から60分を超える、または同等の期限切れ条件を再現したStart済みsessionで、SAS更新なしに取得済みbytesからPNG生成・保存・共有できることを確認する
+- [x] 11.8 version/buildを意図的に不一致にした確認用状態ではStart前にreload案内が出て、制作中sessionへ強制reloadが発生しないことを可能な範囲で実機確認する
+- [x] 11.9 SAS発行から60分を超える、または同等の期限切れ条件を再現したStart済みsessionで、SAS更新なしに取得済みbytesからPNG生成・保存・共有できることを確認する
 - [x] 11.10 Android Chromeを今回の合否から除外し、端末確保後に11章相当を実施するリリース後フォロー項目として記録する
 
 ## 12. 結果・採否・完了
 
-- [ ] 12.1 `docs/spikes/azure-template-delivery.md`へ対象環境、定量値、API・SAS・CORS・cache・version/build・Build A/B・browser別結果、制約、未解決事項を記録する
-- [ ] 12.2 Service SAS、60分expiry、CORS origin `*`、private Blob、version/build三者照合、Start時全取得、content hash維持、削除猶予の採否と理由を記録する
-- [ ] 12.3 API、IaC、workflow、フロントport、resource所有権、F/S route、fixture、diagnostic UIをファイルまたはmodule単位で昇格、再実装、削除に分類する
-- [ ] 12.4 `docs/architecture/`へ検証済み構成と秘密値・asset運用を反映し、`docs/development-roadmap.md`のステップ3とAndroidフォロー項目を結果に合わせて更新する
-- [ ] 12.5 `docs/vision.md`のSAS有効期間、cache、削除猶予、session継続性に確定結果を反映する必要があるか判断し、必要な変更だけを行う
-- [ ] 12.6 全品質検査、Bicep検査、secret検索、`openspec validate validate-azure-template-delivery`を再実行し、proposal・spec・design・tasks・実装・日本語コメント・結果記録の整合を確認する
-- [ ] 12.7 F/S delta specをmain specsへ同期しないことを確認し、完了後は`openspec archive validate-azure-template-delivery --skip-specs`でarchiveする方針を結果へ記録する
+- [x] 12.1 `docs/spikes/azure-template-delivery.md`へ対象環境、定量値、API・SAS・CORS・cache・version/build・Build A/B・browser別結果、制約、未解決事項を記録する
+- [x] 12.2 Service SAS、60分expiry、CORS origin `*`、private Blob、version/build三者照合、Start時全取得、content hash維持、削除猶予の採否と理由を記録する
+- [x] 12.3 API、IaC、workflow、フロントport、resource所有権、F/S route、fixture、diagnostic UIをファイルまたはmodule単位で昇格、再実装、削除に分類する
+- [x] 12.4 `docs/architecture/`へ検証済み構成と秘密値・asset運用を反映し、`docs/development-roadmap.md`のステップ3とAndroidフォロー項目を結果に合わせて更新する
+- [x] 12.5 `docs/vision.md`のSAS有効期間、cache、削除猶予、session継続性に確定結果を反映する必要があるか判断し、必要な変更だけを行う
+- [x] 12.6 全品質検査、Bicep検査、secret検索、`openspec validate validate-azure-template-delivery`を再実行し、proposal・spec・design・tasks・実装・日本語コメント・結果記録の整合を確認する
+- [x] 12.7 F/S delta specをmain specsへ同期しないことを確認し、完了後は`openspec archive validate-azure-template-delivery --skip-specs`でarchiveする方針を結果へ記録する

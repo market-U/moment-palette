@@ -46,6 +46,6 @@ az deployment group what-if --resource-group rg-moment-palette-fs --template-fil
 2. 各Blobの`Content-Type`と`Cache-Control: public, max-age=31536000, immutable`を確認する。
 3. `catalog/catalog.json`を最後に更新し、`Content-Type: application/json`、`Cache-Control: no-cache`を設定する。
 4. 公開停止はcatalogの`published`または公開期間を先に変更する。Start済みsessionが保持したbytesを使えるよう旧assetを即時削除しない。
-5. 誤削除・上書きは14日のsoft deleteとversionから復旧する。旧assetの本番削除猶予はF/S結果後に決定する。
+5. catalogから参照されなくなった旧assetは24時間の削除猶予後に削除する。誤削除・上書きは14日のsoft deleteとversionから復旧する。
 
 Storage keyをrotationするときは、未使用側のkeyを再生成し、SWA Application Settingsをそのkeyの接続文字列へ切り替えてAPIを確認してから旧keyを再生成する。設定値はterminal出力、文書、リポジトリへ保存しない。

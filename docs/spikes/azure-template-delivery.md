@@ -125,17 +125,19 @@ Portal生成テンプレートは使用せず、Microsoft Learn、Azure公式Git
 | 長押し保存 | 成功 | 成功 | |
 | Web Share | 成功 | 成功 | |
 | version/build三者一致 | 成功 | 成功 | Build A |
-| 不一致時のreload案内 | 未実施 | 未実施 | |
+| 不一致時のreload案内 | — | — | 保持したBuild B旧tabで実機確認に成功。browser名は未転記 |
 | Build A旧tabの完遂 | 成功 | 成功 | Build B配信後も保存・共有まで完遂 |
 | Start後の対象request | すべて0件 | すべて0件 | API/release/Blob/JS/CSS |
-| SAS期限後の取得済みbytes利用 | 未実施 | 未実施 | |
+| SAS期限後の取得済みbytes利用 | — | — | 保持中のBuild A tabで実機確認に成功。browser名は未転記 |
 
 ## 定量値
 
 | browser/build | API時間 | asset総bytes | asset取得時間 | decode時間 | PNG生成時間 | Start後対象request |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Safari / Build A | 未実施 | 未実施 | 未実施 | 未実施 | 未実施 | 未実施 |
-| Chrome / Build A | 未実施 | 未実施 | 未実施 | 未実施 | 未実施 | 未実施 |
+| Safari / Build A | 画面計測対象外 | 124,726 bytes | 画面計測対象外 | 画面計測対象外 | 値未転記・生成成功 | 0件 |
+| Chrome / Build A | 画面計測対象外 | 124,726 bytes | 画面計測対象外 | 画面計測対象外 | 値未転記・生成成功 | 0件 |
+
+Startで取得する線画と4 maskは合計124,726 bytesである。thumbnailを含む6 asset全体は190,445 bytesだった。preview desktopでのPNG生成は27.3ms、SAS有効期間は60分、完成PNGは1080×1080 `image/png`、Build A旧tabのStart後対象requestはSafari・Chromeとも5分類すべて0件だった。iPhoneのAPI、取得、decode、PNG個別時間は安全な診断UIの対象外だったため、未計測値を推定で補わない。
 
 ## Azure基盤の適用結果
 
@@ -148,6 +150,8 @@ Portal生成テンプレートは使用せず、Microsoft Learn、Azure公式Git
 - blob/container soft delete: 14日
 - Blob versioning: 有効
 - anonymous HTTP: `409 Public access is not permitted on this storage account.`で拒否
+
+最終what-ifではStorage Accountとcontainerは`NoChange`、既存SWAは参照だけの`Ignore`だった。Blob ServiceだけはAzureが応答に補う`staticWebsite.enabled: false`をBicep定義から削除する表示になったが、採用API versionのBicep型では宣言できない既定値であり、静的Webサイトを有効化する差分ではない。CORS、soft delete、versioningに変更はなく、意図しないresource再作成や秘密値outputもないことを確認した。
 
 Azure認証ユーザーには作成直後のStorage data plane roleがなく、`--auth-mode login`によるfixture uploadは権限不足で拒否された。account keyへ迂回せず、Storage Account scopeの`Storage Blob Data Contributor`付与後に再開する。
 
@@ -216,22 +220,48 @@ Safari・Chromeとも、スクロール、公開中template表示、Start、全a
 
 Build B配信後も、Safari・ChromeのStart済みBuild A旧tabはpageを再読み込みせず状態を保持した。background復帰後を含め、取得済みassetと読込済みcodeだけでPNG生成、長押し保存、Web Shareを完遂し、Start後requestはすべて0件だった。新しいtabはBuild Bを取得し、frontend、API、`release.json`のapp versionとbuild IDが一致した。browser間の差異やpage破棄はなかった。SAS期限後確認のため、Build A旧tabを少なくとも一つ保持する。
 
+## version/build不一致の実機結果
+
+Build Bの未開始tabを残した状態で、source commit `bf17c6d238c23f26b7c4f71f217c6b1471f31683`を同じPRへpushし、配信buildを`d38b21106005d165b4cf1d5495b66b08404db1db`へ更新した。保持した古いBuild B tabからStartすると、制作状態とasset読込へ進まず、配信build切替と再読み込みの案内を表示し、session snapshotは未開始のままだった。同時に、Start済みBuild A tabは強制再読み込みされず、取得済み資源からPNG生成・共有を継続できた。確認に使用したbrowser名は記録できていないため、Safari・Chrome個別の完了とは扱わない。
+
+## SAS期限後の実機結果
+
+Build A sessionのSAS expiryは`2026-09-21T10:13:54.221Z`（日本時間19:13:54）だった。期限経過後もBuild A tabを再読み込みせず、取得済みbytesからPNG再生成、長押し保存、Web Shareを完遂できた。API、release、Blob、JavaScript、CSSの追加requestはすべて0件で、SAS更新も行われなかった。確認に使用したbrowser名は未転記である。別途、実装したsignerで生成した期限切れSASによるBlob GETが403になることも確認済みであり、「期限切れSASは再利用できないこと」と「Start済みsessionはSASへ再アクセスしないこと」の両方が成立した。
+
+## 採否
+
+| 項目 | 判断 | 理由 |
+| --- | --- | --- |
+| private Blob | 採用 | 匿名要求を拒否し、公開条件をAPIへ集約できた |
+| Blob単位Service SAS | 採用 | `r`、HTTPS、個別Blobに限定でき、書込と一覧権限を渡さない |
+| SAS 60分 | 採用 | Start完了前に全assetを取得し、期限後も再取得なしで完遂できた |
+| CORS origin `*` | 初期リリースで採用 | 動的なPR previewに対応しつつ、methodを`GET`、`HEAD`、`OPTIONS`だけに限定し、認可はprivate BlobとSASが担う |
+| version/build三者照合 | 採用 | 混在buildをStart前に停止し、制作中sessionは強制更新しなかった |
+| Start時全asset取得 | 採用 | Build更新とSAS期限をまたいでも取得済みbytesだけで完遂できた |
+| hash付きJS/CSS | 維持 | DOM screenshotとserver CSS再取得を使わず、旧tabを継続できた |
+| revision付きasset | 採用 | immutable cacheと内容更新を両立できた |
+| 旧asset削除猶予 | 24時間を採用 | 60分SASと配信反映の余裕を上回る。誤削除は14日soft deleteとversioningで復旧する |
+
 ## 秘密値・asset運用
 
 - localは追跡対象外の`api/local.settings.json`だけに接続文字列を置く。
 - AzureではSWA Application Settingsへ設定し、command output、文書、shell historyへ値を表示しない。
 - assetは新revisionへ全件配置し、Content-TypeとCache-Controlを確認してからcatalogを最後に更新する。
 - 公開停止はcatalogの`published`または公開期間を先に変更し、制作中sessionの猶予期間中は旧assetを削除しない。
-- 誤削除・上書きはversioningとsoft deleteから復旧する。保持期間と削除猶予の最終値は実機結果を踏まえて決める。
+- catalogから参照されなくなった旧assetは24時間後に削除し、誤削除・上書きは14日のversioningとsoft deleteから復旧する。
 - key rotationは未使用keyを再生成し、Application Settingsをそのkeyへ切替・確認してから旧keyを再生成する。発行済みSASは署名keyの再生成または期限到達まで有効性が変わり得るため、実施時に影響を確認する。
 
-## F/Sコードの境界
+## F/Sコードの扱い
 
-| 区分 | 対象 |
+| 扱い | 対象 |
 | --- | --- |
-| 後続で削除 | 専用route、Build A/B表示、公開条件fixture、診断UI、手動検証用Canvas |
-| 昇格候補 | API契約、catalog検証、公開判定、SAS signer、version/build生成・照合、template取得port、resource所有権、IaC、workflow |
-| 結果後に判断 | CORS origin、SAS 60分、soft delete保持期間、旧asset削除猶予 |
+| 本実装へ昇格 | `api/src/catalog.ts`、`catalogReader.ts`、`serviceSasSigner.ts`、`templatesService.ts`、API契約型、Functions endpointと単体テスト |
+| 本実装へ昇格 | `scripts/generate-build-metadata.mjs`、三者一致検査、成果物秘密値検査、`staticwebapp.config.json`、GitHub Actions |
+| 本実装へ昇格 | Storage Bicep、private container、CORS、soft delete、versioning、asset更新・key rotation手順 |
+| 設計を保って製品featureへ再実装 | template catalog / release / asset loader port、version照合、session resource所有権、browser adapter |
+| 既存の製品候補へ統合 | Canvas生成はcamera・photoのscene/compositorへ、共有は`validate-image-sharing`の基準adapterへ統合する |
+| 本実装開始後に削除 | `/spikes/azure-template-delivery` route、専用page・UI、request診断collector、F/S用catalog分類、手動検証用compositor |
+| 運用fixtureとして保持 | 文鳥01のrevision付きBlob assetとcatalog例。製品catalogへ移すときは正式schemaへ更新する |
 
 ## Androidの扱い
 
@@ -239,10 +269,14 @@ Android Chromeは今回の合否へ含めず、端末確保後に公開条件、
 
 ## 制約と未解決事項
 
-- 60分SASとStart時全取得が通常制作とbackground復帰に十分かは実機確認待ち。
-- PRプレビューに必要なCORS origin `*`を本番でも維持するかはF/S結果後に判断する。
-- iOSがbackground中にpageを破棄した場合の復元は初期リリース対象外。
-- template assetの削除猶予とsoft delete保持期間は未確定。
+- iOSがbackground中にpageを破棄した場合の制作状態復元は初期リリース対象外である。
+- Android Chromeは端末確保後に同じchecklistを実行する。
+- SWA managed FunctionsはManaged Identityを利用できないため、F/Sと初期構成では接続文字列をApplication Settingsで管理する。
+- 開発用Functions Core Toolsの内包依存に既知脆弱性があり、互換な上流修正版を継続確認する。
+
+## 最終検査
+
+2026-09-21にfrontendの型検査・production build・lint・format・145件の単体テスト、APIの型検査・build・14件の単体テスト、build metadata一致、成果物の秘密値検索、OpenSpec validateを再実行してすべて成功した。Bicepはformat・build・resource group validate・what-ifを再実行し、前述のAzure既定値表示を除いて意図しない差分がないことを確認した。proposal、delta spec、design、tasks、実装、日本語コメント、検証結果の対象範囲も一致している。
 
 ## 完了方針
 
