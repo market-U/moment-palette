@@ -130,7 +130,7 @@ OpenSpec change候補:
 
 - `validate-camera-compositing`（完了・archive済み）
 - `validate-photo-import`（完了・archive済み）
-- `validate-image-sharing`
+- `validate-image-sharing`（完了・archive済み）
 - `validate-azure-template-delivery`
 
 カメラ・画像処理の検証候補:
@@ -195,6 +195,15 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 - pointer描画の画面更新周期への集約と、選択中エリアの前後に分けた静的レイヤーキャッシュにより、4エリア確定後の置換を含めて滑らかに操作できた。6レイヤー分割は自動テストで確認済みとし、実際の6レイヤーtemplateで後日再計測する。
 - 写真形式によって配置モードを分けず、すべての写真をcover状態から縮小して余白を残せる方式を採用する。透過部分と余白には対象エリアの初期カラーを表示する。
 - Android Chrome、広色域・HDRの厳密な色保持、6レイヤー実機templateは後続の確認項目とする。
+
+`validate-image-sharing`の完了結果:
+
+- iPhone 15（iOS 26）のSafari・Chromeで、1080×1080 PNGの長押し保存、共有シートからの保存、共有キャンセル、共有文コピー、Blob再利用、再生成を確認した。初回生成はSafari 102.0ms、Chrome 75.0msで、ブラウザと方式をまたぐ10回以上の操作でも継続的な劣化はなかった。
+- PNG bytesと`.png`名を保った`text/plain`の基準方式、標準の`image/png`方式、画像のみ方式は、両ブラウザですべて`canShare()`が`true`になった。基準・標準方式ともX、LINE、Bufferへ画像、固定文、ハッシュタグ、URLを渡せた。
+- Blueskyは基準・標準方式とも画像だけを受け取った。ブラウザやFile typeではなく共有先側の対応差と判断し、アプリはOSまたは共有先への引き渡しまでを責務とする。
+- 初期の製品実装では、今回のiPhone実機結果と既存アプリでのiPhone・Android共通の3年以上の運用実績を根拠に、`text/plain`方式を共有の基準経路として採用する。`image/png`方式は将来のAndroid比較候補とし、画像のみ方式は製品UIへ追加しない。
+- 通常の画像要素による長押し保存、共有文のClipboard fallback、一つのPNG Blobを表示と再共有へ使い、再生成・画面離脱時にobject URLを破棄する方式を本実装へ引き継ぐ。
+- 共有結果分類、resource所有権、portとbrowser adapterは本実装への昇格・再実装候補とし、F/S専用route、Canvas fixture、三経路比較UI、診断表示は削除対象とする。Android ChromeでのMoment Palette固有の確認は、端末を確保した後の回帰項目とする。
 
 ### 4. F/S結果を要求とデザインへ反映する
 
@@ -265,8 +274,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ## 次のセッションで行うこと
 
-1. `validate-image-sharing`で完成PNGの長押し保存、Web Share、再利用、破棄を検証する。
-2. `validate-azure-template-delivery`でBlob、マネージドAPI、SAS URL、キャッシュ、デプロイをまたぐ制作継続性を検証する。
+1. `validate-azure-template-delivery`でBlob、マネージドAPI、SAS URL、キャッシュ、デプロイをまたぐ制作継続性を検証する。
 
 ## 更新ルール
 
