@@ -328,6 +328,8 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .azure-spike {
+  /* 固定高のpage内でこの要素自体をscroll containerにする。 */
+  height: 100%;
   min-height: 100%;
   padding: calc(env(safe-area-inset-top) + 1rem)
     calc(env(safe-area-inset-right) + 1rem)

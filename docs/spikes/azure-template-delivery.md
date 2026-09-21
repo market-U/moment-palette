@@ -169,6 +169,28 @@ Node.js 22のFunctions hostを`localhost:7071`、Node.js 24のSWA CLIを`localho
 
 API packageの`npm audit`では、開発時だけ使用する現行`azure-functions-core-tools` 4.14.0が内包する`extract-zip` 2.0.1についてhigh 2件が報告された。npmが提示する自動修正はFunctions v3への非互換なdowngradeであり、Node.js 22の検証条件を満たさない。production依存からは到達せず、現行Core Toolsの配布物取得時だけに関係するため、F/Sでは公式現行版を固定したまま既知制約として記録し、上流更新を追跡する。
 
+## PRプレビュー 初回デプロイ（Build A候補）
+
+| 項目 | 結果 |
+| --- | --- |
+| PR | [#9](https://github.com/market-U/moment-palette/pull/9) |
+| preview URL | `https://icy-mushroom-0c0e42e00-9.eastasia.5.azurestaticapps.net` |
+| source commit | `59a1624804c16a546c0686daeac264812e97516d` |
+| deployed build ID | `8d4808cd81c18dac08dfb736816dc041b2b62a24` |
+| workflow | `F/S preview deployment` / 成功 / 2分1秒 |
+
+PRの`pull_request`実行では、GitHub Actionsの`GITHUB_SHA`がhead commitではなく検証用merge commitを指すため、source commitとdeployed build IDは異なる。フロント、API、`release.json`は同じdeployed build IDを持ち、Start時の三者照合は成功した。
+
+- 通常タイトル、3つの既存F/S、Azure配信F/S、`GET /api/templates`、`release.json`はHTTPSで200を返した。
+- Productionへ登録したApplication SettingsをPR previewのManaged APIから利用でき、APIは公開中1件だけを返した。
+- APIは`Cache-Control: no-store`、`release.json`は`no-store`、`index.html`は`no-cache`だった。hash付きJS/CSSとrevision付きtemplate assetは`public, max-age=31536000, immutable`だった。
+- Blob単位SASはread-only、HTTPS限定、60分で、asset GETはCORS付き200、SASなしは409、PUTは403、別途生成した期限切れSASは403だった。
+- preview画面で全asset decodeとStartが完了し、1080×1080 `image/png`を27.3msで生成した。生成後のAPI、release、Blob、JS、CSS追加requestは0件だった。
+- GitHub Actions logとbuild成果物に接続文字列、account key、完全なSAS署名は見つからなかった。
+- iPhone Safari・Chromeの保存・共有とBuild A/B継続性は次の実機確認で判定する。
+
+iPhoneでは固定高page内のF/S rootがscroll containerになっておらず、初期表示より下へ移動できなかった。このデプロイはBuild A/B継続確認の基準から除外し、F/S rootへ`height: 100%`を追加した次のデプロイをBuild Aとして扱う。
+
 ## 秘密値・asset運用
 
 - localは追跡対象外の`api/local.settings.json`だけに接続文字列を置く。

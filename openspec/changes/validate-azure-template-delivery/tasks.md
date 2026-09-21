@@ -99,17 +99,17 @@
 - [x] 9.2 Storage Account、Blob Service、private container、CORS、soft delete、versioningがIaCどおりで、匿名Blob要求が拒否されることを確認する
 - [x] 9.3 文鳥01assetをrevision付きpathへ先にアップロードし、Content-Typeとimmutable cache metadataを設定してからcatalogを最後にアップロードする
 - [x] 9.4 catalogとassetをAzure認証で読み取れ、匿名では読めず、CORSに書込methodが含まれないことをCLIとservice設定で確認する
-- [ ] 9.5 Storage接続文字列を値を表示・保存せずにSWA production Application Settingsへ設定し、PR previewへ適用される環境設定を確認する
-- [ ] 9.6 Azure上のAPIがcatalogを読み、公開中templateだけへread-only・60分SASを返し、SASなし・期限切れ・書込要求を拒否することを確認する
+- [x] 9.5 Storage接続文字列を値を表示・保存せずにSWA production Application Settingsへ設定し、PR previewへ適用される環境設定を確認する
+- [x] 9.6 Azure上のAPIがcatalogを読み、公開中templateだけへread-only・60分SASを返し、SASなし・期限切れ・書込要求を拒否することを確認する
 - [x] 9.7 Application Settings更新、Storage key rotation、asset更新・公開停止・削除・復旧の実行手順を秘密値なしで結果文書へ確定する
 
 ## 10. PRプレビューとBuild Aの確認
 
-- [ ] 10.1 作業branchをpushして`main`向けPRを作成し、フロント・API・IaCを含む全品質検査とSWA PRプレビューデプロイを成功させる
-- [ ] 10.2 PR previewの`/spikes/azure-template-delivery`と`/api/templates`へHTTPSで直接アクセスでき、通常画面と既存F/Sに回帰がないことを確認する
-- [ ] 10.3 Build Aのフロント、API、`release.json`のapp version/build IDが一致し、公開中template、server time、catalog revision、60分SASが表示されることを確認する
-- [ ] 10.4 Azure Blobへの直接requestがCORSに成功し、匿名requestは拒否され、Canvas PNGが1080×1080 `image/png`として生成されることを確認する
-- [ ] 10.5 Build AのURL、commit、build ID、workflow結果、API response header、cache header、秘密値非露出を結果文書へ記録する
+- [x] 10.1 作業branchをpushして`main`向けPRを作成し、フロント・API・IaCを含む全品質検査とSWA PRプレビューデプロイを成功させる
+- [x] 10.2 PR previewの`/spikes/azure-template-delivery`と`/api/templates`へHTTPSで直接アクセスでき、通常画面と既存F/Sに回帰がないことを確認する
+- [x] 10.3 Build Aのフロント、API、`release.json`のapp version/build IDが一致し、公開中template、server time、catalog revision、60分SASが表示されることを確認する
+- [x] 10.4 Azure Blobへの直接requestがCORSに成功し、匿名requestは拒否され、Canvas PNGが1080×1080 `image/png`として生成されることを確認する
+- [x] 10.5 Build AのURL、commit、build ID、workflow結果、API response header、cache header、秘密値非露出を結果文書へ記録する
 
 ## 11. iPhone Safari・ChromeとBuild A/B継続性
 
