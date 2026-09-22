@@ -1,4 +1,10 @@
 import { APP_VERSION, BUILD_ID } from '@/app/config/generatedBuildMetadata'
+import { createCanvasCameraCompositor } from '@/infrastructure/camera-fill/canvasCameraCompositor'
+import { createBrowserCameraPermission } from '@/infrastructure/camera/browserCameraPermission'
+import {
+  createBrowserCameraStream,
+  toCameraFailure,
+} from '@/infrastructure/camera/browserCameraStream'
 import { createBrowserReleaseAdapter } from '@/infrastructure/creation-session/browserReleaseAdapter'
 import { createBrowserTemplateAssetLoader } from '@/infrastructure/template-selection/browserTemplateAssetLoader'
 import { createCanvasArtworkPreview } from '@/infrastructure/template-selection/canvasArtworkPreview'
@@ -15,6 +21,11 @@ export const creationSessionAppService = createCreationSessionAppService({
   catalogPort: createDevelopmentTemplateCatalogAdapter(frontend),
   assetLoader: createBrowserTemplateAssetLoader(),
   previewPort: createCanvasArtworkPreview(),
+  cameraPort: createBrowserCameraStream(),
+  cameraPermission: createBrowserCameraPermission(),
+  cameraCompositor: createCanvasCameraCompositor(),
+  mapCameraFailure: toCameraFailure,
+  isDocumentHidden: () => document.visibilityState === 'hidden',
   now: () => new Date(),
   reloadPage: () => window.location.reload(),
 })

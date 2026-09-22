@@ -1,5 +1,7 @@
 import { inject, type InjectionKey, type Ref } from 'vue'
 
+import type { MediaTransform, Size } from '@/shared/lib/mediaTransform'
+
 export type LocalizedViewText = Readonly<{ ja: string; en: string }>
 
 export type StartViewState =
@@ -40,8 +42,37 @@ export type ActiveCreationView = Readonly<{
     id: string
     label: LocalizedViewText
     initialColor: string
+    fillKind: 'initial' | 'camera'
   }>[]
 }>
+
+type ActiveCameraView = Readonly<{
+  areaId: string
+  facing: 'environment' | 'user'
+  canSwitch: boolean
+  sourceSize: Size
+  transform: MediaTransform
+  blend: number
+}>
+
+/** 製品camera UIへ公開する、外部例外本文を含まない表示状態を表す。 */
+export type CameraViewState =
+  | Readonly<{ phase: 'closed' }>
+  | Readonly<{ phase: 'rationale'; areaId: string }>
+  | Readonly<{ phase: 'requesting'; areaId: string }>
+  | (ActiveCameraView & Readonly<{ phase: 'live' }>)
+  | (ActiveCameraView & Readonly<{ phase: 'capturing' }>)
+  | Readonly<{ phase: 'denied'; areaId: string }>
+  | Readonly<{
+      phase: 'unavailable'
+      areaId: string
+      reason:
+        | 'not-found'
+        | 'not-readable'
+        | 'constraint-failed'
+        | 'unsupported'
+        | 'unknown'
+    }>
 
 /** 製品画面へ公開する制作開始フローの状態と操作を定義する。 */
 export type CreationSessionFacade = {
@@ -49,6 +80,7 @@ export type CreationSessionFacade = {
   readonly startState: Readonly<Ref<StartViewState>>
   readonly templateSelection: Readonly<Ref<TemplateSelectionViewState>>
   readonly activeCreation: Readonly<Ref<ActiveCreationView | null>>
+  readonly cameraState: Readonly<Ref<CameraViewState>>
   start: () => Promise<boolean>
   selectTemplate: (templateId: string) => Promise<boolean>
   retryTemplate: () => Promise<boolean>
@@ -56,6 +88,23 @@ export type CreationSessionFacade = {
   returnToTemplates: () => void
   resetToStart: () => void
   reload: () => void
+  attachCameraTarget: (target: HTMLVideoElement) => void
+  detachCameraTarget: () => void
+  openCamera: (areaId: string) => Promise<void>
+  confirmCameraRationale: () => Promise<void>
+  retryCamera: () => Promise<void>
+  switchCamera: () => Promise<void>
+  setCameraBlend: (blend: number) => void
+  setCameraTransform: (transform: MediaTransform) => void
+  resizeCameraPreview: (
+    canvas: HTMLCanvasElement,
+    cssPixels: number,
+    pixelRatio: number,
+  ) => Size
+  renderCameraPreview: (canvas: HTMLCanvasElement) => void
+  captureCamera: () => Promise<boolean>
+  cancelCamera: () => void
+  handleCameraVisibilityChange: () => void
 }
 
 export const creationSessionFacadeKey: InjectionKey<CreationSessionFacade> =

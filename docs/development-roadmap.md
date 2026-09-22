@@ -1,6 +1,6 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: フェーズ5進行中・`establish-creation-session`完了
+> ステータス: フェーズ5進行中・次のchangeは`unify-screen-layout`
 >
 > 最終更新日: 2026-09-22
 
@@ -29,6 +29,8 @@
 - Azureテンプレート配信とリリース継続性を検証する`validate-azure-template-delivery`は、実装、iPhone実機確認、verifyを完了し、delta specを同期せずarchive済みである。
 - フェーズ3のF/S結果をvision、画面遷移、UI状態、フロントエンド方針、Azure構成、template形式へ反映するフェーズ4を完了した。
 - フェーズ5の最初のchange `establish-creation-session`は、Startからtemplate選択、初期作品を表示する制作画面までの実装、verify、main specsへの同期、archiveを完了した。
+- フェーズ5の`implement-camera-fill`は、Artwork更新、camera resource所有、製品camera導線、中央固定Area selector、F/Sコード移行を実装し、iPhoneのSafari・Chromeによる実機確認、verify、main specsへの同期、archiveを完了した。
+- 既存画面で判明したheader位置と戻る操作の重複は、`unify-screen-layout`を独立した通常changeとして扱い、後続画面を増やす前に共通化する。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序
@@ -253,21 +255,26 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ステータス: 進行中（最初のchangeは完了）
 
-本実装は、ユーザーが確認できる能力ごとに次の五つの通常changeへ分ける。各changeを単独で検証可能にし、最初の三つでタイトルからカメラ撮影、完成、保存・共有までの縦切りを完成させる。
+本実装は、ユーザーが確認できる能力と画面横断の整備を次の六つの通常changeへ分ける。各changeを単独で検証可能にし、`unify-screen-layout`を挟みつつ、`establish-creation-session`、`implement-camera-fill`、`implement-completed-artwork`でタイトルからカメラ撮影、完成、保存・共有までの縦切りを完成させる。
 
 1. `establish-creation-session`（完了・archive済み）
    - Start、app version・build ID確認、template一覧・選択、全asset準備、制作画面までの遷移を実装する。
    - `Template`、`Artwork`、`Area`、制作sessionのdomainとresource所有権を定める。
    - template取得port、開発用catalog、製品API仕様書、読み込み・空・更新必要・取得失敗状態を実装・文書化する。
-2. `implement-camera-fill`
+2. `implement-camera-fill`（完了・archive済み）
    - 中央固定のエリア選択、カメラ権限、前面・背面切替、pan、pinch、比較slider、撮影、撮り直し、上書きを製品導線へ実装する。
    - camera frameを作品状態へ反映し、Canvas 2D compositorへ統合する。
-3. `implement-completed-artwork`
+3. `unify-screen-layout`
+   - タイトル、テンプレート選択、制作画面でheaderのsafe area、上端・左右余白、最大幅を共有する画面shellを`shared/ui`へ実装する。
+   - 戻るボタンの見た目とclick通知を再利用componentへまとめ、遷移先の決定、遷移前のsession破棄、router操作は各pageの責務として渡せる構造にする。
+   - 共通に保つ寸法をCSS custom propertiesへまとめ、画面固有の配置との差を明示する。
+   - 言語切替は正式な画面仕様に従ってタイトル画面だけへ配置し、既存三画面のレイアウトを揃える。
+4. `implement-completed-artwork`
    - 1080×1080 PNG生成、完成確認、長押し保存、Web Share、共有キャンセル・失敗分類、Clipboard fallbackを実装する。
    - 作品変更と画面離脱に応じたPNG Blob、object URLの再利用・破棄を実装する。
-4. `implement-photo-fill`
+5. `implement-photo-fill`
    - 写真ライブラリ・ファイル選択、標準APIによるdecode、4096px・12MP上限への正規化、位置・倍率調整、余白を含む反映、選び直し、失敗からの復帰を実装する。
-5. `implement-solid-color-fill`
+6. `implement-solid-color-fill`
    - カラーパレット、単色の反映・上書き、キャンセルを実装し、カラーピッカー方式を製品UIとして確定する。
 
 このフェーズでは、開発用カタログと抽象化したテンプレート取得処理を使ってフロントエンドの主要導線を優先する。Azure上の本番リソースとの接続はフェーズ6で行う。
@@ -329,9 +336,8 @@ template catalogの運用支援は、本番用schemaとasset更新手順の確�
 
 ## 次のセッションで行うこと
 
-1. `establish-creation-session`の差分をレビューし、commit、PR、mainへのmergeを行う。
-2. merge後に`main`を最新化し、`implement-camera-fill`用の作業ブランチを作成する。
-3. camera F/Sの採用結果と制作sessionの境界を基に、`implement-camera-fill`のproposal、delta spec、design、tasksを作成する。
+1. 画面仕様を確認しながら、次の通常change `unify-screen-layout`を開始する。
+2. 画面共通化の完了後、`implement-completed-artwork`を開始する。
 
 ## 更新ルール
 

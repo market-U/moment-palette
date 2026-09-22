@@ -13,14 +13,33 @@ import type { CatalogSnapshot } from './catalog'
 
 const artworkSize = 1080
 
-/** 制作中に必要なdomain状態と解放対象resourceをまとめて所有するsessionを表す。 */
+/** ArtworkのAreaへ適用した描画resourceと、その解放手段を表す。 */
+export type ArtworkAreaResource = Readonly<{
+  source: CanvasImageSource
+  release: () => void
+}>
+
+/** 次の作品状態とArea resourceから、置換候補の表示resourceを生成する。 */
+export type ArtworkPreviewGenerator = (
+  artwork: Artwork,
+  areaResources: ReadonlyMap<string, ArtworkAreaResource>,
+) => Promise<ArtworkPreview>
+
+/** 制作中の作品と外部resourceを原子的に更新し、tab内で一括所有するsessionを表す。 */
 export type ActiveCreationSession = Readonly<{
   catalogRevision: string
   template: Template
-  artwork: Artwork
+  readonly artwork: Artwork
   assets: LoadedTemplateAssets
-  preview: ArtworkPreview
+  readonly preview: ArtworkPreview
+  readonly areaResources: ReadonlyMap<string, ArtworkAreaResource>
   startedAt: string
+  replaceAreaResource: (
+    areaId: string,
+    artwork: Artwork,
+    resource: ArtworkAreaResource,
+    generatePreview: ArtworkPreviewGenerator,
+  ) => Promise<void>
   release: () => void
 }>
 
@@ -72,18 +91,63 @@ export const prepareTemplate = async (
       assets,
     )
     let released = false
+    let currentArtwork = artwork
+    let currentPreview = preview
+    const areaResources = new Map<string, ArtworkAreaResource>()
     return Object.freeze({
       catalogRevision: snapshot.catalogRevision,
       template: entry.template,
-      artwork,
+      get artwork() {
+        return currentArtwork
+      },
       assets,
-      preview,
+      get preview() {
+        return currentPreview
+      },
+      get areaResources() {
+        return areaResources as ReadonlyMap<string, ArtworkAreaResource>
+      },
       startedAt: dependencies.now().toISOString(),
+      async replaceAreaResource(
+        areaId,
+        nextArtwork,
+        nextResource,
+        generatePreview,
+      ) {
+        if (released) {
+          nextResource.release()
+          throw new Error('解放済みの制作sessionは更新できません。')
+        }
+        if (!entry.template.areas.some((area) => area.id === areaId)) {
+          nextResource.release()
+          throw new Error(`templateに存在しないareaです: ${areaId}`)
+        }
+
+        const pendingResources = new Map(areaResources)
+        pendingResources.set(areaId, nextResource)
+        let nextPreview: ArtworkPreview
+        try {
+          nextPreview = await generatePreview(nextArtwork, pendingResources)
+        } catch (error) {
+          nextResource.release()
+          throw error
+        }
+
+        const previousResource = areaResources.get(areaId)
+        const previousPreview = currentPreview
+        currentArtwork = nextArtwork
+        currentPreview = nextPreview
+        areaResources.set(areaId, nextResource)
+        previousResource?.release()
+        previousPreview.release()
+      },
       release() {
         // route離脱など複数の終了経路が重なってもresourceは一度だけ解放する。
         if (released) return
         released = true
-        preview.release()
+        currentPreview.release()
+        areaResources.forEach((resource) => resource.release())
+        areaResources.clear()
         assets.release()
       },
     })

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import type { CameraVideoTarget } from '@/features/camera-compositing-spike/cameraPort'
+import type { CameraVideoTarget } from '@/features/camera-fill/cameraPort'
 
 import {
   createBrowserCameraStream,
@@ -20,6 +20,8 @@ const createStream = (track = createTrack()) =>
 
 const createTarget = (): CameraVideoTarget => ({
   srcObject: null,
+  videoWidth: 1920,
+  videoHeight: 1080,
   play: vi.fn(async () => undefined),
 })
 
@@ -99,6 +101,8 @@ describe('createBrowserCameraStream', () => {
     const track = createTrack()
     const target: CameraVideoTarget = {
       srcObject: null,
+      videoWidth: 0,
+      videoHeight: 0,
       play: vi.fn(async () => {
         throw new Error('play failed')
       }),

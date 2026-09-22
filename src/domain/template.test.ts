@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { createInitialArtwork, createTemplate } from './template'
+import {
+  applyCameraFill,
+  createInitialArtwork,
+  createTemplate,
+} from './template'
 
 const input = () => ({
   id: 'buncho-01',
@@ -65,5 +69,40 @@ describe('template domain', () => {
         areas: [{ ...input().areas[0]!, initialColor: '#fff' }],
       }),
     ).toThrow(/#RRGGBB/)
+  })
+
+  it('指定areaだけをcamera fillへ更新し、元の作品を変更しない', () => {
+    const template = createTemplate({
+      ...input(),
+      areas: [
+        ...input().areas,
+        {
+          id: 'body',
+          label: { ja: '体', en: 'Body' },
+          initialColor: '#E8DED2',
+        },
+      ],
+    })
+    const initial = createInitialArtwork(template)
+
+    const updated = applyCameraFill(initial, 'body')
+
+    expect(updated.areas).toEqual([
+      {
+        areaId: 'background',
+        fill: { kind: 'initial', color: '#F3EBDD' },
+      },
+      { areaId: 'body', fill: { kind: 'camera' } },
+    ])
+    expect(initial.areas[1]?.fill).toEqual({
+      kind: 'initial',
+      color: '#E8DED2',
+    })
+  })
+
+  it('存在しないareaへのcamera fillを拒否する', () => {
+    const artwork = createInitialArtwork(createTemplate(input()))
+
+    expect(() => applyCameraFill(artwork, 'missing')).toThrow(/存在しないarea/)
   })
 })

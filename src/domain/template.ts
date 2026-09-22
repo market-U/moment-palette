@@ -19,13 +19,20 @@ export type Template = Readonly<{
   areas: readonly Area[]
 }>
 
+/** 作品内の一領域に適用されている塗りの種類を、外部resourceから分離して表す。 */
+export type ArtworkFill =
+  | Readonly<{
+      kind: 'initial'
+      color: string
+    }>
+  | Readonly<{
+      kind: 'camera'
+    }>
+
 /** 作品内の一領域に適用されている塗りの状態を表す。 */
 export type ArtworkArea = Readonly<{
   areaId: string
-  fill: Readonly<{
-    kind: 'initial'
-    color: string
-  }>
+  fill: ArtworkFill
 }>
 
 /** 選択したテンプレートから制作中の作品状態を表す。 */
@@ -116,3 +123,24 @@ export const createInitialArtwork = (template: Template): Artwork =>
       ),
     ),
   })
+
+/** 指定した領域だけをカメラ撮影済みにした新しい作品状態を生成する。 */
+export const applyCameraFill = (artwork: Artwork, areaId: string): Artwork => {
+  if (!artwork.areas.some((area) => area.areaId === areaId)) {
+    throw new Error(`Artworkに存在しないareaです: ${areaId}`)
+  }
+
+  return Object.freeze({
+    ...artwork,
+    areas: Object.freeze(
+      artwork.areas.map((area) =>
+        area.areaId === areaId
+          ? Object.freeze({
+              areaId: area.areaId,
+              fill: Object.freeze({ kind: 'camera' as const }),
+            })
+          : area,
+      ),
+    ),
+  })
+}

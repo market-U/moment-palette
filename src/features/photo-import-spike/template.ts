@@ -5,7 +5,7 @@ import {
 } from './types'
 
 // 実行アセットだけを共有し、写真F/SからカメラF/S featureへ依存しない。
-const assetRoot = '/spikes/camera-compositing'
+const assetRoot = '/templates/buncho-01/r1'
 
 export const photoAreas = [
   {

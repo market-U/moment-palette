@@ -3,6 +3,8 @@ import { computed, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
+import AreaSelector from '@/features/camera-fill/AreaSelector.vue'
+import CameraFillPanel from '@/features/camera-fill/CameraFillPanel.vue'
 import { useCreationSession } from '@/features/creation-session/sessionFacade'
 import LanguageSwitcher from '@/shared/ui/LanguageSwitcher.vue'
 
@@ -23,6 +25,14 @@ watchEffect(() => {
 const localized = (value: { ja: string; en: string }) =>
   locale.value === 'ja' ? value.ja : value.en
 
+const localizedAreas = computed(
+  () =>
+    creation.value?.areas.map((area) => ({
+      ...area,
+      label: localized(area.label),
+    })) ?? [],
+)
+
 const backToTemplates = async () => {
   session.returnToTemplates()
   await router.push({ name: 'template-selection' })
@@ -31,6 +41,10 @@ const backToTemplates = async () => {
 const startOver = async () => {
   session.resetToStart()
   await router.push({ name: 'title' })
+}
+
+const openCamera = async () => {
+  if (selectedAreaId.value) await session.openCamera(selectedAreaId.value)
 }
 </script>
 
@@ -59,21 +73,20 @@ const startOver = async () => {
 
       <section class="area-panel" :aria-label="t('creation.areas')">
         <p>{{ t('creation.chooseArea') }}</p>
-        <div class="area-list">
-          <button
-            v-for="area in creation.areas"
-            :key="area.id"
-            type="button"
-            :aria-pressed="selectedAreaId === area.id"
-            @click="selectedAreaId = area.id"
-          >
-            <span
-              class="area-swatch"
-              :style="{ backgroundColor: area.initialColor }"
-            />
-            {{ localized(area.label) }}
-          </button>
-        </div>
+        <AreaSelector
+          :areas="localizedAreas"
+          :selected-area-id="selectedAreaId"
+          :label="t('creation.areas')"
+          :captured-label="t('creation.cameraFilled')"
+          @select="selectedAreaId = $event"
+        />
+      </section>
+
+      <section class="fill-actions" :aria-label="t('creation.fillMethods')">
+        <button class="camera-action" type="button" @click="openCamera">
+          <span>{{ t('creation.cameraAction') }}</span>
+          <small>{{ t('creation.cameraActionHint') }}</small>
+        </button>
       </section>
 
       <p class="creation-page__next">{{ t('creation.nextChanges') }}</p>
@@ -81,6 +94,21 @@ const startOver = async () => {
         {{ t('actions.startOver') }}
       </button>
     </section>
+    <CameraFillPanel
+      :state="session.cameraState.value"
+      :attach-target="session.attachCameraTarget"
+      :detach-target="session.detachCameraTarget"
+      :confirm-rationale="session.confirmCameraRationale"
+      :retry="session.retryCamera"
+      :switch-facing="session.switchCamera"
+      :set-blend="session.setCameraBlend"
+      :set-transform="session.setCameraTransform"
+      :resize-preview="session.resizeCameraPreview"
+      :render-preview="session.renderCameraPreview"
+      :capture="session.captureCamera"
+      :cancel="session.cancelCamera"
+      :handle-visibility-change="session.handleCameraVisibilityChange"
+    />
   </main>
 </template>
 
@@ -136,6 +164,7 @@ h1 {
 }
 
 .area-panel {
+  min-width: 0;
   margin-top: 1.25rem;
 }
 
@@ -145,37 +174,31 @@ h1 {
   text-align: center;
 }
 
-.area-list {
-  display: flex;
-  gap: 0.5rem;
-  padding-bottom: 0.35rem;
-  overflow-x: auto;
+.fill-actions {
+  display: grid;
+  margin-top: 1rem;
 }
 
-.area-list button {
-  display: flex;
-  flex: 0 0 auto;
-  gap: 0.45rem;
-  align-items: center;
-  min-height: 2.75rem;
-  padding: 0.5rem 0.8rem;
-  color: var(--color-ink);
+.camera-action {
+  display: grid;
+  gap: 0.2rem;
+  justify-self: center;
+  min-width: min(100%, 18rem);
+  min-height: 3.5rem;
+  padding: 0.7rem 1.25rem;
+  color: #fff;
+  font-weight: 700;
   cursor: pointer;
-  background: rgb(255 255 255 / 70%);
-  border: 1px solid rgb(65 54 76 / 14%);
+  background: var(--color-accent);
+  border: 0;
   border-radius: 999px;
+  box-shadow: 0 0.7rem 1.7rem rgb(86 58 78 / 22%);
 }
 
-.area-list button[aria-pressed='true'] {
-  border-color: var(--color-focus);
-  box-shadow: 0 0 0 2px rgb(114 92 164 / 18%);
-}
-
-.area-swatch {
-  width: 1.25rem;
-  aspect-ratio: 1;
-  border: 1px solid rgb(65 54 76 / 16%);
-  border-radius: 50%;
+.camera-action small {
+  font-size: 0.72rem;
+  font-weight: 400;
+  opacity: 0.82;
 }
 
 .creation-page__next {

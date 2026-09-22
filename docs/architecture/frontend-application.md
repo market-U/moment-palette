@@ -1,10 +1,10 @@
 # フロントエンドアプリケーションアーキテクチャ
 
-> ステータス: 基盤実装済み・F/S結果反映済み
+> ステータス: 制作session・camera fill実装済み
 >
-> 最終更新日: 2026-09-21
+> 最終更新日: 2026-09-22
 >
-> 対応change: `establish-frontend-foundation`、フェーズ3の各F/S
+> 対応change: `establish-frontend-foundation`、フェーズ3の各F/S、`establish-creation-session`、`implement-camera-fill`
 
 ## 目的
 
@@ -98,6 +98,8 @@ src/
 
 pageは`CreationSessionFacade`のview stateとcommandだけを参照する。`app/`のserviceが二つのfeature use caseを組み合わせ、具体的なbrowser adapterを注入するため、UIのtemplateとstyleを変更してもdomain、HTTP、Canvasへ波及しない。
 
+`implement-camera-fill`では、`features/camera-fill/`へArea selector、camera状態機械、camera・permission・compositor portを追加し、`infrastructure/camera/`と`infrastructure/camera-fill/`へbrowser実装を置いた。camera componentはcreation-session featureを直接importせず、`pages/CreationPage.vue`がfacadeのview stateとcommandをpropsとして結線する。
+
 ## importの依存方向
 
 次の矢印は、呼び出し順ではなくimportによるコンパイル時依存を表す。
@@ -164,8 +166,8 @@ HTTPレスポンスやSAS URLなど、外部サービス固有の形式をdomain
 | owner | 保持するもの |
 | --- | --- |
 | `app/`の開始処理 | build identity、catalog snapshot、開始中・更新必要・失敗の状態 |
-| 制作session | template IDとrevision、decode済みline art・mask、順序付き作品状態、完成PNGの有効性 |
-| カメラfeature | live stream、現在のpan・zoom・比較比率。撮影または離脱でstreamを停止する |
+| 制作session | template IDとrevision、decode済みline art・mask、順序付き作品状態、Area単位の撮影frame、現在の作品preview。Area上書き、session置換・終了で不要resourceを解放する |
+| カメラfeature | live stream、現在のpan・zoom・比較比率、権限・取得状態。撮影、cancel、background移行、離脱でstreamを停止する |
 | 写真feature | picker結果、decode・正規化中のresource、pan・zoom・比較比率。反映後は正規化済みframeをsessionへ渡す |
 | 完成feature | sessionの作品versionに対応するPNG Blobとobject URL。作品変更・離脱で破棄する |
 
@@ -195,6 +197,26 @@ flowchart LR
 フェーズ5では製品導線へ開発用catalog adapterを結線する。このadapterも製品schema version 1のvalidatorを通る。フェーズ6ではcomposition rootのcatalog adapterだけを`GET /api/templates`実装へ差し替え、feature、domain、pageを維持する。
 
 F/Sからはbuild identity判定、browser release adapter、decode処理、session ownerを製品moduleへ昇格または共通化した。現行API response、診断UI、固定色compositorは製品契約と異なるためF/S routeに残し、フェーズ6のAPI移行まで保持する。
+
+## Camera fill導線とresource所有
+
+```mermaid
+flowchart LR
+  area["中央固定のArea選択"] --> rationale["利用理由"]
+  rationale --> permission["権限照会とgetUserMedia"]
+  permission --> live["Canvas live preview"]
+  live --> capture["1080px frameを固定"]
+  capture --> candidate["次のArtworkとpreviewを仮生成"]
+  candidate -->|成功| commit["sessionへ一括commit"]
+  candidate -->|失敗| keep["新resourceを解放し旧作品を維持"]
+  commit --> creation["更新済み制作画面"]
+```
+
+- `ArtworkArea.fill`は`initial`または`camera`という作品上の意味だけを持ち、Canvas resourceをdomainへ格納しない。
+- 撮影frameはArea IDをkeyとするsession resourceとして保持する。同じAreaの撮り直しでは新preview生成後に旧frameと旧previewを解放する。
+- live previewは全体camera映像のsource planeと、現在作品のartwork planeを比較比率で重ね、line artを最後に描く。選択Areaは両planeへ同じlive映像を描くため中間比率でも薄くならない。
+- pan・pinchは`shared/lib/mediaTransform.ts`と`pointerGesture.ts`の純粋ロジックを使い、編集Canvasだけへ`touch-action: none`を適用する。
+- camera F/Sの専用route、診断UI、固定asset loader、固定templateは製品導線への移行後に削除した。開発用template画像は`public/templates/<template-id>/<revision>/`へ移し、製品schemaのcatalog adapterから参照する。
 
 ## UI component方針
 
