@@ -21,9 +21,23 @@ macOS上のChromeで、`http://127.0.0.1:5174`の開発サーバーを使用し�
 
 - 自動操作環境から複数pointerを発生できないため、実ブラウザ上のpinch操作は未確認。座標・gestureロジックの単体テストは成功している。
 - 確認端末で利用可能なcameraが一方向だけだったため、camera切替操作は表示されず未確認。
-- HTTPSのPR previewとiPhone Safari・Chromeの確認は未実施。
+- HTTPSのPR preview上でのiPhone Safari・Chrome確認は未実施。
 
 これらを確認するまでタスク6.2と6.3は未完了のままとする。
+
+## PR preview
+
+- PR: https://github.com/market-U/moment-palette/pull/13
+- Preview: https://icy-mushroom-0c0e42e00-13.eastasia.5.azurestaticapps.net
+- CI: GitHub Actionsの「品質検査とデプロイ」が成功。
+
+### iPhone確認項目
+
+- SafariとChromeの両方で、Area選択、権限説明、背面camera開始を確認する。
+- 前面・背面を切り替え、前面cameraのpreviewと撮影結果が同じ鏡像になることを確認する。
+- slider両端と中間、1本指pan、2本指pinchで余白が現れないことを確認する。
+- 30秒以上連続操作し、10回の撮影・撮り直しで他Areaのfillが維持されることを確認する。
+- cancel、background移行、route離脱でcamera indicatorが消え、foreground復帰時に自動再開しないことを確認する。
 
 ## 完了時の引き継ぎ
 
