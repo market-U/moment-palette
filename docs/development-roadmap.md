@@ -1,6 +1,6 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: フェーズ5進行中・`implement-camera-fill` verify待ち
+> ステータス: フェーズ5進行中・次のchangeは`unify-screen-layout`
 >
 > 最終更新日: 2026-09-22
 
@@ -29,7 +29,7 @@
 - Azureテンプレート配信とリリース継続性を検証する`validate-azure-template-delivery`は、実装、iPhone実機確認、verifyを完了し、delta specを同期せずarchive済みである。
 - フェーズ3のF/S結果をvision、画面遷移、UI状態、フロントエンド方針、Azure構成、template形式へ反映するフェーズ4を完了した。
 - フェーズ5の最初のchange `establish-creation-session`は、Startからtemplate選択、初期作品を表示する制作画面までの実装、verify、main specsへの同期、archiveを完了した。
-- フェーズ5の`implement-camera-fill`は、Artwork更新、camera resource所有、製品camera導線、中央固定Area selector、F/Sコード移行を実装し、iPhoneのSafari・Chromeによる実機確認まで完了した。verifyとarchiveを残している。
+- フェーズ5の`implement-camera-fill`は、Artwork更新、camera resource所有、製品camera導線、中央固定Area selector、F/Sコード移行を実装し、iPhoneのSafari・Chromeによる実機確認、verify、main specsへの同期、archiveを完了した。
 - 既存画面で判明したheader位置と戻る操作の重複は、`unify-screen-layout`を独立した通常changeとして扱い、後続画面を増やす前に共通化する。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
@@ -261,7 +261,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
    - Start、app version・build ID確認、template一覧・選択、全asset準備、制作画面までの遷移を実装する。
    - `Template`、`Artwork`、`Area`、制作sessionのdomainとresource所有権を定める。
    - template取得port、開発用catalog、製品API仕様書、読み込み・空・更新必要・取得失敗状態を実装・文書化する。
-2. `implement-camera-fill`（実装・実機確認完了、verify待ち）
+2. `implement-camera-fill`（完了・archive済み）
    - 中央固定のエリア選択、カメラ権限、前面・背面切替、pan、pinch、比較slider、撮影、撮り直し、上書きを製品導線へ実装する。
    - camera frameを作品状態へ反映し、Canvas 2D compositorへ統合する。
 3. `unify-screen-layout`
@@ -336,9 +336,8 @@ template catalogの運用支援は、本番用schemaとasset更新手順の確�
 
 ## 次のセッションで行うこと
 
-1. `implement-camera-fill`をverifyし、main specsへ同期してarchiveする。
-2. 画面仕様を確認しながら、次の通常change `unify-screen-layout`を開始する。
-3. 画面共通化の完了後、`implement-completed-artwork`を開始する。
+1. 画面仕様を確認しながら、次の通常change `unify-screen-layout`を開始する。
+2. 画面共通化の完了後、`implement-completed-artwork`を開始する。
 
 ## 更新ルール
 
