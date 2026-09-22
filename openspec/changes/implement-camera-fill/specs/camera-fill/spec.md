@@ -181,4 +181,3 @@
 
 - **WHEN** 利用者がlive映像からAreaを撮影する
 - **THEN** アプリケーションは映像とframeをbrowser memory内だけで処理し、serverまたは外部serviceへ送信しない
-
