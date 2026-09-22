@@ -125,7 +125,9 @@ Azure OpenID Connectでの認証は長期secretを減らせる可能性がある
 
 Git差分とAIによる継続的な更新に向き、GitHub上で追加のレンダラーなしに表示できるMermaidを採用する。図にはGitHub Actions、F/S用SWA、`main`の固定環境、PR一時環境、モバイル実機、HTTPS経路、対象外のBlob・APIを示す。対象環境、更新日、構成状態も図と同じ文書へ明記する。
 
-Microsoft公式のAzure Architecture IconsとAzure Well-Architected Frameworkの作図方針は確認する。一方、今回の小さな提案図では、GitHubのMermaid描画へ公式SVGを安全かつ可搬に登録するための追加処理や、コミュニティ管理のアイコンライブラリを導入しない。正式なAzureサービス名、方向付きの矢印、経路ラベル、対象範囲を明示することで意図を伝える。実サービス向けの詳細な構成図で公式アイコンが必要になった場合は、その時点の公式素材を使う。
+Microsoft公式のAzure Architecture IconsとAzure Well-Architected Frameworkの作図方針は確認する。一方、今回の小さな提案図では、GitHubのMermaid描画へ公式SVGを安全かつ可搬に登録するための追加処理や、コミュニティ管理のアイコンライブラリを導入しない。正式なAzureサービス名、方向付きの矢印、経路ラベル、対象範囲を明示することで意図を伝える。当時は、実サービス向けの詳細な構成図について公式アイコンを将来候補として残していた。
+
+> 2026-09-22追記: F/Sで作図コストを確認した結果、将来の公式アイコン採用案は取り下げた。本番構成もMarkdown内のシンプルなMermaidを正本兼表示形式とする。現在の方針は`docs/architecture/README.md`を参照する。
 
 PlantUMLと確認用SVGを管理する案は、ローカルレンダラーとJavaまたはネイティブ実行ファイルの準備が必要で、現状の図一枚に対して再現手順が重いため採用しない。
 

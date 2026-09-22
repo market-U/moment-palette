@@ -12,6 +12,19 @@
 - 本採用する要求は、後続の本実装changeへ正式に記述し、そのchangeからmain specsへ同期する。
 - archive済みchangeは検証過程の記録、このディレクトリは結果と判断の要約として扱う。
 
+## 完了したF/S
+
+| F/S | 主な採用判断 | 後続文書 |
+| --- | --- | --- |
+| [`camera-compositing.md`](camera-compositing.md) | Canvas 2D、PNG mask、Pointer Events、前面鏡像、1080×1080 PNG | `docs/vision.md`、`docs/design/figma.md`、`docs/architecture/frontend-application.md` |
+| [`photo-import.md`](photo-import.md) | 標準decode、4096px・12MP上限、共通gesture、描画集約と前後cache | `docs/vision.md`、`docs/design/ui-states.md`、`docs/architecture/frontend-application.md` |
+| [`image-sharing.md`](image-sharing.md) | 長押し保存、`text/plain` File共有、Clipboard fallback、PNG resource再利用 | `docs/vision.md`、`docs/design/ui-states.md`、`docs/design/screen-flow.md` |
+| [`azure-template-delivery.md`](azure-template-delivery.md) | private Blob、60分SAS、CORS、cache、24時間削除猶予、release継続 | `docs/architecture/azure-template-delivery.md`、`docs/architecture/template-format.md` |
+
+四つのF/SはいずれもiPhone 15（iOS 26）のSafari・Chromeで完了した。Android Chromeは端末確保後の回帰確認として残し、未確認の結果を推定で補わない。
+
+横断的な採用判断は`docs/architecture/README.md`、画面遷移とresource所有権は`docs/design/screen-flow.md`へ反映済みである。本実装へ移すときは、各F/Sの「コードの扱い」に従い、採用する要求を対象changeのdelta specへ記述する。
+
 ## F/S完了時のコードの扱い
 
 - 本実装へ昇格する場合は、本番品質の責務分割、エラー処理、対応環境、単体テストを追加する。
@@ -46,9 +59,9 @@ F/Sごとに `docs/spikes/<topic>.md` を作成し、次の内容を記録する
 ## vision・design・本実装changeへの反映
 ```
 
-最初の候補は、カメラ権限、前面・背面切替、画像マスク、ピンチ操作、Canvas合成、PNG生成、Web Share APIをまとめた中核画像処理F/Sである。
+中核画像処理F/Sでは、カメラ権限、前面・背面切替、画像マスク、ピンチ操作、Canvas合成、PNG生成を検証済みである。
 
-アルバム・ファイルからの画像選択も検証対象に含め、少なくとも次を確認する。
+アルバム・ファイルからの画像選択では、次を確認済みである。
 
 - iPhoneの画像選択でOSが提示する選択肢と、アプリ側から選択元を制限できないことの実機確認。
 - OSメニューからカメラを選んだ場合の、ネイティブ撮影からアプリへの復帰フロー。

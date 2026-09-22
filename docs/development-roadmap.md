@@ -1,8 +1,8 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: フェーズ3 完了・フェーズ4着手待ち
+> ステータス: フェーズ4 完了・フェーズ5着手待ち
 >
-> 最終更新日: 2026-09-21
+> 最終更新日: 2026-09-22
 
 ## 目的
 
@@ -27,6 +27,7 @@
 - 写真選択、標準APIによるdecode、EXIF Orientation、高解像度縮小、位置・倍率調整、mask合成を検証する`validate-photo-import`は、iPhone 15（iOS 26）のSafari・Chromeで実装と実機確認を完了し、delta specを同期せずarchive済みである。
 - 画像保存と共有を検証する`validate-image-sharing`は、iPhone 15（iOS 26）のSafari・Chromeで実装と実機確認を完了し、delta specを同期せずarchive済みである。
 - Azureテンプレート配信とリリース継続性を検証する`validate-azure-template-delivery`は、実装、iPhone実機確認、verifyを完了し、delta specを同期せずarchive済みである。
+- フェーズ3のF/S結果をvision、画面遷移、UI状態、フロントエンド方針、Azure構成、template形式へ反映するフェーズ4を完了した。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序
@@ -218,7 +219,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ### 4. F/S結果を要求とデザインへ反映する
 
-ステータス: 未着手
+ステータス: 完了
 
 主な作業:
 
@@ -230,9 +231,26 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 - SWAへのデプロイをまたぐ制作セッション継続方式を決定する。
 - 本実装changeへ移す正式要件を整理する。
 
+完了結果:
+
+- 4件のF/Sについて、検証結果、採否、制約、コードの扱いを`docs/spikes/`へ記録し、索引から後続文書をたどれるようにした。
+- `docs/vision.md`をF/S結果反映済みの本実装開始基準版とし、写真の実decode、4096px・12MP上限、初期のUI・状態管理方針を反映した。
+- `docs/design/screen-flow.md`と`docs/design/ui-states.md`を追加し、Start、template準備、camera、photo、color、完成、保存、共有の遷移、失敗状態、resource所有権を定めた。
+- UI component libraryとPiniaは初期リリースへ導入せず、native要素、製品固有component、Vue composable、`app/`がprovideする単一の制作sessionを採用した。再評価条件も明文化した。
+- F/S catalogへ`tags`とmask単位の`initialColor`を加えたschema version 1、順序、asset不変条件、API response境界を`docs/architecture/template-format.md`へ定めた。
+- private Blob、Blob単位・read-only・HTTPS限定・60分のService SAS、CORS origin `*`と限定method、resource別cache、旧assetの24時間削除猶予、14日soft deleteとversioningを初期方針として確定した。
+- Start前のbuild identity照合、template選択後の全asset取得・decode、制作開始後の追加取得なし、次のStartでの更新確認をsession継続方式として確定した。
+
+本実装changeへの引き継ぎ:
+
+- 各F/Sのdelta specはmain specsへ同期していない。フェーズ5の各changeは、対象となる採用判断を製品要求としてdelta specへ記述する。
+- 最初の縦切りは、Start時の整合性確認、template一覧と全asset準備、単一session、camera撮影、作品更新、1080×1080 PNG生成、長押し保存・共有までを一つの確認可能な導線としてproposalで再評価する。
+- 写真取り込みと単色塗りは、最初のcamera導線で確立した作品状態とcompositorへ後続changeで追加する。
+- F/S専用route、page、診断UI、固定assetは、対応する製品moduleを移植または再実装したchangeで削除する。
+
 ### 5. 主要導線を本実装する
 
-ステータス: 未着手
+ステータス: 着手待ち
 
 最初の本実装は、タイトルから完成画像生成までを小さな縦切りで通す。changeの単位は、OpenSpec proposal作成時に再検討する。
 
@@ -241,7 +259,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 候補となる順序:
 
 1. アプリシェル、多言語、画面遷移。
-2. テンプレート取得の抽象化、開発用カタログとテンプレート選択。
+2. テンプレート取得の抽象化、開発用カタログ、SWAマネージドAPI仕様書、テンプレート選択。
 3. 中央固定のエリア選択とカメラ撮影。
 4. 作品状態、撮り直し、上書き。
 5. 写真ライブラリ・ファイルからの取り込みと位置調整。
@@ -250,6 +268,8 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 8. リリースバージョン確認とセッション継続性。
 
 このフェーズでは、開発用カタログと抽象化したテンプレート取得処理を使ってフロントエンドの主要導線を優先する。Azure上の本番リソースとの接続はフェーズ6で行う。
+
+フェーズ5では、`GET /api/templates`の製品API仕様を一つの文書へまとめる。endpoint、HTTP method、認証レベル、cache header、成功response、error responseとHTTP status、公開判定、SASの権限と有効期間、app version・build ID、秘密情報を返さない境界を記載する。現行F/S実装と`docs/architecture/template-format.md`の製品schemaとの差分も明示し、フェーズ6のAPI実装・移行判断へ引き継ぐ。
 
 ### 6. 本番用のAzure配信・テンプレート配信基盤を構築する
 
@@ -273,9 +293,9 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 - 公開停止したテンプレートアセットの削除猶予期間。
 - Freeプランの容量、帯域、プレビュー環境などの制限を超えていないことの確認。
 - IaCと運用・デプロイ手順。
-- Azure公式アイコンを用いたアーキテクチャ図。
+- Markdown内のシンプルなMermaidによるアーキテクチャ図。
 
-正式なAzureアーキテクチャ図は、このchangeのproposal、specs、designを固めた後、実装開始前までに `docs/architecture/` へ作成する。構成変更時は同じchangeで図も更新する。
+本番用のAzureアーキテクチャ図は、このchangeのproposal、specs、designを固めた後、実装開始前までに `docs/architecture/` のMermaid図として作成または更新する。構成変更時は同じchangeで図も更新する。
 
 ### 7. 初期リリース候補を確認する
 
@@ -285,7 +305,8 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ## 次のセッションで行うこと
 
-1. フェーズ4として、4件のF/S結果を本実装用の要求、画面仕様、アーキテクチャへ整理する。
+1. フェーズ5の最初の縦切りについてOpenSpec proposalを作成し、責務と完了条件を合意する。
+2. proposal合意後にdelta specとdesignを作成し、F/Sから昇格・再実装・削除するmoduleを確定する。
 
 ## 更新ルール
 
