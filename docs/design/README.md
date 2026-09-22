@@ -8,6 +8,8 @@
 
 - [MomentPalette（Figma）](https://www.figma.com/design/K2tfDw1Wj9pQJ2heFbh7FJ/MomentPalette?node-id=0-1&t=P4QjS9z2QLy0duFM-1)
 - 合意済みの画面構成と操作仕様は [`figma.md`](figma.md) に記録する。
+- 画面遷移と制作resourceの生存期間は [`screen-flow.md`](screen-flow.md) に記録する。
+- 読み込み、空、権限拒否、失敗を含む表示状態は [`ui-states.md`](ui-states.md) に記録する。
 
 現在のFigmaは、画面の責務、主要導線、操作方法を確認するための基準とする。具体的な余白、配色、アイコン、コントロールの大きさなどは確定デザインではなく、操作可能なVueプロトタイプとモバイル実機で調整する。Figmaと `docs/vision.md` が食い違う場合は、要求の正本である `docs/vision.md`を優先する。
 
@@ -29,18 +31,17 @@
 
 操作可能なコードプロトタイプを作る場合は、OpenSpec changeを作成し、そのchangeの範囲内で管理する。
 
-## 予定する構成
+## 構成
 
 ```text
 docs/design/
 ├── README.md
 ├── screen-flow.md
 ├── ui-states.md
-├── figma.md
-└── exports/
+└── figma.md
 ```
 
-必要になった時点でファイルを追加する。エクスポート画像だけを正本にせず、元のFigmaファイルまたは編集可能なソースへの参照を残す。
+確認用画像が必要になった時点で`exports/`を追加する。エクスポート画像だけを正本にせず、元のFigmaファイルまたは編集可能なソースへの参照を残す。
 
 ## 初期の検討対象
 

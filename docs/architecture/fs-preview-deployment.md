@@ -63,7 +63,7 @@ SWA上のProduction環境は、実サービス本番ではなくマージ済み�
 
 復旧手順はリポジトリルートの[`README.md`](../../README.md#復旧)に記載している。
 
-図はGitHubがMarkdown内でネイティブ描画するMermaidを正本兼表示形式とする。Microsoftの[Azure Architecture Icons](https://learn.microsoft.com/azure/architecture/icons/)と[Architecture design diagrams](https://learn.microsoft.com/azure/well-architected/architect-role/design-diagrams)の方針を確認し、正式なAzureサービス名、方向付きでラベルのある経路、対象範囲、更新日、状態を明示した。今回の小さな提案図では、追加レンダラーや未登録のアイコンライブラリを必要としない再現性を優先して公式SVGを埋め込まない。より詳細な実サービス構成図を作る際は、最新の公式アイコンを使う。
+図はGitHubがMarkdown内でネイティブ描画するMermaidを正本兼表示形式とする。[Architecture design diagrams](https://learn.microsoft.com/azure/well-architected/architect-role/design-diagrams)の方針を確認し、正式なAzureサービス名、方向付きでラベルのある経路、対象範囲、更新日、状態を明示した。追加レンダラー、アイコンライブラリ、派生画像を必要としない再現性を優先し、本番構成でも同じ方針を維持する。
 
 ## ローカルSWAエミュレーター
 

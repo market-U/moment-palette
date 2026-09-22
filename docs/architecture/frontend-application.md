@@ -1,10 +1,10 @@
 # フロントエンドアプリケーションアーキテクチャ
 
-> ステータス: 実装済み
+> ステータス: 基盤実装済み・F/S結果反映済み
 >
-> 最終更新日: 2026-09-17
+> 最終更新日: 2026-09-21
 >
-> 対応change: `establish-frontend-foundation`
+> 対応change: `establish-frontend-foundation`、フェーズ3の各F/S
 
 ## 目的
 
@@ -18,12 +18,12 @@
 moment-palette/
 ├── src/                 # Vueフロントエンド
 ├── public/              # ビルド時にそのまま配信する静的ファイル
-├── api/                 # 将来追加するSWAマネージドAPI
+├── api/                 # SWAマネージドAPI
 ├── docs/
 └── openspec/
 ```
 
-フロントエンドはリポジトリ直下の`src/`へ置く。将来マネージドAPIを追加する場合は同階層に`api/`を作るが、利用するchangeまでは作成しない。
+フロントエンドはリポジトリ直下の`src/`へ置く。マネージドAPIは同階層の`api/`へ置き、frontendと別のTypeScript設定、package、testで管理する。
 
 ## `src/`の構成
 
@@ -51,7 +51,7 @@ src/
 - クライアント設定は`app/config/`、型は原則として所有するdomain、feature、portの近くへ置く。
 - 用途が明確になる前に`utils/`、`shared/config/`、`shared/types/`を作らない。
 
-このchange完了時点の実装は次のとおりである。
+基盤change完了時点の実装は次のとおりであった。
 
 ```text
 src/
@@ -72,7 +72,7 @@ src/
     └── TitlePage.vue
 ```
 
-現時点では利用するユースケースがないため、`features/`、`domain/`、`infrastructure/`、`shared/`は作成していない。
+フェーズ3では`features/`、`infrastructure/`、`shared/lib/`へF/Sコードを追加した。これらは境界と処理方式を検証するための実装であり、そのまま製品構成の正本にはしない。本実装changeでは各F/S記録の「コードの扱い」に従い、製品責務へ昇格・再実装したmoduleだけを残し、F/S専用route、page、診断UI、固定assetを削除する。
 
 ## importの依存方向
 
@@ -131,9 +131,32 @@ HTTPレスポンスやSAS URLなど、外部サービス固有の形式をdomain
 ## 状態管理
 
 - feature内の状態は、まずVueの`ref`または`reactive`を使うcomposableで管理する。
-- 複数画面にまたがる制作セッションは、必要になった時点で`app/`が生成してprovideする。
+- 複数画面にまたがる制作セッションは、`app/`がfactoryから一つ生成してprovideする。画面や個別featureが独自の作品copyを持たない。
 - domainはリアクティブ状態を持たず、イミュータブルなデータと純粋関数を基本とする。
-- Piniaは現時点では導入せず、複数feature間の状態共有が複雑になった時点で再評価する。
+- 初期リリースではPiniaなどの専用状態管理ライブラリを導入しない。制作状態のownerが一つで、session APIを通じた明示的な更新と単体テストが可能なためである。
+
+状態とresourceのownerは次のように分ける。
+
+| owner | 保持するもの |
+| --- | --- |
+| `app/`の開始処理 | build identity、catalog snapshot、開始中・更新必要・失敗の状態 |
+| 制作session | template IDとrevision、decode済みline art・mask、順序付き作品状態、完成PNGの有効性 |
+| カメラfeature | live stream、現在のpan・zoom・比較比率。撮影または離脱でstreamを停止する |
+| 写真feature | picker結果、decode・正規化中のresource、pan・zoom・比較比率。反映後は正規化済みframeをsessionへ渡す |
+| 完成feature | sessionの作品versionに対応するPNG Blobとobject URL。作品変更・離脱で破棄する |
+
+専用状態管理ライブラリは、独立した複数sessionを同時に扱う、session外の複数featureが同じ状態を個別に更新する、またはprovideされた明示的APIでは循環依存や更新追跡を維持できない、のいずれかが実際に発生した場合に再評価する。
+
+## UI component方針
+
+初期リリースではUI component libraryを導入しない。主要UIはCanvasを含む作品領域、中央固定のエリア選択、作品比較slider、撮影、写真調整など製品固有であり、汎用libraryの複雑なcomponentをほとんど必要としないためである。
+
+- native HTMLのbutton、input、dialog相当の意味とkeyboard・screen reader向け属性を優先する。
+- 二つ以上の画面またはfeatureで実際に同じ振る舞いを使う場合だけ`shared/ui/`へ抽出する。
+- 見た目の共通値はCSS custom propertiesとして`app/styles.css`から始め、component library固有tokenへ依存しない。
+- camera、photo、Canvasのgesture領域は汎用carouselやgesture componentへ合わせず、F/Sで成立したPointer Eventsと局所的な`touch-action`制御を使用する。
+
+UI component libraryは、accessibilityを満たすdialog、popover、listboxなどの複雑な部品を三種類以上独自実装する必要が生じた場合、または同じinteractionの重複が実装とtestで維持できなくなった場合に再評価する。
 
 ## アプリケーションシェル
 
