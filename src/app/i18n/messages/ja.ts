@@ -35,7 +35,46 @@ export const ja = {
     previewAlt: '{name}の初期作品',
     areas: '作品のエリア',
     chooseArea: '色をつけるエリアを選んでください',
-    nextChanges:
-      'カメラ・写真・単色で色をつける機能は、続くchangeで追加します。',
+    cameraFilled: '撮影済み',
+    fillMethods: '色のつけ方',
+    cameraAction: '景色から切り取る',
+    cameraActionHint: 'カメラで撮影する',
+    nextChanges: '写真と単色で色をつける機能は、続くchangeで追加します。',
+  },
+  camera: {
+    eyebrow: '景色から切り取る',
+    heading: 'カメラで撮影',
+    rationaleHeading: 'カメラを使用します',
+    rationale:
+      '選んだエリアへ、その場の景色を切り取るためにカメラを使用します。映像や写真をサーバーへ送信・保存することはありません。',
+    continue: 'カメラを開く',
+    cancel: 'キャンセル',
+    starting: 'カメラを起動しています…',
+    startingHint:
+      'ブラウザの確認が表示された場合は、カメラの使用を許可してください。',
+    switch: 'カメラ切替',
+    previewLabel: '作品とカメラ映像の合成プレビュー',
+    showSource: 'カメラ全体を表示',
+    showArtwork: '現在の作品を表示',
+    blend: '現在の作品との表示比率',
+    gestureHelp: '正方形の中を1本指で移動、2本指で拡大できます。',
+    shutterLabel: '現在の映像を選択中のエリアへ撮影',
+    unavailableHeading: 'カメラを利用できません',
+    alternativesLater:
+      '写真または単色で塗る方法は、今後のアップデートで追加します。',
+    backToCreation: '制作へ戻る',
+    errors: {
+      denied:
+        'カメラの使用が許可されていません。ブラウザまたは端末のサイト設定を確認してから、もう一度お試しください。',
+      'not-found':
+        '利用できるカメラが見つかりません。端末のカメラがOSとブラウザで認識されているか確認してください。',
+      'not-readable':
+        'カメラを読み取れませんでした。他のアプリが使用していないか確認してください。',
+      'constraint-failed':
+        'この端末では要求したカメラ設定を利用できませんでした。',
+      unsupported:
+        'このブラウザではカメラを利用できません。HTTPSで開いているか確認してください。',
+      unknown: 'カメラの処理中に問題が発生しました。もう一度お試しください。',
+    },
   },
 } as const

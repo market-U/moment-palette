@@ -1,6 +1,6 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: フェーズ5進行中・`establish-creation-session`完了
+> ステータス: フェーズ5進行中・`implement-camera-fill`実装中
 >
 > 最終更新日: 2026-09-22
 
@@ -29,6 +29,7 @@
 - Azureテンプレート配信とリリース継続性を検証する`validate-azure-template-delivery`は、実装、iPhone実機確認、verifyを完了し、delta specを同期せずarchive済みである。
 - フェーズ3のF/S結果をvision、画面遷移、UI状態、フロントエンド方針、Azure構成、template形式へ反映するフェーズ4を完了した。
 - フェーズ5の最初のchange `establish-creation-session`は、Startからtemplate選択、初期作品を表示する制作画面までの実装、verify、main specsへの同期、archiveを完了した。
+- フェーズ5の`implement-camera-fill`は、proposal・delta spec・design・tasksを作成し、Artwork更新、camera resource所有、製品camera導線、中央固定Area selector、F/Sコード移行を実装中である。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序
@@ -259,7 +260,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
    - Start、app version・build ID確認、template一覧・選択、全asset準備、制作画面までの遷移を実装する。
    - `Template`、`Artwork`、`Area`、制作sessionのdomainとresource所有権を定める。
    - template取得port、開発用catalog、製品API仕様書、読み込み・空・更新必要・取得失敗状態を実装・文書化する。
-2. `implement-camera-fill`
+2. `implement-camera-fill`（実装中）
    - 中央固定のエリア選択、カメラ権限、前面・背面切替、pan、pinch、比較slider、撮影、撮り直し、上書きを製品導線へ実装する。
    - camera frameを作品状態へ反映し、Canvas 2D compositorへ統合する。
 3. `implement-completed-artwork`
@@ -329,9 +330,10 @@ template catalogの運用支援は、本番用schemaとasset更新手順の確�
 
 ## 次のセッションで行うこと
 
-1. `establish-creation-session`の差分をレビューし、commit、PR、mainへのmergeを行う。
-2. merge後に`main`を最新化し、`implement-camera-fill`用の作業ブランチを作成する。
-3. camera F/Sの採用結果と制作sessionの境界を基に、`implement-camera-fill`のproposal、delta spec、design、tasksを作成する。
+1. `implement-camera-fill`の自動検査とローカルbrowser確認を完了する。
+2. PR previewを作成し、iPhone Safari・Chromeでcamera権限、切替、slider、pan、pinch、撮影・撮り直し、background・route離脱時の解放を確認する。
+3. 実機結果を記録してchangeをverifyし、main specsへ同期してarchiveする。
+4. 次の通常change `implement-completed-artwork`を開始する。
 
 ## 更新ルール
 

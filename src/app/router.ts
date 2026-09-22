@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { creationSessionAppService } from '@/app/creationSessionAppService'
 import TitlePage from '@/pages/TitlePage.vue'
 
-/** 製品画面と技術F/S画面のroute、および制作状態に基づく遷移境界を提供する。 */
+/** 製品画面と残存する技術F/S画面のroute、および制作状態に基づく遷移境界を提供する。 */
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -23,11 +23,6 @@ export const router = createRouter({
       name: 'creation',
       component: () => import('@/pages/CreationPage.vue'),
       meta: { requiresSession: true },
-    },
-    {
-      path: '/spikes/camera-compositing',
-      name: 'camera-compositing-spike',
-      component: () => import('./spikes/CameraCompositingSpikeRoute.vue'),
     },
     {
       path: '/spikes/photo-import',

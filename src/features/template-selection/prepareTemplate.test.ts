@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import { applyCameraFill } from '@/domain/template'
+
 import { parseTemplateCatalog } from './catalog'
 import { prepareTemplate } from './prepareTemplate'
 
@@ -100,5 +102,97 @@ describe('prepare template', () => {
       }),
     ).rejects.toThrow(/canvas/)
     expect(release).toHaveBeenCalledOnce()
+  })
+
+  it('Area resourceとpreviewを成功時だけ置き換えて旧resourceを解放する', async () => {
+    const releaseAssets = vi.fn()
+    const initialPreviewRelease = vi.fn()
+    const firstPreviewRelease = vi.fn()
+    const firstFrameRelease = vi.fn()
+    const secondFrameRelease = vi.fn()
+    const session = await prepareTemplate(snapshot, 'buncho-01', {
+      assetLoader: {
+        load: vi.fn().mockResolvedValue(assets(releaseAssets)),
+      },
+      previewPort: {
+        generate: vi.fn().mockResolvedValue({
+          url: 'blob:initial',
+          width: 1080,
+          height: 1080,
+          release: initialPreviewRelease,
+        }),
+      },
+      now: () => new Date('2026-09-22T00:00:00.000Z'),
+    })
+    await session.replaceAreaResource(
+      'body',
+      applyCameraFill(session.artwork, 'body'),
+      { source: {} as CanvasImageSource, release: firstFrameRelease },
+      async () => ({
+        url: 'blob:first',
+        width: 1080,
+        height: 1080,
+        release: firstPreviewRelease,
+      }),
+    )
+
+    const finalPreviewRelease = vi.fn()
+    await session.replaceAreaResource(
+      'body',
+      applyCameraFill(session.artwork, 'body'),
+      { source: {} as CanvasImageSource, release: secondFrameRelease },
+      async () => ({
+        url: 'blob:second',
+        width: 1080,
+        height: 1080,
+        release: finalPreviewRelease,
+      }),
+    )
+
+    expect(session.preview.url).toBe('blob:second')
+    expect(session.artwork.areas[0]?.fill).toEqual({ kind: 'camera' })
+    expect(initialPreviewRelease).toHaveBeenCalledOnce()
+    expect(firstFrameRelease).toHaveBeenCalledOnce()
+    expect(firstPreviewRelease).toHaveBeenCalledOnce()
+    session.release()
+    session.release()
+    expect(secondFrameRelease).toHaveBeenCalledOnce()
+    expect(finalPreviewRelease).toHaveBeenCalledOnce()
+    expect(releaseAssets).toHaveBeenCalledOnce()
+  })
+
+  it('次のpreview生成失敗時は新resourceだけを解放して旧作品を維持する', async () => {
+    const initialPreviewRelease = vi.fn()
+    const failedFrameRelease = vi.fn()
+    const session = await prepareTemplate(snapshot, 'buncho-01', {
+      assetLoader: { load: vi.fn().mockResolvedValue(assets()) },
+      previewPort: {
+        generate: vi.fn().mockResolvedValue({
+          url: 'blob:initial',
+          width: 1080,
+          height: 1080,
+          release: initialPreviewRelease,
+        }),
+      },
+      now: () => new Date('2026-09-22T00:00:00.000Z'),
+    })
+    const initialArtwork = session.artwork
+
+    await expect(
+      session.replaceAreaResource(
+        'body',
+        applyCameraFill(initialArtwork, 'body'),
+        { source: {} as CanvasImageSource, release: failedFrameRelease },
+        async () => {
+          throw new Error('preview failed')
+        },
+      ),
+    ).rejects.toThrow('preview failed')
+
+    expect(failedFrameRelease).toHaveBeenCalledOnce()
+    expect(session.artwork).toBe(initialArtwork)
+    expect(session.preview.url).toBe('blob:initial')
+    expect(initialPreviewRelease).not.toHaveBeenCalled()
+    expect(session.areaResources.size).toBe(0)
   })
 })

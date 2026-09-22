@@ -35,6 +35,9 @@ export const drawInitialArtwork = (
     layerContext.globalCompositeOperation = 'source-over'
     layerContext.drawImage(mask.source, 0, 0, artworkSize, artworkSize)
     layerContext.globalCompositeOperation = 'source-in'
+    if (area.fill.kind !== 'initial') {
+      throw new Error('初期previewには初期色以外のfillを描画できません。')
+    }
     layerContext.fillStyle = area.fill.color
     layerContext.fillRect(0, 0, artworkSize, artworkSize)
     context.drawImage(layerContext.canvas, 0, 0, artworkSize, artworkSize)

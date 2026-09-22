@@ -2,7 +2,7 @@ import type { BuildIdentity } from '@/features/creation-session/buildIdentity'
 import { parseTemplateCatalog } from '@/features/template-selection/catalog'
 import type { TemplateCatalogPort } from '@/features/template-selection/templateCatalogPort'
 
-const assetRoot = '/spikes/camera-compositing'
+const assetRoot = '/templates/buncho-01/r1'
 
 /** 開発用fixtureを本番と同じschema検証へ通して返すcatalog adapterを生成する。 */
 export const createDevelopmentTemplateCatalogAdapter = (

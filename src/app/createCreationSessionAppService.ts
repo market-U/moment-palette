@@ -1,11 +1,20 @@
-import { computed, readonly, ref, shallowRef } from 'vue'
+import { computed, readonly, ref, shallowRef, triggerRef } from 'vue'
 
+import { applyCameraFill } from '@/domain/template'
+import { createCameraFillController } from '@/features/camera-fill/cameraController'
+import type { CameraCompositorPort } from '@/features/camera-fill/compositorPort'
+import type {
+  CameraFailure,
+  CameraStreamPort,
+} from '@/features/camera-fill/cameraPort'
+import type { CameraPermissionPort } from '@/features/camera-fill/permissionPort'
 import { beginCreation } from '@/features/creation-session/beginCreation'
 import type { BuildIdentity } from '@/features/creation-session/buildIdentity'
 import { CreationSessionOwner } from '@/features/creation-session/creationSessionOwner'
 import type { ReleasePort } from '@/features/creation-session/releasePort'
 import type {
   ActiveCreationView,
+  CameraViewState,
   CreationSessionFacade,
   StartViewState,
   TemplateSelectionViewState,
@@ -32,6 +41,11 @@ type Dependencies = {
   catalogPort: TemplateCatalogPort
   assetLoader: TemplateAssetLoaderPort
   previewPort: ArtworkPreviewPort
+  cameraPort: CameraStreamPort
+  cameraPermission: CameraPermissionPort
+  cameraCompositor: CameraCompositorPort
+  mapCameraFailure: (error: unknown) => CameraFailure
+  isDocumentHidden: () => boolean
   now: () => Date
   reloadPage: () => void
 }
@@ -73,6 +87,9 @@ const activeViewOf = (session: ActiveCreationSession): ActiveCreationView =>
           id: area.id,
           label: area.label,
           initialColor: area.initialColor,
+          fillKind:
+            session.artwork.areas.find((entry) => entry.areaId === area.id)
+              ?.fill.kind ?? 'initial',
         }),
       ),
     ),
@@ -89,6 +106,17 @@ export const createCreationSessionAppService = (
   const snapshot = shallowRef<CatalogSnapshot | null>(null)
   const owner = new CreationSessionOwner<ActiveCreationSession>()
   const activeSession = shallowRef<ActiveCreationSession | null>(null)
+  const cameraState = shallowRef<CameraViewState>({ phase: 'closed' })
+  let cameraTarget: HTMLVideoElement | undefined
+  const cameraController = createCameraFillController({
+    camera: dependencies.cameraPort,
+    permission: dependencies.cameraPermission,
+    mapFailure: dependencies.mapCameraFailure,
+    isDocumentHidden: dependencies.isDocumentHidden,
+    onStateChange: (state) => {
+      cameraState.value = state
+    },
+  })
 
   const templateSelection = computed(() =>
     selectionViewOf(selectionState.value),
@@ -99,6 +127,7 @@ export const createCreationSessionAppService = (
 
   const clearActiveSession = () => {
     // 所有者と画面用参照を同じ境界で消し、解放済みsessionの参照を残さない。
+    cameraController.resetSession()
     owner.clear()
     activeSession.value = null
   }
@@ -179,6 +208,7 @@ export const createCreationSessionAppService = (
     startState: readonly(startState),
     templateSelection: readonly(templateSelection),
     activeCreation: readonly(activeCreation),
+    cameraState: readonly(cameraState),
     start,
     selectTemplate,
     retryTemplate,
@@ -186,6 +216,87 @@ export const createCreationSessionAppService = (
     returnToTemplates,
     resetToStart,
     reload: dependencies.reloadPage,
+    attachCameraTarget: (target) => {
+      cameraTarget = target
+      cameraController.attachTarget(target)
+    },
+    detachCameraTarget: () => {
+      cameraTarget = undefined
+      cameraController.detachTarget()
+    },
+    openCamera: (areaId) => cameraController.request(areaId),
+    confirmCameraRationale: () => cameraController.confirmRationale(),
+    retryCamera: () => cameraController.retry(),
+    switchCamera: () => cameraController.switchFacing(),
+    setCameraBlend: (blend) => cameraController.setBlend(blend),
+    setCameraTransform: (transform) => cameraController.setTransform(transform),
+    resizeCameraPreview: (canvas, cssPixels, pixelRatio) =>
+      dependencies.cameraCompositor.resizePreview(
+        canvas,
+        cssPixels,
+        pixelRatio,
+      ),
+    renderCameraPreview: (canvas) => {
+      const state = cameraController.state
+      const session = activeSession.value
+      if (
+        !cameraTarget ||
+        !session ||
+        (state.phase !== 'live' && state.phase !== 'capturing')
+      ) {
+        return
+      }
+      dependencies.cameraCompositor.renderPreview(canvas, cameraTarget, {
+        template: session.template,
+        artwork: session.artwork,
+        assets: session.assets,
+        areaResources: session.areaResources,
+        selectedAreaId: state.areaId,
+        blend: state.blend,
+        transform: state.transform,
+        mirrorSource: state.facing === 'user',
+      })
+    },
+    captureCamera: async () => {
+      const session = activeSession.value
+      const target = cameraTarget
+      const state = cameraController.beginCapture()
+      if (!session || !target || !state) return false
+
+      let frame: ReturnType<CameraCompositorPort['captureFrame']> | undefined
+      let ownershipTransferred = false
+      try {
+        frame = dependencies.cameraCompositor.captureFrame(
+          target,
+          state.transform,
+          state.facing === 'user',
+        )
+        const nextArtwork = applyCameraFill(session.artwork, state.areaId)
+        ownershipTransferred = true
+        await session.replaceAreaResource(
+          state.areaId,
+          nextArtwork,
+          frame,
+          (artwork, areaResources) =>
+            dependencies.cameraCompositor.generatePreview({
+              template: session.template,
+              artwork,
+              assets: session.assets,
+              areaResources,
+            }),
+        )
+        triggerRef(activeSession)
+        cameraController.finishCapture()
+        return true
+      } catch {
+        if (frame && !ownershipTransferred) frame.release()
+        cameraController.failCapture()
+        return false
+      }
+    },
+    cancelCamera: () => cameraController.cancel(),
+    handleCameraVisibilityChange: () =>
+      cameraController.handleVisibilityChange(),
     hasCatalog: () => snapshot.value !== null,
     hasActiveSession: () => activeSession.value !== null,
     dispose: resetToStart,

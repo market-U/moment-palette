@@ -1,11 +1,11 @@
 import type {
   CameraFailure,
   CameraFailureCode,
-  CameraSession,
+  CameraFacing,
   CameraStreamPort,
+  CameraStreamSession,
   CameraVideoTarget,
-} from '@/features/camera-compositing-spike/cameraPort'
-import type { CameraFacing } from '@/features/camera-compositing-spike/types'
+} from '@/features/camera-fill/cameraPort'
 
 interface MediaDevicesPort {
   getUserMedia(constraints?: MediaStreamConstraints): Promise<MediaStream>
@@ -20,6 +20,7 @@ const failureCodes: Partial<Record<string, CameraFailureCode>> = {
   UnsupportedError: 'unsupported',
 }
 
+/** Browser例外を利用者向け文言から独立した製品failure codeへ変換する。 */
 export const toCameraFailure = (error: unknown): CameraFailure => {
   if (error instanceof DOMException) {
     return {
@@ -44,12 +45,13 @@ export const toCameraFailure = (error: unknown): CameraFailure => {
   }
 }
 
+/** MediaDevicesを使い、同時に一つのcamera streamだけを所有するadapterを生成する。 */
 export const createBrowserCameraStream = (
   mediaDevices: MediaDevicesPort | undefined = navigator.mediaDevices,
 ): CameraStreamPort => {
   let activeStream: MediaStream | undefined
   let activeTarget: CameraVideoTarget | undefined
-  let session: CameraSession | undefined
+  let session: CameraStreamSession | undefined
 
   const stop = () => {
     activeStream?.getTracks().forEach((track) => track.stop())

@@ -64,6 +64,36 @@ const dependencies = () => {
   const loadAvailable = vi.fn().mockResolvedValue(catalog())
   const loadAssets = vi.fn().mockResolvedValue(loadedAssets())
   const releasePreview = vi.fn()
+  const releaseCameraPreview = vi.fn()
+  const releaseFrame = vi.fn()
+  const cameraPort = {
+    start: vi.fn().mockResolvedValue({
+      facing: 'environment' as const,
+      canSwitch: true,
+      settings: { width: 1920, height: 1080, facingMode: 'environment' },
+    }),
+    switchFacing: vi.fn().mockResolvedValue({
+      facing: 'user' as const,
+      canSwitch: true,
+      settings: { width: 1920, height: 1080, facingMode: 'user' },
+    }),
+    stop: vi.fn(),
+    getSession: vi.fn(),
+  }
+  const cameraCompositor = {
+    resizePreview: vi.fn().mockReturnValue({ width: 540, height: 540 }),
+    renderPreview: vi.fn(),
+    captureFrame: vi.fn().mockReturnValue({
+      source: {} as CanvasImageSource,
+      release: releaseFrame,
+    }),
+    generatePreview: vi.fn().mockResolvedValue({
+      url: 'blob:camera-preview',
+      width: 1080,
+      height: 1080,
+      release: releaseCameraPreview,
+    }),
+  }
   return {
     values: {
       frontend: { appVersion: '0.0.0', buildId: 'build-a' },
@@ -78,6 +108,15 @@ const dependencies = () => {
           release: releasePreview,
         }),
       },
+      cameraPort,
+      cameraPermission: { query: vi.fn().mockResolvedValue('prompt' as const) },
+      cameraCompositor,
+      mapCameraFailure: (error: unknown) => ({
+        code: 'unknown' as const,
+        name: error instanceof Error ? error.name : 'UnknownError',
+        message: error instanceof Error ? error.message : String(error),
+      }),
+      isDocumentHidden: () => false,
       now: () => new Date('2026-09-21T00:10:00.000Z'),
       reloadPage: vi.fn(),
     },
@@ -85,6 +124,10 @@ const dependencies = () => {
     loadAvailable,
     loadAssets,
     releasePreview,
+    releaseCameraPreview,
+    releaseFrame,
+    cameraPort,
+    cameraCompositor,
   }
 }
 
@@ -153,5 +196,32 @@ describe('creation session app service', () => {
       phase: 'error',
       templateId: 'buncho-01',
     })
+  })
+
+  it('camera撮影を作品へcommitし、resetでframeを一度だけ解放する', async () => {
+    const deps = dependencies()
+    const service = createCreationSessionAppService(deps.values)
+    await service.start()
+    await service.selectTemplate('buncho-01')
+    service.attachCameraTarget({
+      srcObject: null,
+      videoWidth: 1920,
+      videoHeight: 1080,
+      play: vi.fn(async () => undefined),
+    } as unknown as HTMLVideoElement)
+
+    await service.openCamera('body')
+    await service.confirmCameraRationale()
+    await expect(service.captureCamera()).resolves.toBe(true)
+
+    expect(service.activeCreation.value).toMatchObject({
+      previewUrl: 'blob:camera-preview',
+      areas: [{ id: 'body', fillKind: 'camera' }],
+    })
+    expect(deps.releasePreview).toHaveBeenCalledOnce()
+    service.resetToStart()
+    service.dispose()
+    expect(deps.releaseFrame).toHaveBeenCalledOnce()
+    expect(deps.releaseCameraPreview).toHaveBeenCalledOnce()
   })
 })
