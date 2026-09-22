@@ -10,6 +10,7 @@ import type {
   TemplateCatalogResponse,
 } from './types'
 import { compareBuildIdentity } from './versionCompatibility'
+import { CreationSessionOwner } from '@/features/creation-session/creationSessionOwner'
 
 export class ReloadRequiredError extends Error {
   constructor(
@@ -68,21 +69,4 @@ export const startTemplateSession = async (
   }
 }
 
-export class TemplateSessionOwner {
-  #current: TemplateSession | null = null
-
-  get current(): TemplateSession | null {
-    return this.#current
-  }
-
-  replace(next: TemplateSession): void {
-    if (this.#current === next) return
-    this.#current?.release()
-    this.#current = next
-  }
-
-  clear(): void {
-    this.#current?.release()
-    this.#current = null
-  }
-}
+export class TemplateSessionOwner extends CreationSessionOwner<TemplateSession> {}

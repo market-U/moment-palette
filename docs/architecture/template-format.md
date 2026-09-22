@@ -10,7 +10,9 @@
 
 ## Blob catalog
 
-catalogの正本は、private Blobコンテナ内の`catalog/catalog.json`とする。schema version 1は次の形を持つ。
+各API環境で使用するcatalogの正本は、private Blobコンテナの`catalog/`配下に置く。Application Settingsの`TEMPLATE_CATALOG_FILE`には`catalog-dev.json`、`catalog-staging.json`、`catalog.json`のようなJSONファイル名だけを指定し、APIが固定prefixの`catalog/`と結合する。catalogのファイル名はAPI内部の配信設定であり、frontendのresponseやdomainには含めない。
+
+複数環境が同じStorage containerを利用する場合、catalog JSONだけを環境別に分け、各catalogから共通の`templates/<template-id>/<asset-revision>/...`を参照して画像を流用できる。schema version 1は次の形を持つ。
 
 ```json
 {
@@ -78,6 +80,7 @@ F/S schemaに対して、製品要件で必要な`tags`とmaskごとの`initialC
 
 `GET /api/templates`は、公開条件を満たすtemplateだけを返す。responseは次のmetadataを持つ。
 
+- 製品response schemaを示す`schemaVersion: 1`。
 - APIのapp versionとbuild ID。
 - server時刻、catalog revision、SAS期限。
 - 公開対象templateの`id`、`assetRevision`、`name`、`tags`。
@@ -92,7 +95,7 @@ F/S schemaに対して、製品要件で必要な`tags`とmaskごとの`initialC
 - revision付きassetは`public, max-age=31536000, immutable`とする。
 - catalogは`no-cache`、API responseは`no-store`とする。
 - 新revisionの全assetを配置し、寸法、MIME type、cache metadata、参照整合性を検査してからcatalogを最後に更新する。
-- 公開停止またはrevision切替後の旧assetは24時間保持してから削除する。Blobとcontainerのsoft deleteは14日、Blob versioningは有効にする。
+- 公開停止またはrevision切替後の旧assetは、運用対象となるすべての環境別catalogから参照がなくなったことを確認し、最後の参照を外してから24時間保持した後に削除する。Blobとcontainerのsoft deleteは14日、Blob versioningは有効にする。
 
 ## frontendへの変換
 

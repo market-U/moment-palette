@@ -5,6 +5,7 @@ import type {
 } from '@/features/azure-template-delivery-spike/assetLoaderPort'
 import type { RequestDiagnostics } from '@/features/azure-template-delivery-spike/requestDiagnostics'
 import type { TemplateAssetReference } from '@/features/azure-template-delivery-spike/types'
+import { loadDecodedAsset } from './loadDecodedAsset'
 
 const loadOne = async (
   asset: TemplateAssetReference,
@@ -12,27 +13,12 @@ const loadOne = async (
   decode: (blob: Blob) => Promise<ImageBitmap>,
   diagnostics?: RequestDiagnostics,
 ): Promise<DecodedTemplateAsset> => {
-  diagnostics?.record(asset.url, 'blob')
-  const response = await fetcher(asset.url, {
-    cache: 'force-cache',
-    mode: 'cors',
-  })
-  if (!response.ok) throw new Error('template asset request failed')
-  const blob = await response.blob()
-  const bitmap = await decode(blob)
-  let released = false
+  const decoded = await loadDecodedAsset(asset, fetcher, decode, (url) =>
+    diagnostics?.record(url, 'blob'),
+  )
   return {
     path: asset.path,
-    mimeType: blob.type || asset.mimeType,
-    byteLength: blob.size,
-    width: bitmap.width,
-    height: bitmap.height,
-    source: bitmap,
-    release() {
-      if (released) return
-      released = true
-      bitmap.close()
-    },
+    ...decoded,
   }
 }
 

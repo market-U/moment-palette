@@ -74,6 +74,30 @@ src/
 
 フェーズ3では`features/`、`infrastructure/`、`shared/lib/`へF/Sコードを追加した。これらは境界と処理方式を検証するための実装であり、そのまま製品構成の正本にはしない。本実装changeでは各F/S記録の「コードの扱い」に従い、製品責務へ昇格・再実装したmoduleだけを残し、F/S専用route、page、診断UI、固定assetを削除する。
 
+`establish-creation-session`では、製品導線として次を追加した。
+
+```text
+src/
+├── app/
+│   ├── createCreationSessionAppService.ts
+│   └── creationSessionAppService.ts
+├── domain/
+│   └── template.ts
+├── features/
+│   ├── creation-session/
+│   └── template-selection/
+├── infrastructure/
+│   ├── creation-session/
+│   └── template-selection/
+├── pages/
+│   ├── TemplateSelectionPage.vue
+│   └── CreationPage.vue
+└── shared/ui/
+    └── LanguageSwitcher.vue
+```
+
+pageは`CreationSessionFacade`のview stateとcommandだけを参照する。`app/`のserviceが二つのfeature use caseを組み合わせ、具体的なbrowser adapterを注入するため、UIのtemplateとstyleを変更してもdomain、HTTP、Canvasへ波及しない。
+
 ## importの依存方向
 
 次の矢印は、呼び出し順ではなくimportによるコンパイル時依存を表す。
@@ -147,6 +171,31 @@ HTTPレスポンスやSAS URLなど、外部サービス固有の形式をdomain
 
 専用状態管理ライブラリは、独立した複数sessionを同時に扱う、session外の複数featureが同じ状態を個別に更新する、またはprovideされた明示的APIでは循環依存や更新追跡を維持できない、のいずれかが実際に発生した場合に再評価する。
 
+## 制作session開始導線
+
+```mermaid
+flowchart LR
+  title["タイトル"] -->|Start| check["releaseとcatalogを並列取得"]
+  check -->|identity一致| selection["template選択"]
+  check -->|不一致| reload["更新案内"]
+  check -->|取得・検証失敗| retry["再試行"]
+  selection -->|template選択| assets["line artと全maskを取得・decode"]
+  assets -->|全件成功| preview["初期ArtworkとCanvas previewを生成"]
+  preview --> session["単一session ownerへ設定"]
+  session --> creation["制作画面"]
+```
+
+- `creation-session`はbuild identity、Start状態、release port、単一session ownerを持つ。
+- `template-selection`は製品catalog schema、catalog port、asset loader port、Canvas preview port、template準備規則を持つ。
+- `app`が両featureを組み合わせ、tabにつき一つのsnapshotと制作sessionを保持する。
+- snapshotなしの`/templates`とsessionなしの`/create`はrouter guardでタイトルへ戻す。
+- sessionの置換、タイトルへの復帰、app unmount、`pagehide`は同じownerをclearし、resourceを冪等に解放する。
+- 制作画面へ進んだ後はrelease、catalog、asset portを再度呼ばず、取得済みresourceだけを使う。
+
+フェーズ5では製品導線へ開発用catalog adapterを結線する。このadapterも製品schema version 1のvalidatorを通る。フェーズ6ではcomposition rootのcatalog adapterだけを`GET /api/templates`実装へ差し替え、feature、domain、pageを維持する。
+
+F/Sからはbuild identity判定、browser release adapter、decode処理、session ownerを製品moduleへ昇格または共通化した。現行API response、診断UI、固定色compositorは製品契約と異なるためF/S routeに残し、フェーズ6のAPI移行まで保持する。
+
 ## UI component方針
 
 初期リリースではUI component libraryを導入しない。主要UIはCanvasを含む作品領域、中央固定のエリア選択、作品比較slider、撮影、写真調整など製品固有であり、汎用libraryの複雑なcomponentをほとんど必要としないためである。
@@ -162,6 +211,7 @@ UI component libraryは、accessibilityを満たすdialog、popover、listboxな
 
 - ルーティングにはVue RouterのHTML5 historyを使用し、`import.meta.env.BASE_URL`を基準パスとする。
 - `/`でタイトル画面を表示し、未知のアプリ内URLはタイトル画面へ戻す。
+- `/templates`でStart時のsnapshotからtemplateを選択し、`/create`で初期作品を表示する。必要なtab内状態がなければタイトルへ戻す。
 - 日本語と英語のメッセージを`app/i18n/`で管理し、初期言語はブラウザの優先言語が`ja`または`ja-*`なら日本語、それ以外は英語とする。
 - タイトル画面から日本語と英語を切り替えられるようにする。
 - 表示言語に合わせて`html`要素の`lang`を更新する。

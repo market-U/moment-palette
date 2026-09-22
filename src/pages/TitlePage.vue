@@ -1,46 +1,59 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 
-const { locale, t } = useI18n()
+import { useCreationSession } from '@/features/creation-session/sessionFacade'
+import LanguageSwitcher from '@/shared/ui/LanguageSwitcher.vue'
 
-type SupportedLocale = 'ja' | 'en'
+const { t } = useI18n()
+const router = useRouter()
+const session = useCreationSession()
 
-const setLocale = (nextLocale: SupportedLocale) => {
-  locale.value = nextLocale
+const handleStart = async () => {
+  if (await session.start()) await router.push({ name: 'template-selection' })
 }
 </script>
 
 <template>
   <main class="title-page">
-    <div
-      class="language-switcher"
-      role="group"
-      :aria-label="t('title.language.label')"
-    >
-      <button
-        type="button"
-        lang="ja"
-        :aria-pressed="locale === 'ja'"
-        @click="setLocale('ja')"
-      >
-        {{ t('title.language.ja') }}
-      </button>
-      <button
-        type="button"
-        lang="en"
-        :aria-pressed="locale === 'en'"
-        @click="setLocale('en')"
-      >
-        {{ t('title.language.en') }}
-      </button>
-    </div>
+    <LanguageSwitcher class="language-switcher" />
 
     <section class="title-page__hero" aria-labelledby="title-heading">
       <div class="title-page__mark" aria-hidden="true"><span /></div>
       <h1 id="title-heading">{{ t('title.name') }}</h1>
-      <button class="title-page__start" type="button" disabled>
-        {{ t('title.start') }}
+      <p class="title-page__version">v{{ session.appVersion }}</p>
+      <button
+        class="title-page__start"
+        type="button"
+        :disabled="session.startState.value.phase === 'checking'"
+        @click="handleStart"
+      >
+        {{
+          session.startState.value.phase === 'checking'
+            ? t('title.checking')
+            : t('title.start')
+        }}
       </button>
+      <div
+        v-if="session.startState.value.phase === 'reload-required'"
+        class="title-page__notice"
+        role="alert"
+      >
+        <p>{{ t('title.reloadRequired') }}</p>
+        <button type="button" @click="session.reload">
+          {{ t('actions.reload') }}
+        </button>
+      </div>
+      <div
+        v-else-if="session.startState.value.phase === 'retryable-error'"
+        class="title-page__notice"
+        role="alert"
+      >
+        <p>{{ t('title.startFailed') }}</p>
+        <button type="button" @click="handleStart">
+          {{ t('actions.retry') }}
+        </button>
+      </div>
     </section>
   </main>
 </template>
@@ -86,34 +99,9 @@ const setLocale = (nextLocale: SupportedLocale) => {
 
 .language-switcher {
   z-index: 1;
-  display: flex;
   justify-self: end;
-  padding: 0.25rem;
-  background: rgb(255 255 255 / 68%);
-  border: 1px solid rgb(65 54 76 / 12%);
-  border-radius: 999px;
-  box-shadow: 0 0.5rem 1.5rem rgb(65 54 76 / 8%);
-  backdrop-filter: blur(0.75rem);
 }
 
-.language-switcher button {
-  min-height: 2.5rem;
-  padding: 0.5rem 0.85rem;
-  color: #6e6575;
-  cursor: pointer;
-  background: transparent;
-  border: 0;
-  border-radius: 999px;
-  touch-action: manipulation;
-}
-
-.language-switcher button[aria-pressed='true'] {
-  color: #352c3c;
-  background: #fff;
-  box-shadow: 0 0.2rem 0.8rem rgb(65 54 76 / 12%);
-}
-
-.language-switcher button:focus-visible,
 .title-page__start:focus-visible {
   outline: 3px solid #725ca4;
   outline-offset: 3px;
@@ -205,6 +193,33 @@ h1 {
   box-shadow: 0 0.75rem 1.75rem rgb(68 58 80 / 20%);
 }
 
+.title-page__version {
+  margin: 0.75rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+}
+
+.title-page__notice {
+  width: min(100%, 18rem);
+  margin-top: 1rem;
+  color: var(--color-ink);
+  text-align: center;
+}
+
+.title-page__notice p {
+  margin: 0 0 0.75rem;
+}
+
+.title-page__notice button {
+  min-height: 2.75rem;
+  padding: 0.55rem 1rem;
+  color: var(--color-ink);
+  cursor: pointer;
+  background: rgb(255 255 255 / 82%);
+  border: 1px solid rgb(65 54 76 / 18%);
+  border-radius: 999px;
+}
+
 .title-page__start:disabled {
   cursor: not-allowed;
   opacity: 0.62;
@@ -227,17 +242,12 @@ h1 {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .language-switcher button,
   .title-page__start {
     transition:
       color 160ms ease,
       background-color 160ms ease,
       box-shadow 160ms ease,
       transform 160ms ease;
-  }
-
-  .language-switcher button:active:not([aria-pressed='true']) {
-    transform: scale(0.96);
   }
 }
 </style>

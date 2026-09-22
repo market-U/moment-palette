@@ -1,0 +1,20 @@
+import { APP_VERSION, BUILD_ID } from '@/app/config/generatedBuildMetadata'
+import { createBrowserReleaseAdapter } from '@/infrastructure/creation-session/browserReleaseAdapter'
+import { createBrowserTemplateAssetLoader } from '@/infrastructure/template-selection/browserTemplateAssetLoader'
+import { createCanvasArtworkPreview } from '@/infrastructure/template-selection/canvasArtworkPreview'
+import { createDevelopmentTemplateCatalogAdapter } from '@/infrastructure/template-selection/developmentTemplateCatalogAdapter'
+
+import { createCreationSessionAppService } from './createCreationSessionAppService'
+
+const frontend = { appVersion: APP_VERSION, buildId: BUILD_ID }
+
+/** Browser用adapterを結線し、tab内で共有する単一の制作sessionサービスを提供する。 */
+export const creationSessionAppService = createCreationSessionAppService({
+  frontend,
+  releasePort: createBrowserReleaseAdapter(),
+  catalogPort: createDevelopmentTemplateCatalogAdapter(frontend),
+  assetLoader: createBrowserTemplateAssetLoader(),
+  previewPort: createCanvasArtworkPreview(),
+  now: () => new Date(),
+  reloadPage: () => window.location.reload(),
+})

@@ -1,6 +1,6 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: フェーズ4 完了・フェーズ5着手待ち
+> ステータス: フェーズ5進行中・`establish-creation-session`完了
 >
 > 最終更新日: 2026-09-22
 
@@ -28,6 +28,7 @@
 - 画像保存と共有を検証する`validate-image-sharing`は、iPhone 15（iOS 26）のSafari・Chromeで実装と実機確認を完了し、delta specを同期せずarchive済みである。
 - Azureテンプレート配信とリリース継続性を検証する`validate-azure-template-delivery`は、実装、iPhone実機確認、verifyを完了し、delta specを同期せずarchive済みである。
 - フェーズ3のF/S結果をvision、画面遷移、UI状態、フロントエンド方針、Azure構成、template形式へ反映するフェーズ4を完了した。
+- フェーズ5の最初のchange `establish-creation-session`は、Startからtemplate選択、初期作品を表示する制作画面までの実装、verify、main specsへの同期、archiveを完了した。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序
@@ -250,11 +251,11 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ### 5. 主要導線を本実装する
 
-ステータス: 着手待ち
+ステータス: 進行中（最初のchangeは完了）
 
 本実装は、ユーザーが確認できる能力ごとに次の五つの通常changeへ分ける。各changeを単独で検証可能にし、最初の三つでタイトルからカメラ撮影、完成、保存・共有までの縦切りを完成させる。
 
-1. `establish-creation-session`
+1. `establish-creation-session`（完了・archive済み）
    - Start、app version・build ID確認、template一覧・選択、全asset準備、制作画面までの遷移を実装する。
    - `Template`、`Artwork`、`Area`、制作sessionのdomainとresource所有権を定める。
    - template取得port、開発用catalog、製品API仕様書、読み込み・空・更新必要・取得失敗状態を実装・文書化する。
@@ -271,7 +272,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 このフェーズでは、開発用カタログと抽象化したテンプレート取得処理を使ってフロントエンドの主要導線を優先する。Azure上の本番リソースとの接続はフェーズ6で行う。
 
-フェーズ5では、`GET /api/templates`の製品API仕様を一つの文書へまとめる。endpoint、HTTP method、認証レベル、cache header、成功response、error responseとHTTP status、公開判定、SASの権限と有効期間、app version・build ID、秘密情報を返さない境界を記載する。現行F/S実装と`docs/architecture/template-format.md`の製品schemaとの差分も明示し、フェーズ6のAPI実装・移行判断へ引き継ぐ。
+フェーズ5では、`GET /api/templates`の製品API仕様を一つの文書へまとめる。endpoint、HTTP method、認証レベル、cache header、成功response、error responseとHTTP status、公開判定、SASの権限と有効期間、app version・build ID、秘密情報を返さない境界を記載する。現行F/S実装と`docs/architecture/template-format.md`の製品schemaとの差分に加え、環境ごとのApplication Settingsで`TEMPLATE_CATALOG_FILE`へcatalogのJSONファイル名だけを指定し、APIが固定の`catalog/`配下から取得して、その値をfrontendへ返さない規則も明示する。環境別catalogは共通のrevision付き画像assetを参照できるものとし、フェーズ6のAPI実装・移行判断へ引き継ぐ。
 
 #### F/Sコードの活用方針
 
@@ -299,6 +300,8 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 - 非公開Azure Blob Storage。
 - Blob上のテンプレートカタログJSONとテンプレートアセット。
 - `GET /api/templates`を提供するマネージドAzure Functions。
+- 環境ごとの`TEMPLATE_CATALOG_FILE`による`catalog/`配下のJSON選択と設定値の検証。
+- 環境別catalogから共通のrevision付きtemplate画像を参照する運用と、安全な削除判定。
 - 公開状態と公開期間の判定、および読み取り専用・短期間のSAS URL発行。
 - Application Settingsによる秘密情報の管理。
 - BlobのCORS、論理削除、バージョニングまたは同等の復旧方針。
@@ -326,9 +329,9 @@ template catalogの運用支援は、本番用schemaとasset更新手順の確�
 
 ## 次のセッションで行うこと
 
-1. `main`を最新化した後、`establish-creation-session`用の作業ブランチを作成する。
-2. `establish-creation-session`のOpenSpec proposalを作成し、責務と完了条件を合意する。
-3. proposal合意後にdelta specとdesignを作成し、F/Sから昇格・移設・変更するmoduleと、後続changeまで保持するmoduleを確定する。
+1. `establish-creation-session`の差分をレビューし、commit、PR、mainへのmergeを行う。
+2. merge後に`main`を最新化し、`implement-camera-fill`用の作業ブランチを作成する。
+3. camera F/Sの採用結果と制作sessionの境界を基に、`implement-camera-fill`のproposal、delta spec、design、tasksを作成する。
 
 ## 更新ルール
 
