@@ -12,6 +12,7 @@
 - [`fs-preview-deployment.md`](fs-preview-deployment.md): 実装済みF/S用SWAのMermaid構成図、外部仕様、固定したGitHub Action、デプロイ・実機確認結果。
 - [`azure-template-delivery.md`](azure-template-delivery.md): private Blob、SWAマネージドAPI、SAS、cache、release継続性を検証した構成。
 - [`template-format.md`](template-format.md): 初期リリースで採用するcatalog schema、asset不変条件、API response境界。
+- [`template-api.md`](template-api.md): `GET /api/templates`の製品契約、環境別catalog、SAS、cache、秘密情報境界。
 - このREADME: Azureを含む初期構成案と、アーキテクチャ図の管理方針。
 
 ## F/S用SWAプレビュー構成

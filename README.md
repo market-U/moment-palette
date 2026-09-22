@@ -1,5 +1,15 @@
 # Moment Palette
 
+## 製品導線のローカル確認
+
+```sh
+pnpm dev
+```
+
+`http://localhost:5173`を開き、Start、テンプレート選択、初期作品を表示する制作画面まで確認できる。フェーズ5では製品schemaと同じvalidationを通る開発用catalogを使用し、画像にはF/Sで作成したrevision相当の固定assetを流用する。`/templates`と`/create`を直接開いた場合は、tab内snapshotまたは制作sessionがないためタイトルへ戻る。
+
+この導線は`release.json`を取得する。`pnpm build`または`pnpm metadata:local`の後は、frontend metadataと`public/release.json`が`local-development`で一致する。
+
 ## Azureテンプレート配信F/Sのローカル起動
 
 本番相当のruntime差を確認するため、APIとSWA CLIを別terminalで起動する。
