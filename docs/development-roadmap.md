@@ -252,24 +252,40 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ステータス: 着手待ち
 
-最初の本実装は、タイトルから完成画像生成までを小さな縦切りで通す。changeの単位は、OpenSpec proposal作成時に再検討する。
+本実装は、ユーザーが確認できる能力ごとに次の五つの通常changeへ分ける。各changeを単独で検証可能にし、最初の三つでタイトルからカメラ撮影、完成、保存・共有までの縦切りを完成させる。
 
-原則として、次の各項目を一つまたは少数の責務が明確な通常changeへ分ける。最初にカメラを使う導線を完成確認まで通し、その後に写真と単色を追加する。
-
-候補となる順序:
-
-1. アプリシェル、多言語、画面遷移。
-2. テンプレート取得の抽象化、開発用カタログ、SWAマネージドAPI仕様書、テンプレート選択。
-3. 中央固定のエリア選択とカメラ撮影。
-4. 作品状態、撮り直し、上書き。
-5. 写真ライブラリ・ファイルからの取り込みと位置調整。
-6. カラーパレットによる単色塗り。
-7. 完成画像生成、長押し保存、共有。
-8. リリースバージョン確認とセッション継続性。
+1. `establish-creation-session`
+   - Start、app version・build ID確認、template一覧・選択、全asset準備、制作画面までの遷移を実装する。
+   - `Template`、`Artwork`、`Area`、制作sessionのdomainとresource所有権を定める。
+   - template取得port、開発用catalog、製品API仕様書、読み込み・空・更新必要・取得失敗状態を実装・文書化する。
+2. `implement-camera-fill`
+   - 中央固定のエリア選択、カメラ権限、前面・背面切替、pan、pinch、比較slider、撮影、撮り直し、上書きを製品導線へ実装する。
+   - camera frameを作品状態へ反映し、Canvas 2D compositorへ統合する。
+3. `implement-completed-artwork`
+   - 1080×1080 PNG生成、完成確認、長押し保存、Web Share、共有キャンセル・失敗分類、Clipboard fallbackを実装する。
+   - 作品変更と画面離脱に応じたPNG Blob、object URLの再利用・破棄を実装する。
+4. `implement-photo-fill`
+   - 写真ライブラリ・ファイル選択、標準APIによるdecode、4096px・12MP上限への正規化、位置・倍率調整、余白を含む反映、選び直し、失敗からの復帰を実装する。
+5. `implement-solid-color-fill`
+   - カラーパレット、単色の反映・上書き、キャンセルを実装し、カラーピッカー方式を製品UIとして確定する。
 
 このフェーズでは、開発用カタログと抽象化したテンプレート取得処理を使ってフロントエンドの主要導線を優先する。Azure上の本番リソースとの接続はフェーズ6で行う。
 
 フェーズ5では、`GET /api/templates`の製品API仕様を一つの文書へまとめる。endpoint、HTTP method、認証レベル、cache header、成功response、error responseとHTTP status、公開判定、SASの権限と有効期間、app version・build ID、秘密情報を返さない境界を記載する。現行F/S実装と`docs/architecture/template-format.md`の製品schemaとの差分も明示し、フェーズ6のAPI実装・移行判断へ引き継ぐ。
+
+#### F/Sコードの活用方針
+
+- F/Sで実機確認と単体テストが成立した純粋ロジック、port、browser adapter、resource解放処理、test fixtureは、原則として本実装へ昇格または移設して再利用する。
+- F/Sコードを理由なく書き直さず、製品の責務、命名、error処理、domain、画面遷移へ適合させるために必要な箇所だけを変更する。
+- F/S専用UI、route、診断表示、固定templateは製品UIへ流用しない。対応する製品導線へ検証済み処理を移し、回帰testを維持できたchange内で削除する。
+- camera F/Sは`implement-camera-fill`、画像共有F/Sは`implement-completed-artwork`、写真F/Sは`implement-photo-fill`で移行・削除する。Azure配信F/Sはフェーズ6の本番接続まで保持する。
+
+#### UIデザインの変更方針
+
+- Figmaおよび`docs/design/`のUIデザインは、ユーザーが任意のタイミングで更新できる。見た目の変更だけであればOpenSpec changeを必要としない。
+- Vue componentは表示と操作の結線へ責務を限定し、domain、制作session、画像処理、browser adapterから分離する。余白、色、文字、配置などの調整がuse caseや画像処理へ波及しない構造にする。
+- 共通の見た目はCSS custom propertiesと小さな再利用componentへ寄せ、画面固有の調整を行いやすくする。用途が確定する前に大規模なdesign systemや抽象componentを作らない。
+- UI変更が画面遷移、操作方法、errorからの復帰、accessibility、作品の座標系などの要求へ影響する場合は、該当するOpenSpec changeと`docs/vision.md`・`docs/design/`を合わせて更新する。
 
 ### 6. 本番用のAzure配信・テンプレート配信基盤を構築する
 
@@ -291,11 +307,16 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 - フェーズ2で作成したGitHub ActionsとIaCの本番構成への拡張。
 - リリース情報JSONと、制作中のセッション継続方式。
 - 公開停止したテンプレートアセットの削除猶予期間。
+- template metadataとasset情報からschema version 1のcatalog JSONまたはtemplate fragmentを生成し、形式と参照整合性を検証する運用支援ツール。
 - Freeプランの容量、帯域、プレビュー環境などの制限を超えていないことの確認。
 - IaCと運用・デプロイ手順。
 - Markdown内のシンプルなMermaidによるアーキテクチャ図。
 
 本番用のAzureアーキテクチャ図は、このchangeのproposal、specs、designを固めた後、実装開始前までに `docs/architecture/` のMermaid図として作成または更新する。構成変更時は同じchangeで図も更新する。
+
+template catalogの運用支援は、本番用schemaとasset更新手順の確定後に`build-template-catalog-tooling`などの独立した通常changeとして実施する。中核は、入力したtemplate ID、revision、多言語名、公開条件、tag、asset path、area順序、初期カラーからJSONを決定的に生成し、schema、重複ID、安全な相対path、必須asset、画像形式と寸法を検証できる非対話スクリプトとする。初期リリースで固定catalogを手作業できる場合はフェーズ7の後へ送ってよいが、継続的にtemplateを追加する前には用意する。
+
+専用GUIは必須とせず、必要性を別途判断する。Codex SkillなどAI向けの操作インターフェースだけを用意する構成も許可するが、Skillは同じ生成・検証スクリプトを呼び出し、schema規則をpromptだけに依存させない。生成結果は差分確認と自動検査を通してからBlobへ配置し、ツールから直接公開環境を更新しない。
 
 ### 7. 初期リリース候補を確認する
 
@@ -305,8 +326,9 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ## 次のセッションで行うこと
 
-1. フェーズ5の最初の縦切りについてOpenSpec proposalを作成し、責務と完了条件を合意する。
-2. proposal合意後にdelta specとdesignを作成し、F/Sから昇格・再実装・削除するmoduleを確定する。
+1. `main`を最新化した後、`establish-creation-session`用の作業ブランチを作成する。
+2. `establish-creation-session`のOpenSpec proposalを作成し、責務と完了条件を合意する。
+3. proposal合意後にdelta specとdesignを作成し、F/Sから昇格・移設・変更するmoduleと、後続changeまで保持するmoduleを確定する。
 
 ## 更新ルール
 
