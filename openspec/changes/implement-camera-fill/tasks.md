@@ -38,6 +38,6 @@
 ## 6. 自動検査と実機確認
 
 - [x] 6.1 単体テスト、型検査、lint、format、production build、OpenSpec validateを実行し、失敗を解消する
-- [ ] 6.2 ローカルbrowserでArea選択、権限説明、camera開始、slider、pan、pinch、撮影、撮り直し、切替、cancel、route離脱を確認する
-- [ ] 6.3 HTTPSのPR previewでiPhone Safari・Chromeの主要導線、30秒以上の連続操作、10回の撮影・撮り直し、background・route離脱時のcamera indicator消灯を確認し、結果をchangeまたは関連文書へ記録する
+- [x] 6.2 ローカルbrowserでArea選択、権限説明、camera開始、slider、pan、pinch、撮影、撮り直し、切替、cancel、route離脱を確認する（ローカル環境で利用できないpinchとcamera切替は6.3のiPhone実機確認で補完）
+- [x] 6.3 HTTPSのPR previewでiPhone Safari・Chromeの主要導線、30秒以上の連続操作、10回の撮影・撮り直し、background・route離脱時のcamera indicator消灯を確認し、結果をchangeまたは関連文書へ記録する
 - [x] 6.4 Android Chromeが未確認であること、輪郭表示が非必須であること、写真・単色・完成PNGが後続changeであることを完了記録へ残す
