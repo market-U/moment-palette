@@ -1,6 +1,6 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: フェーズ5進行中・次のchangeは`unify-screen-layout`
+> ステータス: フェーズ5進行中・`unify-screen-layout`を実装中
 >
 > 最終更新日: 2026-09-22
 
@@ -30,7 +30,7 @@
 - フェーズ3のF/S結果をvision、画面遷移、UI状態、フロントエンド方針、Azure構成、template形式へ反映するフェーズ4を完了した。
 - フェーズ5の最初のchange `establish-creation-session`は、Startからtemplate選択、初期作品を表示する制作画面までの実装、verify、main specsへの同期、archiveを完了した。
 - フェーズ5の`implement-camera-fill`は、Artwork更新、camera resource所有、製品camera導線、中央固定Area selector、F/Sコード移行を実装し、iPhoneのSafari・Chromeによる実機確認、verify、main specsへの同期、archiveを完了した。
-- 既存画面で判明したheader位置と戻る操作の重複は、`unify-screen-layout`を独立した通常changeとして扱い、後続画面を増やす前に共通化する。
+- `unify-screen-layout`で、既存画面で判明したheader位置と戻る操作の重複を、後続画面を増やす前に共通化している。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序

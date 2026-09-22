@@ -6,7 +6,8 @@ import { useRouter } from 'vue-router'
 import AreaSelector from '@/features/camera-fill/AreaSelector.vue'
 import CameraFillPanel from '@/features/camera-fill/CameraFillPanel.vue'
 import { useCreationSession } from '@/features/creation-session/sessionFacade'
-import LanguageSwitcher from '@/shared/ui/LanguageSwitcher.vue'
+import BackButton from '@/shared/ui/BackButton.vue'
+import ScreenShell from '@/shared/ui/ScreenShell.vue'
 
 const { locale, t } = useI18n()
 const router = useRouter()
@@ -49,51 +50,53 @@ const openCamera = async () => {
 </script>
 
 <template>
-  <main v-if="creation" class="creation-page">
-    <header class="creation-page__header">
-      <button class="text-button" type="button" @click="backToTemplates">
-        {{ t('actions.templates') }}
-      </button>
-      <LanguageSwitcher />
-    </header>
+  <template v-if="creation">
+    <ScreenShell class="creation-page">
+      <template #header-left>
+        <BackButton :label="t('actions.templates')" @click="backToTemplates" />
+      </template>
 
-    <section class="creation-page__content" aria-labelledby="creation-heading">
-      <div class="creation-page__copy">
-        <p class="eyebrow">{{ t('creation.eyebrow') }}</p>
-        <h1 id="creation-heading">{{ localized(creation.templateName) }}</h1>
-      </div>
+      <section
+        class="creation-page__content"
+        aria-labelledby="creation-heading"
+      >
+        <div class="creation-page__copy">
+          <p class="eyebrow">{{ t('creation.eyebrow') }}</p>
+          <h1 id="creation-heading">{{ localized(creation.templateName) }}</h1>
+        </div>
 
-      <img
-        class="artwork-preview"
-        :src="creation.previewUrl"
-        :alt="
-          t('creation.previewAlt', { name: localized(creation.templateName) })
-        "
-      />
-
-      <section class="area-panel" :aria-label="t('creation.areas')">
-        <p>{{ t('creation.chooseArea') }}</p>
-        <AreaSelector
-          :areas="localizedAreas"
-          :selected-area-id="selectedAreaId"
-          :label="t('creation.areas')"
-          :captured-label="t('creation.cameraFilled')"
-          @select="selectedAreaId = $event"
+        <img
+          class="artwork-preview"
+          :src="creation.previewUrl"
+          :alt="
+            t('creation.previewAlt', { name: localized(creation.templateName) })
+          "
         />
-      </section>
 
-      <section class="fill-actions" :aria-label="t('creation.fillMethods')">
-        <button class="camera-action" type="button" @click="openCamera">
-          <span>{{ t('creation.cameraAction') }}</span>
-          <small>{{ t('creation.cameraActionHint') }}</small>
+        <section class="area-panel" :aria-label="t('creation.areas')">
+          <p>{{ t('creation.chooseArea') }}</p>
+          <AreaSelector
+            :areas="localizedAreas"
+            :selected-area-id="selectedAreaId"
+            :label="t('creation.areas')"
+            :captured-label="t('creation.cameraFilled')"
+            @select="selectedAreaId = $event"
+          />
+        </section>
+
+        <section class="fill-actions" :aria-label="t('creation.fillMethods')">
+          <button class="camera-action" type="button" @click="openCamera">
+            <span>{{ t('creation.cameraAction') }}</span>
+            <small>{{ t('creation.cameraActionHint') }}</small>
+          </button>
+        </section>
+
+        <p class="creation-page__next">{{ t('creation.nextChanges') }}</p>
+        <button class="start-over" type="button" @click="startOver">
+          {{ t('actions.startOver') }}
         </button>
       </section>
-
-      <p class="creation-page__next">{{ t('creation.nextChanges') }}</p>
-      <button class="start-over" type="button" @click="startOver">
-        {{ t('actions.startOver') }}
-      </button>
-    </section>
+    </ScreenShell>
     <CameraFillPanel
       :state="session.cameraState.value"
       :attach-target="session.attachCameraTarget"
@@ -109,32 +112,18 @@ const openCamera = async () => {
       :cancel="session.cancelCamera"
       :handle-visibility-change="session.handleCameraVisibilityChange"
     />
-  </main>
+  </template>
 </template>
 
 <style scoped>
 .creation-page {
-  width: 100%;
-  height: 100%;
-  padding: calc(env(safe-area-inset-top) + 0.75rem)
-    calc(env(safe-area-inset-right) + 1rem)
-    calc(env(safe-area-inset-bottom) + 1.25rem)
-    calc(env(safe-area-inset-left) + 1rem);
-  overflow-y: auto;
-  background: var(--surface-gradient);
-}
+  --screen-content-max-width: 36rem;
 
-.creation-page__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 36rem;
-  margin: 0 auto;
+  background: var(--surface-gradient);
 }
 
 .creation-page__content {
   display: grid;
-  max-width: 36rem;
   margin: 1.5rem auto 0;
 }
 
@@ -207,7 +196,6 @@ h1 {
   text-align: center;
 }
 
-.text-button,
 .start-over {
   min-height: 2.75rem;
   padding: 0.55rem 1rem;

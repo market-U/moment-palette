@@ -3,6 +3,12 @@
   --color-muted: #6e6575;
   --color-accent: #8b5171;
   --color-focus: #725ca4;
+  --screen-padding-block-start: clamp(1rem, 4vw, 1.5rem);
+  --screen-padding-inline: clamp(1rem, 6vw, 2rem);
+  --screen-padding-block-end: clamp(1.25rem, 5vw, 2rem);
+  --screen-header-min-height: 2.75rem;
+  --screen-header-max-width: 46rem;
+  --screen-content-max-width: 46rem;
   --surface-gradient:
     radial-gradient(circle at 10% 12%, rgb(250 191 104 / 30%), transparent 30%),
     radial-gradient(circle at 90% 78%, rgb(117 198 188 / 26%), transparent 34%),
