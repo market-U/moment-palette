@@ -13,4 +13,20 @@ describe('PhotoFillPanel', () => {
     expect(source).toContain('new FrameRenderScheduler(')
     expect(source).toContain('requestRender')
   })
+
+  it('OS picker表示中はdialogを出さず、写真調整のキャンセル操作を一つにする', () => {
+    expect(source).toContain('@cancel="cancel"')
+    expect(source).toContain(
+      "v-if=\"state.phase !== 'closed' && state.phase !== 'selecting'\"",
+    )
+    expect(source).toContain('v-if="state.phase === \'decoding\'"')
+    expect(source).not.toContain(
+      "state.phase === 'selecting' || state.phase === 'decoding'",
+    )
+    const editingMarkup = source.slice(
+      source.indexOf('<div v-else-if="editing"'),
+      source.indexOf('</section>'),
+    )
+    expect(editingMarkup.match(/@click="cancel"/g)).toHaveLength(1)
+  })
 })

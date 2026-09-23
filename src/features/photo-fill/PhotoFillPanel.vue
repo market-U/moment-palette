@@ -47,10 +47,10 @@ const openPicker = async () => {
 }
 
 watch(
-  () => props.state.phase,
-  (phase) => {
+  () => props.state,
+  (state) => {
     pointerTracker.clear()
-    if (phase === 'selecting') void openPicker()
+    if (state.phase === 'selecting') void openPicker()
   },
   { immediate: true },
 )
@@ -165,26 +165,21 @@ onBeforeUnmount(() => {
     type="file"
     accept="image/*"
     @change="choose"
+    @cancel="cancel"
   />
   <section
-    v-if="state.phase !== 'closed'"
+    v-if="state.phase !== 'closed' && state.phase !== 'selecting'"
     class="photo-fill-panel"
     role="dialog"
     aria-modal="true"
     :aria-label="t('photo.heading')"
   >
     <div
-      v-if="state.phase === 'selecting' || state.phase === 'decoding'"
+      v-if="state.phase === 'decoding'"
       class="photo-fill-panel__message"
       aria-live="polite"
     >
-      <h2>
-        {{
-          state.phase === 'selecting'
-            ? t('photo.selecting')
-            : t('photo.decoding')
-        }}
-      </h2>
+      <h2>{{ t('photo.decoding') }}</h2>
       <p>{{ t('photo.private') }}</p>
       <button type="button" @click="cancel">{{ t('photo.cancel') }}</button>
     </div>
@@ -202,9 +197,7 @@ onBeforeUnmount(() => {
     </div>
     <div v-else-if="editing" class="photo-fill-panel__workspace">
       <header>
-        <button type="button" @click="cancel">{{ t('photo.cancel') }}</button>
         <h2>{{ t('photo.heading') }}</h2>
-        <span />
       </header>
       <canvas
         ref="preview"
@@ -263,9 +256,7 @@ onBeforeUnmount(() => {
   margin: auto;
 }
 .photo-fill-panel__workspace header {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
+  text-align: center;
   margin-bottom: 0.75rem;
 }
 .photo-fill-panel__workspace header h2 {
