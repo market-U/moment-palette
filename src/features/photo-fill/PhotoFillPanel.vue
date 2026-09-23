@@ -47,10 +47,11 @@ const openPicker = async () => {
 }
 
 watch(
-  () => props.state,
-  (state) => {
+  () => props.state.phase,
+  (phase, previousPhase) => {
+    if (phase === previousPhase) return
     pointerTracker.clear()
-    if (state.phase === 'selecting') void openPicker()
+    if (phase === 'selecting') void openPicker()
   },
   { immediate: true },
 )

@@ -12,6 +12,8 @@ describe('PhotoFillPanel', () => {
     expect(source).toContain('createLooseTransformPolicy(state.areaBounds)')
     expect(source).toContain('new FrameRenderScheduler(')
     expect(source).toContain('requestRender')
+    expect(source).toContain('() => props.state.phase')
+    expect(source).not.toContain('() => props.state,')
   })
 
   it('OS picker表示中はdialogを出さず、写真調整のキャンセル操作を一つにする', () => {
