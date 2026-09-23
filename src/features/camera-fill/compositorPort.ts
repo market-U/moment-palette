@@ -50,10 +50,21 @@ export interface CameraCompositorPort {
     video: HTMLVideoElement | undefined,
     state: CameraPreviewState,
   ): void
+  renderPhotoPreview?(
+    canvas: HTMLCanvasElement,
+    source: CanvasImageSource,
+    sourceSize: Size,
+    state: Omit<CameraPreviewState, 'mirrorSource'>,
+  ): void
   captureFrame(
     video: HTMLVideoElement,
     transform: MediaTransform,
     mirrorSource: boolean,
+  ): CapturedCameraFrame
+  capturePhotoFrame?(
+    source: CanvasImageSource,
+    sourceSize: Size,
+    transform: MediaTransform,
   ): CapturedCameraFrame
   generatePreview(context: CameraArtworkContext): Promise<CameraArtworkPreview>
 }

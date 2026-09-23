@@ -4,6 +4,7 @@ import type { MediaTransform, Size } from '@/shared/lib/mediaTransform'
 import type { ClipboardOutcome } from '@/features/completed-artwork/clipboardPort'
 import type { CompletedArtworkShareCopy } from '@/features/completed-artwork/sharePayload'
 import type { CompletedArtworkShareOutcome } from '@/features/completed-artwork/shareOutcome'
+import type { PhotoFillState } from '@/features/photo-fill/photoState'
 
 export type LocalizedViewText = Readonly<{ ja: string; en: string }>
 
@@ -45,7 +46,7 @@ export type ActiveCreationView = Readonly<{
     id: string
     label: LocalizedViewText
     initialColor: string
-    fillKind: 'initial' | 'camera'
+    fillKind: 'initial' | 'camera' | 'photo'
   }>[]
 }>
 
@@ -99,6 +100,7 @@ export type CreationSessionFacade = {
   readonly templateSelection: Readonly<Ref<TemplateSelectionViewState>>
   readonly activeCreation: Readonly<Ref<ActiveCreationView | null>>
   readonly cameraState: Readonly<Ref<CameraViewState>>
+  readonly photoState: Readonly<Ref<PhotoFillState>>
   readonly completedArtwork: Readonly<Ref<CompletedArtworkViewState>>
   start: () => Promise<boolean>
   selectTemplate: (templateId: string) => Promise<boolean>
@@ -124,6 +126,19 @@ export type CreationSessionFacade = {
   captureCamera: () => Promise<boolean>
   cancelCamera: () => void
   handleCameraVisibilityChange: () => void
+  openPhoto: (areaId: string) => void
+  selectPhoto: (file: File) => Promise<void>
+  retryPhoto: () => void
+  setPhotoBlend: (blend: number) => void
+  setPhotoTransform: (transform: MediaTransform) => void
+  resizePhotoPreview: (
+    canvas: HTMLCanvasElement,
+    cssPixels: number,
+    pixelRatio: number,
+  ) => Size
+  renderPhotoPreview: (canvas: HTMLCanvasElement) => void
+  applyPhoto: () => Promise<boolean>
+  cancelPhoto: () => void
   completeArtwork: () => Promise<boolean>
   retryCompletedArtwork: () => Promise<boolean>
   shareCompletedArtwork: (copy: CompletedArtworkShareCopy) => Promise<void>

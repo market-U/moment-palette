@@ -8,6 +8,10 @@ schema: spec-driven
 #     Tech stack: TypeScript, React, Node.js
 #     We use conventional commits
 #     Domain: e-commerce platform
+context: |
+  Git Workflow: changeに対応した作業ブランチで作業すること。作業ブランチを未作成の場合は、mainの先頭から作成すること。
+  Github Authentication: GitHub CLIの認証が切れている場合はユーザに認証を促すこと。
+  ユーザによる認証後、同一セッション内のトークンは更新されないため、サンドボックス外で確認すること。
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.

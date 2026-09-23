@@ -9,6 +9,7 @@ import { createBrowserReleaseAdapter } from '@/infrastructure/creation-session/b
 import { createBrowserClipboard } from '@/infrastructure/completed-artwork/browserClipboard'
 import { createBrowserCompletedArtworkShare } from '@/infrastructure/completed-artwork/browserCompletedArtworkShare'
 import { createCanvasCompletedArtworkGenerator } from '@/infrastructure/completed-artwork/canvasCompletedArtworkGenerator'
+import { createBrowserProductPhotoDecoder } from '@/infrastructure/photo-import/browserProductPhotoDecoder'
 import { createBrowserTemplateAssetLoader } from '@/infrastructure/template-selection/browserTemplateAssetLoader'
 import { createCanvasArtworkPreview } from '@/infrastructure/template-selection/canvasArtworkPreview'
 import { createDevelopmentTemplateCatalogAdapter } from '@/infrastructure/template-selection/developmentTemplateCatalogAdapter'
@@ -30,6 +31,7 @@ export const creationSessionAppService = createCreationSessionAppService({
   completedArtworkGenerator: createCanvasCompletedArtworkGenerator(),
   completedArtworkShare: createBrowserCompletedArtworkShare(),
   clipboard: createBrowserClipboard(),
+  photoDecoder: createBrowserProductPhotoDecoder(),
   mapCameraFailure: toCameraFailure,
   isDocumentHidden: () => document.visibilityState === 'hidden',
   now: () => new Date(),

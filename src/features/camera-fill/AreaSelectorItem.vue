@@ -3,7 +3,7 @@ type AreaItem = Readonly<{
   id: string
   label: string
   initialColor: string
-  fillKind: 'initial' | 'camera'
+  fillKind: 'initial' | 'camera' | 'photo'
 }>
 
 defineProps<{
@@ -32,6 +32,7 @@ const emit = defineEmits<{
     />
     <span>{{ area.label }}</span>
     <small v-if="area.fillKind === 'camera'">{{ capturedLabel }}</small>
+    <small v-else-if="area.fillKind === 'photo'">{{ capturedLabel }}</small>
   </button>
 </template>
 

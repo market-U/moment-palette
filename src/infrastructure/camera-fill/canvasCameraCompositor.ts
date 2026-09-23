@@ -79,6 +79,7 @@ const drawFill = (
   context: CanvasRenderingContext2D,
   fill: ArtworkFill,
   areaId: string,
+  initialColor: string,
   areaResources: ReadonlyMap<string, CapturedCameraFrame>,
 ) => {
   if (fill.kind === 'initial') {
@@ -89,6 +90,10 @@ const drawFill = (
 
   const resource = areaResources.get(areaId)
   if (!resource) throw new Error(`camera fillのresourceがありません: ${areaId}`)
+  if (fill.kind === 'photo') {
+    context.fillStyle = initialColor
+    context.fillRect(0, 0, artworkSize, artworkSize)
+  }
   context.drawImage(resource.source, 0, 0, artworkSize, artworkSize)
 }
 
@@ -105,9 +110,11 @@ export const createCanvasCameraCompositor = (
     state: CameraArtworkContext,
     live?: Readonly<{
       selectedAreaId: string
-      video: HTMLVideoElement
+      source: CanvasImageSource
+      sourceSize: { width: number; height: number }
       transform: MediaTransform
       mirrorSource: boolean
+      fillBackground: boolean
     }>,
   ) => {
     context.clearRect(0, 0, artworkSize, artworkSize)
@@ -122,9 +129,8 @@ export const createCanvasCameraCompositor = (
         !mask ||
         definition.id !== area.areaId ||
         mask.id !== area.areaId
-      ) {
+      )
         throw new Error('Artworkとmaskの順序が一致しません。')
-      }
 
       const layer = requireContext(areaPlane)
       layer.save()
@@ -133,19 +139,29 @@ export const createCanvasCameraCompositor = (
       layer.globalCompositeOperation = 'source-over'
       if (
         live?.selectedAreaId === area.areaId &&
-        live.video.videoWidth > 0 &&
-        live.video.videoHeight > 0
+        live.sourceSize.width > 0 &&
+        live.sourceSize.height > 0
       ) {
+        if (live.fillBackground) {
+          layer.fillStyle = definition.initialColor
+          layer.fillRect(0, 0, artworkSize, artworkSize)
+        }
         drawCameraSource(
           layer,
-          live.video,
-          live.video.videoWidth,
-          live.video.videoHeight,
+          live.source,
+          live.sourceSize.width,
+          live.sourceSize.height,
           live.transform,
           live.mirrorSource,
         )
       } else {
-        drawFill(layer, area.fill, area.areaId, state.areaResources)
+        drawFill(
+          layer,
+          area.fill,
+          area.areaId,
+          definition.initialColor,
+          state.areaResources,
+        )
       }
       layer.globalCompositeOperation = 'destination-in'
       layer.drawImage(mask.source, 0, 0, artworkSize, artworkSize)
@@ -202,14 +218,53 @@ export const createCanvasCameraCompositor = (
         hasLiveSource && video
           ? {
               selectedAreaId: state.selectedAreaId,
-              video,
+              source: video,
+              sourceSize: {
+                width: video.videoWidth,
+                height: video.videoHeight,
+              },
               transform: state.transform,
               mirrorSource: state.mirrorSource,
+              fillBackground: false,
             }
           : undefined,
       )
 
       const alphas = getCameraSceneAlphas(state.blend, hasLiveSource)
+      const context = requireContext(canvas)
+      context.save()
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.fillStyle = '#FFFFFF'
+      context.fillRect(0, 0, canvas.width, canvas.height)
+      context.scale(canvas.width / artworkSize, canvas.height / artworkSize)
+      context.globalAlpha = alphas.source
+      context.drawImage(sourcePlane, 0, 0)
+      context.globalAlpha = alphas.artwork
+      context.drawImage(artworkPlane, 0, 0)
+      context.globalAlpha = alphas.lineArt
+      drawLineArt(context, state)
+      context.restore()
+    },
+    renderPhotoPreview(canvas, source, sourceSize, state) {
+      const sourceContext = requireContext(sourcePlane)
+      const artworkContext = requireContext(artworkPlane)
+      sourceContext.clearRect(0, 0, artworkSize, artworkSize)
+      drawCameraSource(
+        sourceContext,
+        source,
+        sourceSize.width,
+        sourceSize.height,
+        state.transform,
+      )
+      drawArtwork(artworkContext, state, {
+        selectedAreaId: state.selectedAreaId,
+        source,
+        sourceSize,
+        transform: state.transform,
+        mirrorSource: false,
+        fillBackground: true,
+      })
+      const alphas = getCameraSceneAlphas(state.blend, true)
       const context = requireContext(canvas)
       context.save()
       context.clearRect(0, 0, canvas.width, canvas.height)
@@ -236,6 +291,26 @@ export const createCanvasCameraCompositor = (
         video.videoHeight,
         transform,
         mirrorSource,
+      )
+      let released = false
+      return Object.freeze({
+        source: canvas,
+        release() {
+          if (released) return
+          released = true
+          canvas.width = 0
+          canvas.height = 0
+        },
+      })
+    },
+    capturePhotoFrame(source, sourceSize, transform): CapturedCameraFrame {
+      const canvas = sizeCanvas(dependencies.createCanvas())
+      drawCameraSource(
+        requireContext(canvas),
+        source,
+        sourceSize.width,
+        sourceSize.height,
+        transform,
       )
       let released = false
       return Object.freeze({

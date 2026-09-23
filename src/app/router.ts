@@ -31,11 +31,6 @@ export const router = createRouter({
       meta: { requiresSession: true, requiresCompletedArtwork: true },
     },
     {
-      path: '/spikes/photo-import',
-      name: 'photo-import-spike',
-      component: () => import('./spikes/PhotoImportSpikeRoute.vue'),
-    },
-    {
       path: '/spikes/azure-template-delivery',
       name: 'azure-template-delivery-spike',
       component: () => import('./spikes/AzureTemplateDeliverySpikeRoute.vue'),

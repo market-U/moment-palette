@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { PhotoImportError } from '@/features/photo-import-spike/photoFailure'
+import { PhotoImportError } from '@/features/photo-fill/photoFailure'
 
 import { createBrowserPhotoDecoder } from './browserPhotoDecoder'
 

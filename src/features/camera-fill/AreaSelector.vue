@@ -8,7 +8,7 @@ type AreaItem = Readonly<{
   id: string
   label: string
   initialColor: string
-  fillKind: 'initial' | 'camera'
+  fillKind: 'initial' | 'camera' | 'photo'
 }>
 
 const props = defineProps<{

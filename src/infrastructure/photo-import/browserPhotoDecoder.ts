@@ -1,15 +1,32 @@
-import {
-  calculateNormalizedSize,
-  normalizationLimits,
-} from '@/features/photo-import-spike/normalization'
-import { PhotoImportError } from '@/features/photo-import-spike/photoFailure'
-import type {
-  DecodedPhoto,
-  PhotoDecodePath,
-  PhotoDecoderPort,
-  PhotoFileSummary,
-  PhotoNormalizationPreset,
-} from '@/features/photo-import-spike/photoDecoderPort'
+import { calculateNormalizedSize } from '@/features/photo-fill/normalization'
+import { PhotoImportError } from '@/features/photo-fill/photoFailure'
+
+type PhotoNormalizationPreset = 'quality' | 'memory'
+type PhotoDecodePath = 'image-bitmap' | 'html-image'
+type PhotoFileSummary = Readonly<{
+  extension: string
+  mimeType: string
+  bytes: number
+}>
+type DecodedPhoto = Readonly<{
+  source: HTMLCanvasElement
+  diagnostics: Readonly<{
+    file: PhotoFileSummary
+    path: PhotoDecodePath
+    originalSize: Readonly<{ width: number; height: number }>
+    normalizedSize: Readonly<{ width: number; height: number }>
+    decodeMs: number
+    normalizeMs: number
+    preset: PhotoNormalizationPreset
+  }>
+  dispose: () => void
+}>
+type BrowserPhotoDecoderPort = Readonly<{
+  decode: (
+    file: File,
+    preset: PhotoNormalizationPreset,
+  ) => Promise<DecodedPhoto>
+}>
 
 interface BrowserPhotoDecoderDependencies {
   createBitmap?: (
@@ -37,17 +54,11 @@ const defaultDependencies = (): BrowserPhotoDecoderDependencies => ({
 
 const summarizeFile = (file: File): PhotoFileSummary => {
   const finalDot = file.name.lastIndexOf('.')
-  // 完全なファイル名は個人情報になり得るため、最後の拡張子だけを保持する。
   const extension =
     finalDot >= 0 && finalDot < file.name.length - 1
       ? file.name.slice(finalDot + 1).toLowerCase()
       : 'なし'
-
-  return {
-    extension,
-    mimeType: file.type || '未提供',
-    bytes: file.size,
-  }
+  return { extension, mimeType: file.type || '未提供', bytes: file.size }
 }
 
 const normalizationError = (error: unknown) => {
@@ -64,7 +75,7 @@ const normalizationError = (error: unknown) => {
 
 export const createBrowserPhotoDecoder = (
   dependencies: BrowserPhotoDecoderDependencies = defaultDependencies(),
-): PhotoDecoderPort => ({
+): BrowserPhotoDecoderPort => ({
   async decode(
     file: File,
     preset: PhotoNormalizationPreset,
@@ -124,17 +135,17 @@ export const createBrowserPhotoDecoder = (
         )
       }
 
-      if (!path) {
-        // sourceとpathは同じ分岐で設定するが、型上も不変条件を明示しておく。
+      if (!path)
         throw new PhotoImportError(
           'decode-failed',
           '画像のデコード経路を確定できませんでした。',
         )
-      }
 
       const normalizedSize = calculateNormalizedSize(
         { width, height },
-        normalizationLimits[preset],
+        preset === 'quality'
+          ? { maxEdge: 4096, maxPixels: 12_000_000 }
+          : { maxEdge: 2160 },
       )
       const normalizationStartedAt = dependencies.now()
       const canvas = dependencies.createCanvas()
@@ -164,8 +175,8 @@ export const createBrowserPhotoDecoder = (
         throw normalizationError(error)
       }
 
-      const normalizeMs = dependencies.now() - normalizationStartedAt
       let disposed = false
+      const normalizeMs = dependencies.now() - normalizationStartedAt
 
       return {
         source: canvas,
