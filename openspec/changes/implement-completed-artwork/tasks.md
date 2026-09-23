@@ -22,5 +22,5 @@
 ## 4. 品質確認と文書化
 
 - [x] 4.1 format、lint、型検査、単体テスト、production buildを実行し、失敗を解消する
-- [ ] 4.2 iPhone Safari・Chromeで未着色を含むPNG生成、長押し保存、共有、共有キャンセル、共有非対応/失敗fallback、Artwork更新後の再生成、制作session終了時の動作を確認する
+- [x] 4.2 iPhone Safari・Chromeで未着色を含むPNG生成、長押し保存、共有、共有キャンセル、Artwork更新後の再生成、制作session終了時の動作を確認する。実機で再現できない共有非対応/失敗fallbackは、`navigator.canShare()`がfalseの場合と共有Promiseの失敗を分類し、完成画像と手動コピー可能な共有文を維持する単体テストで確認する
 - [x] 4.3 実装結果とAndroid Chromeの未確認回帰項目を`docs/development-roadmap.md`へ反映し、OpenSpec verifyに備えて手動確認結果を記録する
