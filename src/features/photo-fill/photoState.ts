@@ -1,4 +1,4 @@
-import type { MediaTransform, Size } from '@/shared/lib/mediaTransform'
+import type { MediaTransform, Rect, Size } from '@/shared/lib/mediaTransform'
 
 /** 写真選択から調整・反映までを画面へ安全に公開する状態を表す。 */
 export type PhotoFillState =
@@ -10,6 +10,7 @@ export type PhotoFillState =
       phase: 'editing'
       areaId: string
       sourceSize: Size
+      areaBounds: Rect
       transform: MediaTransform
       blend: number
     }>

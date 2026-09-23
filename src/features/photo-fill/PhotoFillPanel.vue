@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import type { PhotoFillState } from './photoState'
@@ -9,6 +9,9 @@ import {
   type Size,
 } from '@/shared/lib/mediaTransform'
 import { PointerGestureTracker } from '@/shared/lib/pointerGesture'
+
+import { FrameRenderScheduler } from './frameRenderScheduler'
+import { createLooseTransformPolicy } from './photoPlacement'
 
 const props = defineProps<{
   state: PhotoFillState
@@ -32,6 +35,7 @@ const preview = ref<HTMLCanvasElement>()
 const pointerTracker = new PointerGestureTracker()
 const artworkSize = { width: 1080, height: 1080 }
 let resizeObserver: ResizeObserver | undefined
+let renderScheduler: FrameRenderScheduler | undefined
 
 const editing = computed(() =>
   props.state.phase === 'editing' ? props.state : undefined,
@@ -57,7 +61,21 @@ const resize = () => {
   const width = canvas.getBoundingClientRect().width
   if (width <= 0) return
   props.resizePreview(canvas, width, window.devicePixelRatio || 1)
-  props.renderPreview(canvas)
+  renderImmediately()
+}
+
+const render = () => {
+  if (preview.value) props.renderPreview(preview.value)
+}
+
+const renderImmediately = () => {
+  renderScheduler?.cancel()
+  render()
+}
+
+const requestRender = () => {
+  if (renderScheduler) renderScheduler.request()
+  else render()
 }
 
 watch(preview, (canvas) => {
@@ -68,13 +86,9 @@ watch(preview, (canvas) => {
   void nextTick(resize)
 })
 
-watch(
-  () => editing.value?.transform,
-  () => {
-    if (preview.value) props.renderPreview(preview.value)
-  },
-  { deep: true },
-)
+watch(() => editing.value?.transform, requestRender, { deep: true })
+
+watch(() => editing.value?.blend, requestRender)
 
 const choose = async (event: Event) => {
   const target = event.target as HTMLInputElement
@@ -111,6 +125,7 @@ const pointerMove = (event: PointerEvent) => {
     point,
     state.sourceSize,
     artworkSize,
+    createLooseTransformPolicy(state.areaBounds),
   )
   if (transform) props.setTransform(transform)
 }
@@ -127,9 +142,18 @@ const pointerEnd = (event: PointerEvent) => {
 const blend = (event: Event) =>
   props.setBlend(Number((event.target as HTMLInputElement).value) / 100)
 
+onMounted(() => {
+  renderScheduler = new FrameRenderScheduler(
+    render,
+    (callback) => window.requestAnimationFrame(callback),
+    (frameId) => window.cancelAnimationFrame(frameId),
+  )
+})
+
 onBeforeUnmount(() => {
   pointerTracker.clear()
   resizeObserver?.disconnect()
+  renderScheduler?.dispose()
   props.cancel()
 })
 </script>

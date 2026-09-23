@@ -104,7 +104,14 @@ describe('drawCameraSource', () => {
 describe('createCanvasCameraCompositor', () => {
   it('Area順に初期色と撮影frameへmaskを適用し、line artを最後に描く', async () => {
     const calls: string[] = []
-    const contexts = [context(), context(), context(calls), context(calls)]
+    const contexts = [
+      context(),
+      context(),
+      context(calls),
+      context(),
+      context(),
+      context(calls),
+    ]
     const canvases = contexts.map((value, index) =>
       canvas(value, `canvas-${String(index)}`),
     )
@@ -148,7 +155,13 @@ describe('createCanvasCameraCompositor', () => {
   })
 
   it('表示比率の中間値でsourceを不透明、artworkを比率alphaで重ねる', () => {
-    const internalContexts = [context(), context(), context()]
+    const internalContexts = [
+      context(),
+      context(),
+      context(),
+      context(),
+      context(),
+    ]
     const internalCanvases = internalContexts.map((value, index) =>
       canvas(value, `internal-${String(index)}`),
     )
@@ -186,7 +199,14 @@ describe('createCanvasCameraCompositor', () => {
   })
 
   it('撮影frameを1080角で生成し、複数回releaseしても一度だけ解放する', () => {
-    const contexts = [context(), context(), context(), context()]
+    const contexts = [
+      context(),
+      context(),
+      context(),
+      context(),
+      context(),
+      context(),
+    ]
     const canvases = contexts.map((value) => canvas(value))
     const compositor = createCanvasCameraCompositor({
       createCanvas: () => canvases.shift()!,
@@ -210,5 +230,51 @@ describe('createCanvasCameraCompositor', () => {
     frame.release()
     expect(frameCanvas.width).toBe(0)
     expect(frameCanvas.height).toBe(0)
+  })
+
+  it('写真の連続調整では選択Areaの前後を静的cacheから再利用する', () => {
+    const calls: string[] = []
+    const internalCanvases = [
+      canvas(context(calls), 'source-plane'),
+      canvas(context(calls), 'artwork-plane'),
+      canvas(context(calls), 'area-plane'),
+      canvas(context(calls), 'before-plane'),
+      canvas(context(calls), 'after-plane'),
+    ]
+    const compositor = createCanvasCameraCompositor({
+      createCanvas: () => internalCanvases.shift()!,
+      createObjectUrl: vi.fn(),
+      revokeObjectUrl: vi.fn(),
+    })
+    const preview = canvas(context(calls), 'preview')
+    preview.width = 540
+    preview.height = 540
+    const state = {
+      template,
+      artwork: createInitialArtwork(template),
+      assets,
+      areaResources: new Map(),
+      selectedAreaId: 'body',
+      blend: 1,
+      transform: { scale: 1, offsetX: 0, offsetY: 0 },
+    }
+
+    compositor.renderPhotoPreview!(
+      preview,
+      { name: 'photo' } as never,
+      { width: 100, height: 100 },
+      state,
+    )
+    compositor.renderPhotoPreview!(
+      preview,
+      { name: 'photo' } as never,
+      { width: 100, height: 100 },
+      { ...state, transform: { scale: 1.1, offsetX: 2, offsetY: 3 } },
+    )
+
+    expect(
+      calls.filter((call) => call === 'draw:background-mask'),
+    ).toHaveLength(1)
+    expect(calls.filter((call) => call === 'draw:body-mask')).toHaveLength(2)
   })
 })

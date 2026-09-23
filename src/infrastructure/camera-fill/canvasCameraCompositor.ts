@@ -7,7 +7,7 @@ import type {
   CapturedCameraFrame,
 } from '@/features/camera-fill/compositorPort'
 import { getCameraSceneAlphas } from '@/features/camera-fill/scene'
-import type { MediaTransform } from '@/shared/lib/mediaTransform'
+import type { MediaTransform, Rect } from '@/shared/lib/mediaTransform'
 
 const artworkSize = 1080
 const haveCurrentData = 2
@@ -104,6 +104,92 @@ export const createCanvasCameraCompositor = (
   const sourcePlane = sizeCanvas(dependencies.createCanvas())
   const artworkPlane = sizeCanvas(dependencies.createCanvas())
   const areaPlane = sizeCanvas(dependencies.createCanvas())
+  // 写真の連続操作中は、選択Areaより前後を描き直さない。F/Sで確認した
+  // 固定三段合成を製品のtemplate asset境界でも維持する。
+  const beforeEditingPlane = sizeCanvas(dependencies.createCanvas())
+  const afterEditingPlane = sizeCanvas(dependencies.createCanvas())
+  let preparedPhoto:
+    | Readonly<{
+        artwork: CameraArtworkContext['artwork']
+        areaResources: CameraArtworkContext['areaResources']
+        template: CameraArtworkContext['template']
+        assets: CameraArtworkContext['assets']
+        areaId: string
+        index: number
+      }>
+    | undefined
+
+  const drawStoredArea = (
+    destination: CanvasRenderingContext2D,
+    state: CameraArtworkContext,
+    index: number,
+  ) => {
+    const area = state.artwork.areas[index]
+    const definition = state.template.areas[index]
+    const mask = state.assets.masks[index]
+    if (
+      !area ||
+      !definition ||
+      !mask ||
+      definition.id !== area.areaId ||
+      mask.id !== area.areaId
+    ) {
+      throw new Error('Artworkとmaskの順序が一致しません。')
+    }
+
+    const layer = requireContext(areaPlane)
+    layer.save()
+    layer.clearRect(0, 0, artworkSize, artworkSize)
+    layer.globalAlpha = 1
+    layer.globalCompositeOperation = 'source-over'
+    drawFill(
+      layer,
+      area.fill,
+      area.areaId,
+      definition.initialColor,
+      state.areaResources,
+    )
+    layer.globalCompositeOperation = 'destination-in'
+    layer.drawImage(mask.source, 0, 0, artworkSize, artworkSize)
+    layer.restore()
+    destination.drawImage(areaPlane, 0, 0, artworkSize, artworkSize)
+  }
+
+  const preparePhotoArtwork = (
+    state: Omit<CameraPreviewState, 'mirrorSource'>,
+  ) => {
+    const index = state.artwork.areas.findIndex(
+      (area) => area.areaId === state.selectedAreaId,
+    )
+    if (index < 0) throw new Error('選択中のAreaがArtworkに存在しません。')
+
+    const before = requireContext(beforeEditingPlane)
+    const after = requireContext(afterEditingPlane)
+    before.clearRect(0, 0, artworkSize, artworkSize)
+    after.clearRect(0, 0, artworkSize, artworkSize)
+    for (const [areaIndex] of state.artwork.areas.entries()) {
+      if (areaIndex < index) drawStoredArea(before, state, areaIndex)
+      else if (areaIndex > index) drawStoredArea(after, state, areaIndex)
+    }
+    preparedPhoto = {
+      artwork: state.artwork,
+      areaResources: state.areaResources,
+      template: state.template,
+      assets: state.assets,
+      areaId: state.selectedAreaId,
+      index,
+    }
+  }
+
+  const requiresPhotoPreparation = (
+    state: Omit<CameraPreviewState, 'mirrorSource'>,
+  ) =>
+    !preparedPhoto ||
+    preparedPhoto.artwork !== state.artwork ||
+    preparedPhoto.areaResources !== state.areaResources ||
+    preparedPhoto.template !== state.template ||
+    preparedPhoto.assets !== state.assets ||
+    preparedPhoto.areaId !== state.selectedAreaId
 
   const drawArtwork = (
     context: CanvasRenderingContext2D,
@@ -246,6 +332,9 @@ export const createCanvasCameraCompositor = (
       context.restore()
     },
     renderPhotoPreview(canvas, source, sourceSize, state) {
+      if (requiresPhotoPreparation(state)) preparePhotoArtwork(state)
+      const prepared = preparedPhoto
+      if (!prepared) throw new Error('写真previewの静的cacheを準備できません。')
       const sourceContext = requireContext(sourcePlane)
       const artworkContext = requireContext(artworkPlane)
       sourceContext.clearRect(0, 0, artworkSize, artworkSize)
@@ -256,14 +345,53 @@ export const createCanvasCameraCompositor = (
         sourceSize.height,
         state.transform,
       )
-      drawArtwork(artworkContext, state, {
-        selectedAreaId: state.selectedAreaId,
+      artworkContext.clearRect(0, 0, artworkSize, artworkSize)
+      artworkContext.drawImage(
+        beforeEditingPlane,
+        0,
+        0,
+        artworkSize,
+        artworkSize,
+      )
+      const area = state.artwork.areas[prepared.index]
+      const definition = state.template.areas[prepared.index]
+      const mask = state.assets.masks[prepared.index]
+      if (
+        !area ||
+        !definition ||
+        !mask ||
+        area.areaId !== state.selectedAreaId ||
+        definition.id !== area.areaId ||
+        mask.id !== area.areaId
+      ) {
+        throw new Error('選択中のAreaとmaskの順序が一致しません。')
+      }
+      const layer = requireContext(areaPlane)
+      layer.save()
+      layer.clearRect(0, 0, artworkSize, artworkSize)
+      layer.globalAlpha = 1
+      layer.globalCompositeOperation = 'source-over'
+      // 写真の透明画素と画像外の余白では、他Areaを見せず選択Areaの初期色を使う。
+      layer.fillStyle = definition.initialColor
+      layer.fillRect(0, 0, artworkSize, artworkSize)
+      drawCameraSource(
+        layer,
         source,
-        sourceSize,
-        transform: state.transform,
-        mirrorSource: false,
-        fillBackground: true,
-      })
+        sourceSize.width,
+        sourceSize.height,
+        state.transform,
+      )
+      layer.globalCompositeOperation = 'destination-in'
+      layer.drawImage(mask.source, 0, 0, artworkSize, artworkSize)
+      layer.restore()
+      artworkContext.drawImage(areaPlane, 0, 0, artworkSize, artworkSize)
+      artworkContext.drawImage(
+        afterEditingPlane,
+        0,
+        0,
+        artworkSize,
+        artworkSize,
+      )
       const alphas = getCameraSceneAlphas(state.blend, true)
       const context = requireContext(canvas)
       context.save()
@@ -278,6 +406,44 @@ export const createCanvasCameraCompositor = (
       context.globalAlpha = alphas.lineArt
       drawLineArt(context, state)
       context.restore()
+    },
+    getPhotoAreaBounds(state, areaId): Rect {
+      const mask = state.assets.masks.find(
+        (candidate) => candidate.id === areaId,
+      )
+      if (!mask) throw new Error('選択中のAreaのmaskがありません。')
+      const canvas = sizeCanvas(dependencies.createCanvas())
+      try {
+        const context = requireContext(canvas)
+        context.clearRect(0, 0, artworkSize, artworkSize)
+        context.drawImage(mask.source, 0, 0, artworkSize, artworkSize)
+        const pixels = context.getImageData(0, 0, artworkSize, artworkSize).data
+        let left = artworkSize
+        let top = artworkSize
+        let right = -1
+        let bottom = -1
+        for (let y = 0; y < artworkSize; y += 1) {
+          for (let x = 0; x < artworkSize; x += 1) {
+            if (pixels[(y * artworkSize + x) * 4 + 3] === 0) continue
+            left = Math.min(left, x)
+            top = Math.min(top, y)
+            right = Math.max(right, x)
+            bottom = Math.max(bottom, y)
+          }
+        }
+        if (right < left || bottom < top) {
+          throw new Error('選択中のAreaのmaskに不透明画素がありません。')
+        }
+        return {
+          x: left,
+          y: top,
+          width: right - left + 1,
+          height: bottom - top + 1,
+        }
+      } finally {
+        canvas.width = 0
+        canvas.height = 0
+      }
     },
     captureFrame(video, transform, mirrorSource): CapturedCameraFrame {
       if (video.videoWidth <= 0 || video.videoHeight <= 0) {

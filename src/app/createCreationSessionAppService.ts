@@ -48,7 +48,9 @@ import type {
   PhotoDecoderPort,
   DecodedPhoto,
 } from '@/features/photo-fill/photoDecoderPort'
+import { LatestSelection } from '@/features/photo-fill/latestSelection'
 import type { PhotoFillState } from '@/features/photo-fill/photoState'
+import { createCenteredCoverTransform } from '@/shared/lib/mediaTransform'
 
 type Dependencies = {
   frontend: BuildIdentity
@@ -128,7 +130,7 @@ export const createCreationSessionAppService = (
   const cameraState = shallowRef<CameraViewState>({ phase: 'closed' })
   const photoState = shallowRef<PhotoFillState>({ phase: 'closed' })
   let pendingPhoto: DecodedPhoto | undefined
-  let photoGeneration = 0
+  const latestPhotoSelection = new LatestSelection<DecodedPhoto>()
   const completedArtwork = shallowRef<CompletedArtworkViewState>({
     phase: 'idle',
   })
@@ -155,7 +157,7 @@ export const createCreationSessionAppService = (
   const clearActiveSession = () => {
     // 所有者と画面用参照を同じ境界で消し、解放済みsessionの参照を残さない。
     cameraController.resetSession()
-    photoGeneration += 1
+    latestPhotoSelection.invalidate()
     pendingPhoto?.dispose()
     pendingPhoto = undefined
     photoState.value = { phase: 'closed' }
@@ -442,6 +444,7 @@ export const createCreationSessionAppService = (
       cameraController.handleVisibilityChange(),
     openPhoto: (areaId) => {
       if (!activeSession.value || !areaId) return
+      latestPhotoSelection.invalidate()
       pendingPhoto?.dispose()
       pendingPhoto = undefined
       photoState.value = { phase: 'selecting', areaId }
@@ -450,8 +453,7 @@ export const createCreationSessionAppService = (
       const current = photoState.value
       if (current.phase !== 'selecting' && current.phase !== 'error') return
       const areaId = current.areaId
-      const generation = photoGeneration + 1
-      photoGeneration = generation
+      const generation = latestPhotoSelection.begin()
       pendingPhoto?.dispose()
       pendingPhoto = undefined
       photoState.value = { phase: 'decoding', areaId }
@@ -459,7 +461,9 @@ export const createCreationSessionAppService = (
         if (!dependencies.photoDecoder)
           throw new Error('写真decoderが構成されていません。')
         const decoded = await dependencies.photoDecoder.decode(file)
-        if (generation !== photoGeneration || !activeSession.value) {
+        const session = activeSession.value
+        if (!latestPhotoSelection.accept(generation, decoded)) return
+        if (!session) {
           decoded.dispose()
           return
         }
@@ -468,32 +472,23 @@ export const createCreationSessionAppService = (
           phase: 'editing',
           areaId,
           sourceSize: decoded.size,
-          transform: {
-            scale: Math.max(
-              1080 / decoded.size.width,
-              1080 / decoded.size.height,
-            ),
-            offsetX:
-              (1080 -
-                decoded.size.width *
-                  Math.max(
-                    1080 / decoded.size.width,
-                    1080 / decoded.size.height,
-                  )) /
-              2,
-            offsetY:
-              (1080 -
-                decoded.size.height *
-                  Math.max(
-                    1080 / decoded.size.width,
-                    1080 / decoded.size.height,
-                  )) /
-              2,
-          },
+          areaBounds: dependencies.cameraCompositor.getPhotoAreaBounds(
+            {
+              template: session.template,
+              artwork: session.artwork,
+              assets: session.assets,
+              areaResources: session.areaResources,
+            },
+            areaId,
+          ),
+          transform: createCenteredCoverTransform(decoded.size, {
+            width: 1080,
+            height: 1080,
+          }),
           blend: 1,
         }
       } catch {
-        if (generation === photoGeneration)
+        if (latestPhotoSelection.isCurrent(generation))
           photoState.value = { phase: 'error', areaId }
       }
     },
@@ -587,7 +582,7 @@ export const createCreationSessionAppService = (
       }
     },
     cancelPhoto: () => {
-      photoGeneration += 1
+      latestPhotoSelection.invalidate()
       pendingPhoto?.dispose()
       pendingPhoto = undefined
       photoState.value = { phase: 'closed' }

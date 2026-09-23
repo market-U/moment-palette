@@ -1,46 +1,58 @@
 import {
   clamp,
-  createCenteredCoverTransform,
-  getCoverScale,
-  type MediaTransform,
   type MediaTransformPolicy,
   type Rect,
-  type Size,
 } from '@/shared/lib/mediaTransform'
 
-const minimumScaleFactor = 0.25
+const looseScaleRange = 4
+const minimumVisiblePixels = 24
 
-/** 写真の余白を許可しつつ、選択Areaから写真が完全に外れないようにする制約を提供する。 */
-export const photoTransformPolicy = (
-  areaBounds: Rect,
+/** 写真を選択Areaから完全に失わず、初期coverより小さくして余白を残せる制約を提供する。 */
+export const createLooseTransformPolicy = (
+  bounds: Rect,
 ): MediaTransformPolicy => ({
   getScaleBounds(source, target) {
-    const cover = getCoverScale(source, target)
-    return { minimum: cover * minimumScaleFactor, maximum: cover * 4 }
+    const minimum = Math.min(
+      bounds.width / source.width,
+      bounds.height / source.height,
+    )
+    const cover = Math.max(
+      target.width / source.width,
+      target.height / source.height,
+    )
+    return { minimum: minimum / looseScaleRange, maximum: cover * 4 }
   },
   constrain(transform, source, target) {
-    const bounds = this.getScaleBounds(source, target)
-    const scale = clamp(transform.scale, bounds.minimum, bounds.maximum)
-    const width = source.width * scale
-    const height = source.height * scale
+    const scaleBounds = this.getScaleBounds(source, target)
+    const scale = clamp(
+      transform.scale,
+      scaleBounds.minimum,
+      scaleBounds.maximum,
+    )
+    const renderedWidth = source.width * scale
+    const renderedHeight = source.height * scale
+    const visibleX = Math.min(
+      minimumVisiblePixels,
+      renderedWidth / 2,
+      bounds.width / 2,
+    )
+    const visibleY = Math.min(
+      minimumVisiblePixels,
+      renderedHeight / 2,
+      bounds.height / 2,
+    )
     return {
       scale,
       offsetX: clamp(
         transform.offsetX,
-        areaBounds.x - width,
-        areaBounds.x + areaBounds.width,
+        bounds.x + visibleX - renderedWidth,
+        bounds.x + bounds.width - visibleX,
       ),
       offsetY: clamp(
         transform.offsetY,
-        areaBounds.y - height,
-        areaBounds.y + areaBounds.height,
+        bounds.y + visibleY - renderedHeight,
+        bounds.y + bounds.height - visibleY,
       ),
     }
   },
 })
-
-/** 1080座標の作品全体を覆う初期写真変換を生成する。 */
-export const createInitialPhotoTransform = (
-  source: Size,
-  target: Size,
-): MediaTransform => createCenteredCoverTransform(source, target)

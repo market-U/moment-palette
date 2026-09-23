@@ -45,9 +45,18 @@ adapterは `createImageBitmap(file, { imageOrientation: 'from-image' })` を先�
 
 previewまたはArtwork更新に失敗した場合は、新resourceをdisposeして、更新前のArtwork、resource、preview、完成PNGを保持する。session終了、route離脱、pagehide、app unmountではcamera frame、photo Canvas、preview、完成PNGを同じ冪等な解放経路で処理する。
 
-### 5. F/Sを移行した後に専用routeと診断UIを削除する
+### 5. F/Sを既定の移行元とし、同等性を確認してから専用routeと診断UIを削除する
 
-F/Sの正規化計算、photo compositor、gesture、browser decoderのうち製品境界に適合するものを移設し、その単体テストを維持する。`/spikes/photo-import` route、固定template、処理時間・MIME・拡張子の診断表示は、製品の写真導線と回帰テストが成立した後に削除する。F/S featureを製品featureからimportする形は採用しない。
+F/Sで採用済みの正規化計算、`createLooseTransformPolicy()`、`FrameRenderScheduler`、photo compositorの静的前後plane、gesture、browser decoderを既定の移行元とする。製品のdomain・session・template asset境界に適合しない箇所だけを移設または再実装し、処理規則とテストを保つ。特に、選択Areaのmask不透明範囲を使う余白許容の配置制約、pointer更新を一画面更新一回へ集約すること、編集Areaの前後を静的cacheにして操作中の再合成を固定三段に保つことは変更しない。
+
+| F/S資産 | 扱い | 製品側の移行先・削除条件 |
+| --- | --- | --- |
+| `photoPlacement.ts`、`frameRenderScheduler.ts`、`photoScene.ts`と各テスト | 設計とテストを保って移設 | `features/photo-fill/`。余白、画像を完全に失わない境界、rAF集約、比較表示を単体テストで証明する。 |
+| `canvasPhotoCompositor.ts`とテスト | 設計を保って再実装 | 製品template assetとsession resourceへ接続するcompositor。mask境界をruntimeで求め、前後cache、初期色下地、mask順序をテストする。 |
+| `browserPhotoDecoder.ts`、`normalization.ts`、`latestSelection.ts`、`photoFailure.ts`と各テスト | 昇格または移設 | 既存の製品decoderと状態管理。F/Sのcleanup・世代競合・正規化テストを維持する。 |
+| F/S route、page、UI、固定template、診断表示 | 最終段階で削除 | 上記の製品実装と対応テスト、format・lint・typecheck・全単体テスト、iPhone Safari・Chrome実機確認を完了した後だけ削除する。 |
+
+F/S featureを製品featureからimportする形は採用しないが、apply中にこの分類を独断で変えない。削除条件が満たされない場合はF/Sコードを保持し、削除タスクを未完了のままにする。
 
 ## Risks / Trade-offs
 
@@ -59,10 +68,12 @@ F/Sの正規化計算、photo compositor、gesture、browser decoderのうち製
 
 ## Migration Plan
 
-1. F/Sの純粋処理とadapterを製品のfeature・infrastructure境界へ移し、domain、session、preview、完成PNGをphoto fill対応にする。
-2. 既存のcamera作品、未編集作品、完成PNGの回帰テストを維持したまま、写真選択・調整・反映・上書き・破棄のテストを追加する。
-3. F/S routeと診断UIを削除し、品質検査とiPhone Safari・ChromeのPRプレビューで写真から完成まで確認する。
-4. 問題時は写真導線だけを外し、既存camera・完成作品のresource形式と公開済みtemplate schemaを変更しないため、直前の正常buildへ戻せる。
+1. Git履歴のF/S実装とテストを基準に、各資産の移行先、同等性の確認方法、削除条件を対応表で固定する。
+2. F/Sの純粋処理とadapterを製品のfeature・infrastructure境界へ移し、domain、session、preview、完成PNGをphoto fill対応にする。
+3. 既存のcamera作品、未編集作品、完成PNGの回帰テストを維持したまま、写真選択・調整・反映・上書き・破棄のテストを追加する。
+4. 品質検査とiPhone Safari・ChromeのPRプレビューで、F/Sの採用済み挙動を含めて写真から完成まで確認する。
+5. 上記の証跡がすべてそろった場合だけF/S routeと診断UIを削除する。満たせない場合はF/Sコードを保持し、削除タスクを未完了にする。
+6. 問題時は写真導線だけを外し、既存camera・完成作品のresource形式と公開済みtemplate schemaを変更しないため、直前の正常buildへ戻せる。
 
 ## Open Questions
 

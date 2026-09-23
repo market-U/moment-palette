@@ -285,8 +285,8 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 #### F/Sコードの活用方針
 
 - F/Sで実機確認と単体テストが成立した純粋ロジック、port、browser adapter、resource解放処理、test fixtureは、原則として本実装へ昇格または移設して再利用する。
-- F/Sコードを理由なく書き直さず、製品の責務、命名、error処理、domain、画面遷移へ適合させるために必要な箇所だけを変更する。
-- F/S専用UI、route、診断表示、固定templateは製品UIへ流用しない。対応する製品導線へ検証済み処理を移し、回帰testを維持できたchange内で削除する。
+- F/Sコードを理由なく書き直さず、製品の責務、命名、error処理、domain、画面遷移へ適合させるために必要な箇所だけを変更する。実機確認または単体テストが成立したF/Sコードは、後続changeにおける既定の移行元とする。
+- F/S専用UI、route、診断表示、固定templateは製品UIへ流用しない。ただし、削除前にファイル単位の移行表、対応する回帰test、全自動品質検査、要求された実機確認の証跡を同じchangeへそろえる。未完了の検証がある間は削除しない。
 - camera F/Sは`implement-camera-fill`、画像共有F/Sは`implement-completed-artwork`、写真F/Sは`implement-photo-fill`で移行・削除する。Azure配信F/Sはフェーズ6の本番接続まで保持する。
 
 #### UIデザインの変更方針
