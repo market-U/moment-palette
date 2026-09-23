@@ -66,6 +66,8 @@ const dependencies = () => {
   const releasePreview = vi.fn()
   const releaseCameraPreview = vi.fn()
   const releaseFrame = vi.fn()
+  const releasePhoto = vi.fn()
+  const disposePhoto = vi.fn()
   const cameraPort = {
     start: vi.fn().mockResolvedValue({
       facing: 'environment' as const,
@@ -83,9 +85,20 @@ const dependencies = () => {
   const cameraCompositor = {
     resizePreview: vi.fn().mockReturnValue({ width: 540, height: 540 }),
     renderPreview: vi.fn(),
+    getPhotoAreaBounds: vi.fn().mockReturnValue({
+      x: 0,
+      y: 0,
+      width: 1080,
+      height: 1080,
+    }),
     captureFrame: vi.fn().mockReturnValue({
       source: {} as CanvasImageSource,
       release: releaseFrame,
+    }),
+    renderPhotoPreview: vi.fn(),
+    capturePhotoFrame: vi.fn().mockReturnValue({
+      source: {} as CanvasImageSource,
+      release: releasePhoto,
     }),
     generatePreview: vi.fn().mockResolvedValue({
       url: 'blob:camera-preview',
@@ -126,6 +139,13 @@ const dependencies = () => {
         share: vi.fn().mockResolvedValue({ kind: 'handed-off' }),
       },
       clipboard: { copy: vi.fn().mockResolvedValue({ kind: 'copied' }) },
+      photoDecoder: {
+        decode: vi.fn().mockResolvedValue({
+          source: {} as HTMLCanvasElement,
+          size: { width: 1600, height: 900 },
+          dispose: disposePhoto,
+        }),
+      },
       mapCameraFailure: (error: unknown) => ({
         code: 'unknown' as const,
         name: error instanceof Error ? error.name : 'UnknownError',
@@ -141,6 +161,8 @@ const dependencies = () => {
     releasePreview,
     releaseCameraPreview,
     releaseFrame,
+    releasePhoto,
+    disposePhoto,
     cameraPort,
     cameraCompositor,
     completedArtworkGenerator,
@@ -277,5 +299,69 @@ describe('creation session app service', () => {
     expect(service.completedArtwork.value).toEqual({ phase: 'idle' })
     service.resetToStart()
     expect(releaseCompleted).toHaveBeenCalledOnce()
+  })
+
+  it('写真を正規化resourceから原子的に反映し、resetで一度だけ解放する', async () => {
+    const deps = dependencies()
+    const service = createCreationSessionAppService(deps.values)
+    await service.start()
+    await service.selectTemplate('buncho-01')
+
+    service.openPhoto('body')
+    expect(service.photoState.value).toEqual({
+      phase: 'selecting',
+      areaId: 'body',
+    })
+    await service.selectPhoto(
+      new File(['photo'], 'private.jpg', { type: 'image/jpeg' }),
+    )
+    expect(service.photoState.value).toMatchObject({
+      phase: 'editing',
+      areaId: 'body',
+    })
+    await expect(service.applyPhoto()).resolves.toBe(true)
+    expect(service.activeCreation.value?.areas).toMatchObject([
+      { id: 'body', fillKind: 'photo' },
+    ])
+    expect(deps.disposePhoto).toHaveBeenCalledOnce()
+
+    service.resetToStart()
+    expect(deps.releasePhoto).toHaveBeenCalledOnce()
+  })
+
+  it('キャンセル後に遅れて完了した写真resourceを解放し、閉じた状態を保つ', async () => {
+    let resolveDecode!: (value: {
+      source: HTMLCanvasElement
+      size: { width: number; height: number }
+      dispose: () => void
+    }) => void
+    const decode = new Promise<{
+      source: HTMLCanvasElement
+      size: { width: number; height: number }
+      dispose: () => void
+    }>((resolve) => {
+      resolveDecode = resolve
+    })
+    const deps = dependencies()
+    const releaseLatePhoto = vi.fn()
+    deps.values.photoDecoder.decode = vi.fn().mockReturnValue(decode)
+    const service = createCreationSessionAppService(deps.values)
+    await service.start()
+    await service.selectTemplate('buncho-01')
+
+    service.openPhoto('body')
+    const selecting = service.selectPhoto(
+      new File(['photo'], 'private.jpg', { type: 'image/jpeg' }),
+    )
+    service.cancelPhoto()
+    resolveDecode({
+      source: {} as HTMLCanvasElement,
+      size: { width: 1600, height: 900 },
+      dispose: releaseLatePhoto,
+    })
+    await selecting
+
+    expect(service.photoState.value).toEqual({ phase: 'closed' })
+    expect(releaseLatePhoto).toHaveBeenCalledOnce()
   })
 })

@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 
 import AreaSelector from '@/features/camera-fill/AreaSelector.vue'
 import CameraFillPanel from '@/features/camera-fill/CameraFillPanel.vue'
+import PhotoFillPanel from '@/features/photo-fill/PhotoFillPanel.vue'
 import { useCreationSession } from '@/features/creation-session/sessionFacade'
 import BackButton from '@/shared/ui/BackButton.vue'
 import ScreenShell from '@/shared/ui/ScreenShell.vue'
@@ -46,6 +47,10 @@ const startOver = async () => {
 
 const openCamera = async () => {
   if (selectedAreaId.value) await session.openCamera(selectedAreaId.value)
+}
+
+const openPhoto = () => {
+  if (selectedAreaId.value) session.openPhoto(selectedAreaId.value)
 }
 
 const completeArtwork = async () => {
@@ -95,6 +100,14 @@ const completeArtwork = async () => {
             <span>{{ t('creation.cameraAction') }}</span>
             <small>{{ t('creation.cameraActionHint') }}</small>
           </button>
+          <button
+            class="camera-action photo-action"
+            type="button"
+            @click="openPhoto"
+          >
+            <span>{{ t('creation.photoAction') }}</span>
+            <small>{{ t('creation.photoActionHint') }}</small>
+          </button>
         </section>
 
         <p
@@ -140,6 +153,17 @@ const completeArtwork = async () => {
       :capture="session.captureCamera"
       :cancel="session.cancelCamera"
       :handle-visibility-change="session.handleCameraVisibilityChange"
+    />
+    <PhotoFillPanel
+      :state="session.photoState.value"
+      :select="session.selectPhoto"
+      :retry="session.retryPhoto"
+      :set-blend="session.setPhotoBlend"
+      :set-transform="session.setPhotoTransform"
+      :resize-preview="session.resizePhotoPreview"
+      :render-preview="session.renderPhotoPreview"
+      :apply="session.applyPhoto"
+      :cancel="session.cancelPhoto"
     />
   </template>
 </template>

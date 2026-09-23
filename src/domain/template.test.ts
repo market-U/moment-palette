@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   applyCameraFill,
+  applyPhotoFill,
   createInitialArtwork,
   createTemplate,
 } from './template'
@@ -104,5 +105,17 @@ describe('template domain', () => {
     const artwork = createInitialArtwork(createTemplate(input()))
 
     expect(() => applyCameraFill(artwork, 'missing')).toThrow(/存在しないarea/)
+  })
+
+  it('指定areaだけをphoto fillへ更新し、既存fillを上書きする', () => {
+    const artwork = applyCameraFill(
+      createInitialArtwork(createTemplate(input())),
+      'background',
+    )
+
+    expect(applyPhotoFill(artwork, 'background').areas).toEqual([
+      { areaId: 'background', fill: { kind: 'photo' } },
+    ])
+    expect(artwork.areas[0]?.fill).toEqual({ kind: 'camera' })
   })
 })

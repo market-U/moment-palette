@@ -38,6 +38,7 @@ const drawFill = (
   context: CanvasRenderingContext2D,
   fill: ArtworkFill,
   areaId: string,
+  initialColor: string,
   areaResources: CompletedArtworkInput['areaResources'],
 ): void => {
   if (fill.kind === 'initial') {
@@ -48,6 +49,10 @@ const drawFill = (
 
   const resource = areaResources.get(areaId)
   if (!resource) throw new Error(`camera fillのresourceがありません: ${areaId}`)
+  if (fill.kind === 'photo') {
+    context.fillStyle = initialColor
+    context.fillRect(0, 0, artworkSize, artworkSize)
+  }
   context.drawImage(resource.source, 0, 0, artworkSize, artworkSize)
 }
 
@@ -84,7 +89,13 @@ export const createCanvasCompletedArtworkGenerator = (
         layer.save()
         layer.clearRect(0, 0, artworkSize, artworkSize)
         layer.globalCompositeOperation = 'source-over'
-        drawFill(layer, area.fill, area.areaId, input.areaResources)
+        drawFill(
+          layer,
+          area.fill,
+          area.areaId,
+          definition.initialColor,
+          input.areaResources,
+        )
         layer.globalCompositeOperation = 'destination-in'
         layer.drawImage(mask.source, 0, 0, artworkSize, artworkSize)
         layer.restore()

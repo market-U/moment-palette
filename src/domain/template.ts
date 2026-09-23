@@ -28,6 +28,9 @@ export type ArtworkFill =
   | Readonly<{
       kind: 'camera'
     }>
+  | Readonly<{
+      kind: 'photo'
+    }>
 
 /** 作品内の一領域に適用されている塗りの状態を表す。 */
 export type ArtworkArea = Readonly<{
@@ -138,6 +141,27 @@ export const applyCameraFill = (artwork: Artwork, areaId: string): Artwork => {
           ? Object.freeze({
               areaId: area.areaId,
               fill: Object.freeze({ kind: 'camera' as const }),
+            })
+          : area,
+      ),
+    ),
+  })
+}
+
+/** 指定した領域だけを端末内写真で満たした新しい作品状態を生成する。 */
+export const applyPhotoFill = (artwork: Artwork, areaId: string): Artwork => {
+  if (!artwork.areas.some((area) => area.areaId === areaId)) {
+    throw new Error(`Artworkに存在しないareaです: ${areaId}`)
+  }
+
+  return Object.freeze({
+    ...artwork,
+    areas: Object.freeze(
+      artwork.areas.map((area) =>
+        area.areaId === areaId
+          ? Object.freeze({
+              areaId: area.areaId,
+              fill: Object.freeze({ kind: 'photo' as const }),
             })
           : area,
       ),

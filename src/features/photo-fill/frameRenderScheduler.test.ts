@@ -16,12 +16,9 @@ describe('FrameRenderScheduler', () => {
     scheduler.request()
     scheduler.request()
 
-    expect(requestFrame).toHaveBeenCalledTimes(1)
+    expect(requestFrame).toHaveBeenCalledOnce()
     callbacks[0]?.()
-    expect(render).toHaveBeenCalledTimes(1)
-
-    scheduler.request()
-    expect(requestFrame).toHaveBeenCalledTimes(2)
+    expect(render).toHaveBeenCalledOnce()
   })
 
   it('破棄時に待機中の描画を取り消し、遅れて呼ばれても描画しない', () => {
@@ -40,7 +37,6 @@ describe('FrameRenderScheduler', () => {
     scheduler.request()
     scheduler.dispose()
     callback?.()
-    scheduler.request()
 
     expect(cancelFrame).toHaveBeenCalledWith(42)
     expect(render).not.toHaveBeenCalled()

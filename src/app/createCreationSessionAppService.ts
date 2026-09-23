@@ -1,6 +1,6 @@
 import { computed, readonly, ref, shallowRef, triggerRef } from 'vue'
 
-import { applyCameraFill } from '@/domain/template'
+import { applyCameraFill, applyPhotoFill } from '@/domain/template'
 import { createCameraFillController } from '@/features/camera-fill/cameraController'
 import type { CameraCompositorPort } from '@/features/camera-fill/compositorPort'
 import type {
@@ -44,6 +44,13 @@ import {
   type CompletedArtworkShareCopy,
 } from '@/features/completed-artwork/sharePayload'
 import type { CompletedArtworkSharePort } from '@/features/completed-artwork/sharePort'
+import type {
+  PhotoDecoderPort,
+  DecodedPhoto,
+} from '@/features/photo-fill/photoDecoderPort'
+import { LatestSelection } from '@/features/photo-fill/latestSelection'
+import type { PhotoFillState } from '@/features/photo-fill/photoState'
+import { createCenteredCoverTransform } from '@/shared/lib/mediaTransform'
 
 type Dependencies = {
   frontend: BuildIdentity
@@ -57,6 +64,7 @@ type Dependencies = {
   completedArtworkGenerator: CompletedArtworkGeneratorPort
   completedArtworkShare: CompletedArtworkSharePort
   clipboard: ClipboardPort
+  photoDecoder?: PhotoDecoderPort
   mapCameraFailure: (error: unknown) => CameraFailure
   isDocumentHidden: () => boolean
   now: () => Date
@@ -120,6 +128,9 @@ export const createCreationSessionAppService = (
   const owner = new CreationSessionOwner<ActiveCreationSession>()
   const activeSession = shallowRef<ActiveCreationSession | null>(null)
   const cameraState = shallowRef<CameraViewState>({ phase: 'closed' })
+  const photoState = shallowRef<PhotoFillState>({ phase: 'closed' })
+  let pendingPhoto: DecodedPhoto | undefined
+  const latestPhotoSelection = new LatestSelection<DecodedPhoto>()
   const completedArtwork = shallowRef<CompletedArtworkViewState>({
     phase: 'idle',
   })
@@ -146,6 +157,10 @@ export const createCreationSessionAppService = (
   const clearActiveSession = () => {
     // 所有者と画面用参照を同じ境界で消し、解放済みsessionの参照を残さない。
     cameraController.resetSession()
+    latestPhotoSelection.invalidate()
+    pendingPhoto?.dispose()
+    pendingPhoto = undefined
+    photoState.value = { phase: 'closed' }
     completionGeneration += 1
     completedArtworkOwner.dispose()
     completedArtwork.value = { phase: 'idle' }
@@ -336,6 +351,7 @@ export const createCreationSessionAppService = (
     templateSelection: readonly(templateSelection),
     activeCreation: readonly(activeCreation),
     cameraState: readonly(cameraState),
+    photoState: readonly(photoState),
     completedArtwork: readonly(completedArtwork),
     start,
     selectTemplate,
@@ -426,6 +442,151 @@ export const createCreationSessionAppService = (
     cancelCamera: () => cameraController.cancel(),
     handleCameraVisibilityChange: () =>
       cameraController.handleVisibilityChange(),
+    openPhoto: (areaId) => {
+      if (!activeSession.value || !areaId) return
+      latestPhotoSelection.invalidate()
+      pendingPhoto?.dispose()
+      pendingPhoto = undefined
+      photoState.value = { phase: 'selecting', areaId }
+    },
+    selectPhoto: async (file) => {
+      const current = photoState.value
+      if (current.phase !== 'selecting' && current.phase !== 'error') return
+      const areaId = current.areaId
+      const generation = latestPhotoSelection.begin()
+      pendingPhoto?.dispose()
+      pendingPhoto = undefined
+      photoState.value = { phase: 'decoding', areaId }
+      try {
+        if (!dependencies.photoDecoder)
+          throw new Error('写真decoderが構成されていません。')
+        const decoded = await dependencies.photoDecoder.decode(file)
+        const session = activeSession.value
+        if (!latestPhotoSelection.accept(generation, decoded)) return
+        if (!session) {
+          decoded.dispose()
+          return
+        }
+        pendingPhoto = decoded
+        photoState.value = {
+          phase: 'editing',
+          areaId,
+          sourceSize: decoded.size,
+          areaBounds: dependencies.cameraCompositor.getPhotoAreaBounds(
+            {
+              template: session.template,
+              artwork: session.artwork,
+              assets: session.assets,
+              areaResources: session.areaResources,
+            },
+            areaId,
+          ),
+          transform: createCenteredCoverTransform(decoded.size, {
+            width: 1080,
+            height: 1080,
+          }),
+          blend: 1,
+        }
+      } catch {
+        if (latestPhotoSelection.isCurrent(generation))
+          photoState.value = { phase: 'error', areaId }
+      }
+    },
+    retryPhoto: () => {
+      const current = photoState.value
+      if (current.phase === 'error')
+        photoState.value = { phase: 'selecting', areaId: current.areaId }
+    },
+    setPhotoBlend: (blend) => {
+      const current = photoState.value
+      if (current.phase === 'editing')
+        photoState.value = {
+          ...current,
+          blend: Math.min(1, Math.max(0, blend)),
+        }
+    },
+    setPhotoTransform: (transform) => {
+      const current = photoState.value
+      if (current.phase === 'editing')
+        photoState.value = { ...current, transform }
+    },
+    resizePhotoPreview: (canvas, cssPixels, pixelRatio) =>
+      dependencies.cameraCompositor.resizePreview(
+        canvas,
+        cssPixels,
+        pixelRatio,
+      ),
+    renderPhotoPreview: (canvas) => {
+      const current = photoState.value
+      const session = activeSession.value
+      if (
+        current.phase !== 'editing' ||
+        !pendingPhoto ||
+        !session ||
+        !dependencies.cameraCompositor.renderPhotoPreview
+      )
+        return
+      dependencies.cameraCompositor.renderPhotoPreview(
+        canvas,
+        pendingPhoto.source,
+        pendingPhoto.size,
+        {
+          template: session.template,
+          artwork: session.artwork,
+          assets: session.assets,
+          areaResources: session.areaResources,
+          selectedAreaId: current.areaId,
+          blend: current.blend,
+          transform: current.transform,
+        },
+      )
+    },
+    applyPhoto: async () => {
+      const current = photoState.value
+      const session = activeSession.value
+      const decoded = pendingPhoto
+      if (current.phase !== 'editing' || !session || !decoded) return false
+      const capturePhotoFrame = dependencies.cameraCompositor.capturePhotoFrame
+      if (!capturePhotoFrame) {
+        photoState.value = { phase: 'error', areaId: current.areaId }
+        return false
+      }
+      const frame = capturePhotoFrame(
+        decoded.source,
+        decoded.size,
+        current.transform,
+      )
+      try {
+        await session.replaceAreaResource(
+          current.areaId,
+          applyPhotoFill(session.artwork, current.areaId),
+          frame,
+          (artwork, areaResources) =>
+            dependencies.cameraCompositor.generatePreview({
+              template: session.template,
+              artwork,
+              assets: session.assets,
+              areaResources,
+            }),
+        )
+        pendingPhoto = undefined
+        decoded.dispose()
+        invalidateCompletedArtwork()
+        triggerRef(activeSession)
+        photoState.value = { phase: 'closed' }
+        return true
+      } catch {
+        frame.release()
+        photoState.value = { phase: 'error', areaId: current.areaId }
+        return false
+      }
+    },
+    cancelPhoto: () => {
+      latestPhotoSelection.invalidate()
+      pendingPhoto?.dispose()
+      pendingPhoto = undefined
+      photoState.value = { phase: 'closed' }
+    },
     completeArtwork,
     retryCompletedArtwork: completeArtwork,
     shareCompletedArtwork,

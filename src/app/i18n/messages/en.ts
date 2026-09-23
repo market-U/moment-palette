@@ -37,12 +37,27 @@ export const en = {
     fillMethods: 'Fill methods',
     cameraAction: 'Capture the view',
     cameraActionHint: 'Take a photo with the camera',
+    photoAction: 'Use a memory',
+    photoActionHint: 'Choose a photo on your device',
     complete: 'Finish artwork',
     completing: 'Creating your finished image…',
     completeFailed:
       'We could not create the finished image. Try again or keep creating.',
-    nextChanges:
-      'Photo and solid-color fills will be added in the next changes.',
+    nextChanges: 'Solid-color fills will be added in the next change.',
+  },
+  photo: {
+    heading: 'Adjust photo',
+    selecting: 'Choose a photo',
+    decoding: 'Loading your photo…',
+    private: 'Your photo is processed only on this device.',
+    errorHeading: 'We could not load this photo',
+    error: 'Choose another photo or return to your artwork.',
+    chooseAgain: 'Choose another photo',
+    previewLabel: 'Photo and artwork preview',
+    gestureHelp:
+      'Drag with one finger and pinch with two fingers inside the square.',
+    apply: 'Use this photo',
+    cancel: 'Cancel',
   },
   completed: {
     eyebrow: 'Finished',

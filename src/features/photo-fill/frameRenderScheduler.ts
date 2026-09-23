@@ -1,10 +1,10 @@
+/** 高頻度の入力イベントを、次の画面更新に一度だけ反映するためのrAF境界を表す。 */
 export type RequestRenderFrame = (callback: () => void) => number
+
+/** 予約済みの画面更新を取り消すためのrAF境界を表す。 */
 export type CancelRenderFrame = (frameId: number) => void
 
-/**
- * 高頻度の入力イベントを、ブラウザが次に画面を更新する一回の描画へまとめる。
- * transform自体は呼び出し側が都度更新するため、実行時には常に最新状態を描ける。
- */
+/** 最新の状態だけを次の一画面更新へ描画し、破棄後の描画も防止する。 */
 export class FrameRenderScheduler {
   private pendingFrameId: number | undefined
   private disposed = false
@@ -15,30 +15,22 @@ export class FrameRenderScheduler {
     private readonly cancelFrame: CancelRenderFrame,
   ) {}
 
-  request() {
-    if (this.disposed || this.pendingFrameId !== undefined) {
-      return
-    }
+  request(): void {
+    if (this.disposed || this.pendingFrameId !== undefined) return
 
     this.pendingFrameId = this.requestFrame(() => {
       this.pendingFrameId = undefined
-
-      if (!this.disposed) {
-        this.render()
-      }
+      if (!this.disposed) this.render()
     })
   }
 
-  cancel() {
-    if (this.pendingFrameId === undefined) {
-      return
-    }
-
+  cancel(): void {
+    if (this.pendingFrameId === undefined) return
     this.cancelFrame(this.pendingFrameId)
     this.pendingFrameId = undefined
   }
 
-  dispose() {
+  dispose(): void {
     this.cancel()
     this.disposed = true
   }

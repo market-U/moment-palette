@@ -1,6 +1,6 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: フェーズ5進行中・次のchangeは`implement-photo-fill`
+> ステータス: フェーズ5進行中・次のchangeは`implement-solid-color-fill`
 >
 > 最終更新日: 2026-09-23
 
@@ -32,6 +32,7 @@
 - フェーズ5の`implement-camera-fill`は、Artwork更新、camera resource所有、製品camera導線、中央固定Area selector、F/Sコード移行を実装し、iPhoneのSafari・Chromeによる実機確認、verify、main specsへの同期、archiveを完了した。
 - `unify-screen-layout`は、既存画面で判明したheader位置と戻る操作の重複の共通化、iPhone Safari・Chromeによる実機確認、verify、main specsへの同期、archiveを完了した。
 - `implement-completed-artwork`は、現在のArtworkからの1080×1080 PNG生成、完成確認、長押し保存、Web Share、共有文コピー、作品更新・session終了時の完成PNG resource破棄を実装し、format、lint、型検査、単体テスト、production build、iPhone Safari・Chromeでの実機確認、verify、main specsへの同期を完了した。Web Share非対応・失敗は実機で再現できなかったため、`navigator.canShare()`がfalseの場合と共有Promiseの失敗を分類し、画像と手動コピー可能な共有文を維持する単体テストで確認した。Android Chromeは端末確保後の回帰項目とする。
+- `implement-photo-fill`は、OS画像選択、標準APIによるdecode、EXIF Orientation、4096px・12MP正規化、写真のpan・pinch・余白を許す調整、作品・完成PNGへの反映、resource解放、F/S専用実装の移設と削除を実装し、iPhone Safari・ChromeのPRプレビュー実機確認、verify、main specsへの同期を完了した。Android Chromeは端末確保後の回帰項目とする。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序
@@ -254,7 +255,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ### 5. 主要導線を本実装する
 
-ステータス: 進行中（1〜4を完了・archive済み）
+ステータス: 進行中（1〜5を完了・archive済み）
 
 本実装は、ユーザーが確認できる能力と画面横断の整備を次の六つの通常changeへ分ける。各changeを単独で検証可能にし、`unify-screen-layout`を挟みつつ、`establish-creation-session`、`implement-camera-fill`、`implement-completed-artwork`でタイトルからカメラ撮影、完成、保存・共有までの縦切りを完成させる。
 
@@ -273,7 +274,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 4. `implement-completed-artwork`（完了・archive済み）
    - 1080×1080 PNG生成、完成確認、長押し保存、Web Share、共有キャンセル・失敗分類、Clipboard fallbackを実装する。
    - 作品変更と画面離脱に応じたPNG Blob、object URLの再利用・破棄を実装する。
-5. `implement-photo-fill`
+5. `implement-photo-fill`（完了・archive済み）
    - 写真ライブラリ・ファイル選択、標準APIによるdecode、4096px・12MP上限への正規化、位置・倍率調整、余白を含む反映、選び直し、失敗からの復帰を実装する。
 6. `implement-solid-color-fill`
    - カラーパレット、単色の反映・上書き、キャンセルを実装し、カラーピッカー方式を製品UIとして確定する。
@@ -285,8 +286,8 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 #### F/Sコードの活用方針
 
 - F/Sで実機確認と単体テストが成立した純粋ロジック、port、browser adapter、resource解放処理、test fixtureは、原則として本実装へ昇格または移設して再利用する。
-- F/Sコードを理由なく書き直さず、製品の責務、命名、error処理、domain、画面遷移へ適合させるために必要な箇所だけを変更する。
-- F/S専用UI、route、診断表示、固定templateは製品UIへ流用しない。対応する製品導線へ検証済み処理を移し、回帰testを維持できたchange内で削除する。
+- F/Sコードを理由なく書き直さず、製品の責務、命名、error処理、domain、画面遷移へ適合させるために必要な箇所だけを変更する。実機確認または単体テストが成立したF/Sコードは、後続changeにおける既定の移行元とする。
+- F/S専用UI、route、診断表示、固定templateは製品UIへ流用しない。ただし、削除前にファイル単位の移行表、対応する回帰test、全自動品質検査、要求された実機確認の証跡を同じchangeへそろえる。未完了の検証がある間は削除しない。
 - camera F/Sは`implement-camera-fill`、画像共有F/Sは`implement-completed-artwork`、写真F/Sは`implement-photo-fill`で移行・削除する。Azure配信F/Sはフェーズ6の本番接続まで保持する。
 
 #### UIデザインの変更方針
@@ -337,7 +338,7 @@ template catalogの運用支援は、本番用schemaとasset更新手順の確�
 
 ## 次のセッションで行うこと
 
-1. `implement-photo-fill`を開始する。
+1. `implement-solid-color-fill`を開始する。
 
 ## 更新ルール
 

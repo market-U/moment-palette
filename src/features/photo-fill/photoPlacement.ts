@@ -1,30 +1,26 @@
 import {
   clamp,
-  getScaleBounds,
   type MediaTransformPolicy,
   type Rect,
-  type Size,
 } from '@/shared/lib/mediaTransform'
 
-const LOOSE_SCALE_RANGE = 4
-const MINIMUM_VISIBLE_PIXELS = 24
+const looseScaleRange = 4
+const minimumVisiblePixels = 24
 
-const getContainScale = (source: Size, bounds: Rect) =>
-  Math.min(bounds.width / source.width, bounds.height / source.height)
-
-/**
- * 画像形式を区別せず余白を許す一方、画像を選択エリアから完全には失えない範囲へ留める。
- * 初期表示は従来のcoverのままとし、利用者がpinchしたときだけ小さくできる。
- */
+/** 写真を選択Areaから完全に失わず、初期coverより小さくして余白を残せる制約を提供する。 */
 export const createLooseTransformPolicy = (
   bounds: Rect,
 ): MediaTransformPolicy => ({
   getScaleBounds(source, target) {
-    const initial = getContainScale(source, bounds)
-    return {
-      minimum: initial / LOOSE_SCALE_RANGE,
-      maximum: getScaleBounds(source, target).maximum,
-    }
+    const minimum = Math.min(
+      bounds.width / source.width,
+      bounds.height / source.height,
+    )
+    const cover = Math.max(
+      target.width / source.width,
+      target.height / source.height,
+    )
+    return { minimum: minimum / looseScaleRange, maximum: cover * 4 }
   },
   constrain(transform, source, target) {
     const scaleBounds = this.getScaleBounds(source, target)
@@ -36,16 +32,15 @@ export const createLooseTransformPolicy = (
     const renderedWidth = source.width * scale
     const renderedHeight = source.height * scale
     const visibleX = Math.min(
-      MINIMUM_VISIBLE_PIXELS,
+      minimumVisiblePixels,
       renderedWidth / 2,
       bounds.width / 2,
     )
     const visibleY = Math.min(
-      MINIMUM_VISIBLE_PIXELS,
+      minimumVisiblePixels,
       renderedHeight / 2,
       bounds.height / 2,
     )
-
     return {
       scale,
       offsetX: clamp(
