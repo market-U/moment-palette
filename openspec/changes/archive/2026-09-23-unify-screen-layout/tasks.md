@@ -18,7 +18,7 @@
 
 - [x] 3.1 既存テストを更新し、戻る操作でpage側のsession処理とroute遷移が維持されることを確認する。
 - [x] 3.2 `pnpm test:run`、`pnpm typecheck`、`pnpm lint`、`pnpm format:check`、`pnpm build`を実行する。
-- [ ] 3.3 iPhone Safari・Chromeでタイトル、テンプレート選択、制作のheader位置、safe area、スクロール、言語切替の配置、戻る操作を確認する。
+- [x] 3.3 iPhone Safari・Chromeでタイトル、テンプレート選択、制作のheader位置、safe area、スクロール、言語切替の配置、戻る操作を確認する。
 
 ## 4. 撮影対象選択部品の分割
 

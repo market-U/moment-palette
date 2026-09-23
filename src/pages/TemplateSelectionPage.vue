@@ -146,7 +146,6 @@ h1 {
   /* border: 1px solid rgb(65 54 76 / 12%); */
   border: none;
   border-radius: 1.5rem;
-  /* box-shadow: 0 1rem 2.5rem rgb(65 54 76 / 10%); */
 }
 
 .template-card img {
@@ -182,7 +181,8 @@ h1 {
 }
 
 .primary-button,
-.secondary-button {
+.secondary-button,
+.text-button {
   min-height: 2.75rem;
   padding: 0.55rem 1rem;
   cursor: pointer;
@@ -199,5 +199,11 @@ h1 {
   color: var(--color-ink);
   background: white;
   border: 1px solid rgb(65 54 76 / 18%);
+}
+
+.text-button {
+  color: var(--color-ink);
+  background: transparent;
+  border: 0;
 }
 </style>
