@@ -25,14 +25,15 @@ export const router = createRouter({
       meta: { requiresSession: true },
     },
     {
+      path: '/complete',
+      name: 'completed-artwork',
+      component: () => import('@/pages/CompletedArtworkPage.vue'),
+      meta: { requiresSession: true, requiresCompletedArtwork: true },
+    },
+    {
       path: '/spikes/photo-import',
       name: 'photo-import-spike',
       component: () => import('./spikes/PhotoImportSpikeRoute.vue'),
-    },
-    {
-      path: '/spikes/image-sharing',
-      name: 'image-sharing-spike',
-      component: () => import('./spikes/ImageSharingSpikeRoute.vue'),
     },
     {
       path: '/spikes/azure-template-delivery',
@@ -57,9 +58,19 @@ router.beforeEach((to, from) => {
   ) {
     return { name: 'title' }
   }
+  if (
+    to.meta.requiresCompletedArtwork &&
+    !creationSessionAppService.hasCompletedArtwork()
+  ) {
+    return { name: 'creation' }
+  }
 
   // 制作画面を離れる経路に応じて、sessionだけ、または開始状態全体を破棄する。
-  if (from.name === 'creation' && to.name !== 'creation') {
+  if (
+    (from.name === 'creation' || from.name === 'completed-artwork') &&
+    to.name !== 'creation' &&
+    to.name !== 'completed-artwork'
+  ) {
     if (to.name === 'template-selection') {
       creationSessionAppService.returnToTemplates()
     } else {

@@ -39,7 +39,32 @@ export const ja = {
     fillMethods: '色のつけ方',
     cameraAction: '景色から切り取る',
     cameraActionHint: 'カメラで撮影する',
+    complete: '作品を完成する',
+    completing: '完成画像を生成しています…',
+    completeFailed:
+      '完成画像を生成できませんでした。もう一度試すか、制作を続けてください。',
     nextChanges: '写真と単色で色をつける機能は、続くchangeで追加します。',
+  },
+  completed: {
+    eyebrow: '完成しました',
+    heading: 'あなたのMoment Palette',
+    imageAlt: '完成したMoment Palette作品',
+    longPress: '画像を長押しして保存できます。',
+    share: '共有する',
+    sharing: '共有シートを開いています…',
+    shared:
+      'OSまたは共有先へ画像を渡しました。投稿や保存の完了は共有先で確認してください。',
+    cancelled: '共有をキャンセルしました。同じ画像で再試行できます。',
+    unsupported:
+      'この環境では画像を共有できません。長押し保存または共有文のコピーを利用してください。',
+    failed:
+      '共有を開始できませんでした。もう一度試すか、画像を長押しして保存してください。',
+    shareText: '共有文',
+    copyText: '共有文をコピー',
+    copied: '共有文をコピーしました。',
+    copyFallback: '共有文を手動で選択してコピーしてください。',
+    backToCreation: '制作へ戻る',
+    startOver: 'もういちど遊ぶ',
   },
   camera: {
     eyebrow: '景色から切り取る',

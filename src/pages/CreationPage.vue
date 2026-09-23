@@ -47,6 +47,12 @@ const startOver = async () => {
 const openCamera = async () => {
   if (selectedAreaId.value) await session.openCamera(selectedAreaId.value)
 }
+
+const completeArtwork = async () => {
+  if (await session.completeArtwork()) {
+    await router.push({ name: 'completed-artwork' })
+  }
+}
 </script>
 
 <template>
@@ -90,6 +96,29 @@ const openCamera = async () => {
             <small>{{ t('creation.cameraActionHint') }}</small>
           </button>
         </section>
+
+        <p
+          v-if="session.completedArtwork.value.phase === 'generating'"
+          class="creation-page__status"
+          role="status"
+        >
+          {{ t('creation.completing') }}
+        </p>
+        <p
+          v-else-if="session.completedArtwork.value.phase === 'error'"
+          class="creation-page__error"
+          role="alert"
+        >
+          {{ t('creation.completeFailed') }}
+        </p>
+        <button
+          class="complete-action"
+          type="button"
+          :disabled="session.completedArtwork.value.phase === 'generating'"
+          @click="completeArtwork"
+        >
+          {{ t('creation.complete') }}
+        </button>
 
         <p class="creation-page__next">{{ t('creation.nextChanges') }}</p>
         <button class="start-over" type="button" @click="startOver">
@@ -191,6 +220,35 @@ h1 {
   margin: 1.25rem 0 0;
   color: var(--color-muted);
   text-align: center;
+}
+
+.complete-action {
+  justify-self: center;
+  min-width: min(100%, 18rem);
+  min-height: 3.5rem;
+  margin-top: 1rem;
+  padding: 0.7rem 1.25rem;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--color-ink);
+  border: 0;
+  border-radius: 999px;
+}
+
+.complete-action:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.creation-page__status,
+.creation-page__error {
+  margin: 1rem 0 0;
+  text-align: center;
+}
+
+.creation-page__error {
+  color: #a13d5b;
 }
 
 .start-over {

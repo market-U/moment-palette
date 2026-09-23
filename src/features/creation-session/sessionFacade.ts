@@ -1,6 +1,9 @@
 import { inject, type InjectionKey, type Ref } from 'vue'
 
 import type { MediaTransform, Size } from '@/shared/lib/mediaTransform'
+import type { ClipboardOutcome } from '@/features/completed-artwork/clipboardPort'
+import type { CompletedArtworkShareCopy } from '@/features/completed-artwork/sharePayload'
+import type { CompletedArtworkShareOutcome } from '@/features/completed-artwork/shareOutcome'
 
 export type LocalizedViewText = Readonly<{ ja: string; en: string }>
 
@@ -74,6 +77,21 @@ export type CameraViewState =
         | 'unknown'
     }>
 
+/** 完成PNGの生成・表示・共有について、画面へ公開する安全な状態を表す。 */
+export type CompletedArtworkViewState =
+  | Readonly<{ phase: 'idle' }>
+  | Readonly<{ phase: 'generating' }>
+  | Readonly<{ phase: 'error' }>
+  | Readonly<{
+      phase: 'ready'
+      objectUrl: string
+      width: number
+      height: number
+      sharing: boolean
+      shareOutcome?: CompletedArtworkShareOutcome
+      copyOutcome?: ClipboardOutcome
+    }>
+
 /** 製品画面へ公開する制作開始フローの状態と操作を定義する。 */
 export type CreationSessionFacade = {
   readonly appVersion: string
@@ -81,6 +99,7 @@ export type CreationSessionFacade = {
   readonly templateSelection: Readonly<Ref<TemplateSelectionViewState>>
   readonly activeCreation: Readonly<Ref<ActiveCreationView | null>>
   readonly cameraState: Readonly<Ref<CameraViewState>>
+  readonly completedArtwork: Readonly<Ref<CompletedArtworkViewState>>
   start: () => Promise<boolean>
   selectTemplate: (templateId: string) => Promise<boolean>
   retryTemplate: () => Promise<boolean>
@@ -105,6 +124,13 @@ export type CreationSessionFacade = {
   captureCamera: () => Promise<boolean>
   cancelCamera: () => void
   handleCameraVisibilityChange: () => void
+  completeArtwork: () => Promise<boolean>
+  retryCompletedArtwork: () => Promise<boolean>
+  shareCompletedArtwork: (copy: CompletedArtworkShareCopy) => Promise<void>
+  copyCompletedArtworkShareText: (
+    copy: CompletedArtworkShareCopy,
+  ) => Promise<void>
+  hasCompletedArtwork: () => boolean
 }
 
 export const creationSessionFacadeKey: InjectionKey<CreationSessionFacade> =

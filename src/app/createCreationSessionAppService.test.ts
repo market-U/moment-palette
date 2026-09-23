@@ -94,6 +94,15 @@ const dependencies = () => {
       release: releaseCameraPreview,
     }),
   }
+  const completedArtworkGenerator = {
+    generate: vi.fn().mockResolvedValue({
+      blob: new Blob(['png'], { type: 'image/png' }),
+      objectUrl: 'blob:completed',
+      width: 1080,
+      height: 1080,
+      dispose: vi.fn(),
+    }),
+  }
   return {
     values: {
       frontend: { appVersion: '0.0.0', buildId: 'build-a' },
@@ -111,6 +120,12 @@ const dependencies = () => {
       cameraPort,
       cameraPermission: { query: vi.fn().mockResolvedValue('prompt' as const) },
       cameraCompositor,
+      completedArtworkGenerator,
+      completedArtworkShare: {
+        canShare: vi.fn(() => ({ available: true as const })),
+        share: vi.fn().mockResolvedValue({ kind: 'handed-off' }),
+      },
+      clipboard: { copy: vi.fn().mockResolvedValue({ kind: 'copied' }) },
       mapCameraFailure: (error: unknown) => ({
         code: 'unknown' as const,
         name: error instanceof Error ? error.name : 'UnknownError',
@@ -128,6 +143,7 @@ const dependencies = () => {
     releaseFrame,
     cameraPort,
     cameraCompositor,
+    completedArtworkGenerator,
   }
 }
 
@@ -223,5 +239,43 @@ describe('creation session app service', () => {
     service.dispose()
     expect(deps.releaseFrame).toHaveBeenCalledOnce()
     expect(deps.releaseCameraPreview).toHaveBeenCalledOnce()
+  })
+
+  it('完成PNGを同じsessionで再利用し、作品更新とresetで一度だけ解放する', async () => {
+    const deps = dependencies()
+    const releaseCompleted = vi.fn()
+    deps.completedArtworkGenerator.generate.mockResolvedValue({
+      blob: new Blob(['png'], { type: 'image/png' }),
+      objectUrl: 'blob:completed',
+      width: 1080,
+      height: 1080,
+      dispose: releaseCompleted,
+    })
+    const service = createCreationSessionAppService(deps.values)
+    await service.start()
+    await service.selectTemplate('buncho-01')
+
+    await expect(service.completeArtwork()).resolves.toBe(true)
+    await expect(service.completeArtwork()).resolves.toBe(true)
+    expect(deps.completedArtworkGenerator.generate).toHaveBeenCalledOnce()
+    expect(service.completedArtwork.value).toMatchObject({
+      phase: 'ready',
+      objectUrl: 'blob:completed',
+    })
+
+    service.attachCameraTarget({
+      srcObject: null,
+      videoWidth: 1920,
+      videoHeight: 1080,
+      play: vi.fn(async () => undefined),
+    } as unknown as HTMLVideoElement)
+    await service.openCamera('body')
+    await service.confirmCameraRationale()
+    await service.captureCamera()
+
+    expect(releaseCompleted).toHaveBeenCalledOnce()
+    expect(service.completedArtwork.value).toEqual({ phase: 'idle' })
+    service.resetToStart()
+    expect(releaseCompleted).toHaveBeenCalledOnce()
   })
 })

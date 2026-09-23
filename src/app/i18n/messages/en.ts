@@ -37,8 +37,33 @@ export const en = {
     fillMethods: 'Fill methods',
     cameraAction: 'Capture the view',
     cameraActionHint: 'Take a photo with the camera',
+    complete: 'Finish artwork',
+    completing: 'Creating your finished image…',
+    completeFailed:
+      'We could not create the finished image. Try again or keep creating.',
     nextChanges:
       'Photo and solid-color fills will be added in the next changes.',
+  },
+  completed: {
+    eyebrow: 'Finished',
+    heading: 'Your Moment Palette',
+    imageAlt: 'Finished Moment Palette artwork',
+    longPress: 'Press and hold the image to save it.',
+    share: 'Share',
+    sharing: 'Opening the share sheet…',
+    shared:
+      'The image was handed off to your device or chosen destination. Confirm posting or saving there.',
+    cancelled: 'Sharing was cancelled. You can try again with the same image.',
+    unsupported:
+      'Image sharing is unavailable here. Save by pressing and holding the image, or copy the share text.',
+    failed:
+      'We could not start sharing. Try again or press and hold the image to save it.',
+    shareText: 'Share text',
+    copyText: 'Copy share text',
+    copied: 'Share text copied.',
+    copyFallback: 'Select the share text below and copy it manually.',
+    backToCreation: 'Back to artwork',
+    startOver: 'Start over',
   },
   camera: {
     eyebrow: 'Capture the view',
