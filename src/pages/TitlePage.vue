@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 
 import { useCreationSession } from '@/features/creation-session/sessionFacade'
 import LanguageSwitcher from '@/shared/ui/LanguageSwitcher.vue'
+import ScreenShell from '@/shared/ui/ScreenShell.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -15,8 +16,10 @@ const handleStart = async () => {
 </script>
 
 <template>
-  <main class="title-page">
-    <LanguageSwitcher class="language-switcher" />
+  <ScreenShell class="title-page" :scrollable="false">
+    <template #header-right>
+      <LanguageSwitcher class="language-switcher" />
+    </template>
 
     <section class="title-page__hero" aria-labelledby="title-heading">
       <div class="title-page__mark" aria-hidden="true"><span /></div>
@@ -55,21 +58,12 @@ const handleStart = async () => {
         </button>
       </div>
     </section>
-  </main>
+  </ScreenShell>
 </template>
 
 <style scoped>
 .title-page {
   position: relative;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  width: 100%;
-  height: 100%;
-  padding: calc(env(safe-area-inset-top) + clamp(1rem, 4vw, 1.5rem))
-    calc(env(safe-area-inset-right) + clamp(1rem, 6vw, 2rem))
-    calc(env(safe-area-inset-bottom) + clamp(1.25rem, 5vw, 2rem))
-    calc(env(safe-area-inset-left) + clamp(1rem, 6vw, 2rem));
-  overflow: hidden;
   background:
     radial-gradient(circle at 10% 12%, rgb(250 191 104 / 38%), transparent 30%),
     radial-gradient(circle at 90% 78%, rgb(117 198 188 / 32%), transparent 34%),
@@ -97,9 +91,20 @@ const handleStart = async () => {
   bottom: 8%;
 }
 
+.title-page :deep(.screen-shell__header),
+.title-page :deep(.screen-shell__body) {
+  position: relative;
+  z-index: 1;
+}
+
+.title-page :deep(.screen-shell__body) {
+  display: grid;
+  align-items: center;
+  overflow: hidden;
+}
+
 .language-switcher {
   z-index: 1;
-  justify-self: end;
 }
 
 .title-page__start:focus-visible {
@@ -108,7 +113,6 @@ const handleStart = async () => {
 }
 
 .title-page__hero {
-  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;

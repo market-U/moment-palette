@@ -4,7 +4,8 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
 import { useCreationSession } from '@/features/creation-session/sessionFacade'
-import LanguageSwitcher from '@/shared/ui/LanguageSwitcher.vue'
+import BackButton from '@/shared/ui/BackButton.vue'
+import ScreenShell from '@/shared/ui/ScreenShell.vue'
 
 const { locale, t } = useI18n()
 const router = useRouter()
@@ -31,13 +32,10 @@ const restart = async () => {
 </script>
 
 <template>
-  <main class="selection-page">
-    <header class="selection-page__header">
-      <button class="text-button" type="button" @click="restart">
-        {{ t('actions.back') }}
-      </button>
-      <LanguageSwitcher />
-    </header>
+  <ScreenShell class="selection-page">
+    <template #header-left>
+      <BackButton :label="t('actions.back')" @click="restart" />
+    </template>
 
     <section class="selection-page__content" aria-labelledby="template-heading">
       <p class="eyebrow">Moment Palette</p>
@@ -74,6 +72,7 @@ const restart = async () => {
         v-else-if="state.phase === 'ready' || state.phase === 'preparing'"
         class="template-grid"
       >
+        <!-- テンプレートカードリスト -->
         <li v-for="template in state.templates" :key="template.id">
           <button
             class="template-card"
@@ -97,31 +96,15 @@ const restart = async () => {
         </li>
       </ul>
     </section>
-  </main>
+  </ScreenShell>
 </template>
 
 <style scoped>
 .selection-page {
-  width: 100%;
-  height: 100%;
-  padding: calc(env(safe-area-inset-top) + 1rem)
-    calc(env(safe-area-inset-right) + 1rem)
-    calc(env(safe-area-inset-bottom) + 1.5rem)
-    calc(env(safe-area-inset-left) + 1rem);
-  overflow-y: auto;
-  background: var(--surface-gradient);
-}
-
-.selection-page__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 46rem;
-  margin: 0 auto;
+  background: transparent;
 }
 
 .selection-page__content {
-  max-width: 46rem;
   margin: clamp(2rem, 7vh, 4.5rem) auto 0;
 }
 
@@ -160,9 +143,9 @@ h1 {
   text-align: left;
   cursor: pointer;
   background: rgb(255 255 255 / 82%);
-  border: 1px solid rgb(65 54 76 / 12%);
+  /* border: 1px solid rgb(65 54 76 / 12%); */
+  border: none;
   border-radius: 1.5rem;
-  box-shadow: 0 1rem 2.5rem rgb(65 54 76 / 10%);
 }
 
 .template-card img {
@@ -219,7 +202,7 @@ h1 {
 }
 
 .text-button {
-  color: var(--color-muted);
+  color: var(--color-ink);
   background: transparent;
   border: 0;
 }

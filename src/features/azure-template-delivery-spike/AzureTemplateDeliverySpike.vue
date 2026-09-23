@@ -337,7 +337,7 @@ onBeforeUnmount(() => {
     calc(env(safe-area-inset-left) + 1rem);
   overflow-y: auto;
   color: #27303d;
-  background: linear-gradient(150deg, #eef7ff, #fff8ea 55%, #f6eefb);
+  /* background: linear-gradient(150deg, #eef7ff, #fff8ea 55%, #f6eefb); */
 }
 
 .azure-spike__header,

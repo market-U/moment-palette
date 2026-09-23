@@ -1,8 +1,8 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: フェーズ5進行中・次のchangeは`unify-screen-layout`
+> ステータス: フェーズ5進行中・次のchangeは`implement-completed-artwork`
 >
-> 最終更新日: 2026-09-22
+> 最終更新日: 2026-09-23
 
 ## 目的
 
@@ -30,7 +30,7 @@
 - フェーズ3のF/S結果をvision、画面遷移、UI状態、フロントエンド方針、Azure構成、template形式へ反映するフェーズ4を完了した。
 - フェーズ5の最初のchange `establish-creation-session`は、Startからtemplate選択、初期作品を表示する制作画面までの実装、verify、main specsへの同期、archiveを完了した。
 - フェーズ5の`implement-camera-fill`は、Artwork更新、camera resource所有、製品camera導線、中央固定Area selector、F/Sコード移行を実装し、iPhoneのSafari・Chromeによる実機確認、verify、main specsへの同期、archiveを完了した。
-- 既存画面で判明したheader位置と戻る操作の重複は、`unify-screen-layout`を独立した通常changeとして扱い、後続画面を増やす前に共通化する。
+- `unify-screen-layout`は、既存画面で判明したheader位置と戻る操作の重複の共通化、iPhone Safari・Chromeによる実機確認、verify、main specsへの同期、archiveを完了した。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序
@@ -253,7 +253,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ### 5. 主要導線を本実装する
 
-ステータス: 進行中（最初のchangeは完了）
+ステータス: 進行中（1〜3を完了・archive済み）
 
 本実装は、ユーザーが確認できる能力と画面横断の整備を次の六つの通常changeへ分ける。各changeを単独で検証可能にし、`unify-screen-layout`を挟みつつ、`establish-creation-session`、`implement-camera-fill`、`implement-completed-artwork`でタイトルからカメラ撮影、完成、保存・共有までの縦切りを完成させる。
 
@@ -264,7 +264,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 2. `implement-camera-fill`（完了・archive済み）
    - 中央固定のエリア選択、カメラ権限、前面・背面切替、pan、pinch、比較slider、撮影、撮り直し、上書きを製品導線へ実装する。
    - camera frameを作品状態へ反映し、Canvas 2D compositorへ統合する。
-3. `unify-screen-layout`
+3. `unify-screen-layout`（完了・archive済み）
    - タイトル、テンプレート選択、制作画面でheaderのsafe area、上端・左右余白、最大幅を共有する画面shellを`shared/ui`へ実装する。
    - 戻るボタンの見た目とclick通知を再利用componentへまとめ、遷移先の決定、遷移前のsession破棄、router操作は各pageの責務として渡せる構造にする。
    - 共通に保つ寸法をCSS custom propertiesへまとめ、画面固有の配置との差を明示する。
@@ -336,8 +336,7 @@ template catalogの運用支援は、本番用schemaとasset更新手順の確�
 
 ## 次のセッションで行うこと
 
-1. 画面仕様を確認しながら、次の通常change `unify-screen-layout`を開始する。
-2. 画面共通化の完了後、`implement-completed-artwork`を開始する。
+1. `implement-completed-artwork`を開始する。
 
 ## 更新ルール
 
