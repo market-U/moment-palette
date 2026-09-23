@@ -24,10 +24,10 @@
 
 - [x] 4.1 制作画面の「思い出から切り取る」操作、写真選択中・失敗・調整の画面遷移を実装する
 - [x] 4.2 写真調整UIに編集領域限定のgesture、比較slider、反映・キャンセル・選び直しを実装し、日本語・英語の表示を追加する。OS picker表示中はdialogを出さず、写真調整時の同一キャンセル操作は一つだけにする
-- [ ] 4.3 F/S専用route、固定UI、診断表示を削除し、対応する製品実装、回帰test、全自動品質検査、iPhone Safari・Chrome実機確認の証跡がそろったことを確認する
+- [x] 4.3 F/S専用route、固定UI、診断表示を削除し、対応する製品実装、回帰test、全自動品質検査、iPhone Safari・Chrome実機確認の証跡がそろったことを確認する
 
 ## 5. 検証と実機確認
 
 - [x] 5.1 format、lint、typecheck、単体テスト、production buildを実行し、失敗を解消する
-- [ ] 5.2 iPhone Safari・ChromeのPRプレビューで、写真ライブラリ・OSカメラ・ファイル選択、JPEG・HEIC・PNG、pan・pinch、余白、上書き、完成・保存・共有を確認する
-- [ ] 5.3 Android Chromeの実機確認を端末確保後の回帰項目として記録し、OpenSpec verifyで仕様・設計・実装の整合性を確認する
+- [x] 5.2 iPhone Safari・ChromeのPRプレビューで、写真ライブラリ・OSカメラ・ファイル選択、JPEG・HEIC・PNG、pan・pinch、余白、上書き、完成・保存・共有を確認する
+- [x] 5.3 Android Chromeの実機確認を端末確保後の回帰項目として記録し、OpenSpec verifyで仕様・設計・実装の整合性を確認する

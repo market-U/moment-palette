@@ -20,6 +20,11 @@
 - **WHEN** Artworkにcapture済みのArea resourceを持つ利用者が完成操作をする
 - **THEN** アプリケーションはcatalog順のmaskで各resourceを切り抜き、line artを最前面へ描画したPNGを生成する
 
+#### Scenario: Photo fillを含む作品を完成する
+
+- **WHEN** Artworkに正規化済み写真と調整済みtransformを持つArea resourceを含む利用者が完成操作をする
+- **THEN** アプリケーションは選択Areaの初期色を写真の下に描き、catalog順のmaskで写真を切り抜き、line artを最前面へ描画したPNGを生成する
+
 #### Scenario: PNG生成中に完成操作を重ねる
 
 - **WHEN** PNG生成が完了する前に利用者が完成操作を再度行う
