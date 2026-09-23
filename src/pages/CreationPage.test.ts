@@ -14,5 +14,7 @@ describe('CreationPage', () => {
     )
     expect(source).toContain('session.returnToTemplates()\n  await router.push')
     expect(source).not.toContain('LanguageSwitcher')
+    expect(source).toContain('session.completeArtwork()')
+    expect(source).toContain("router.push({ name: 'completed-artwork' })")
   })
 })

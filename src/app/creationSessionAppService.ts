@@ -6,6 +6,9 @@ import {
   toCameraFailure,
 } from '@/infrastructure/camera/browserCameraStream'
 import { createBrowserReleaseAdapter } from '@/infrastructure/creation-session/browserReleaseAdapter'
+import { createBrowserClipboard } from '@/infrastructure/completed-artwork/browserClipboard'
+import { createBrowserCompletedArtworkShare } from '@/infrastructure/completed-artwork/browserCompletedArtworkShare'
+import { createCanvasCompletedArtworkGenerator } from '@/infrastructure/completed-artwork/canvasCompletedArtworkGenerator'
 import { createBrowserTemplateAssetLoader } from '@/infrastructure/template-selection/browserTemplateAssetLoader'
 import { createCanvasArtworkPreview } from '@/infrastructure/template-selection/canvasArtworkPreview'
 import { createDevelopmentTemplateCatalogAdapter } from '@/infrastructure/template-selection/developmentTemplateCatalogAdapter'
@@ -24,6 +27,9 @@ export const creationSessionAppService = createCreationSessionAppService({
   cameraPort: createBrowserCameraStream(),
   cameraPermission: createBrowserCameraPermission(),
   cameraCompositor: createCanvasCameraCompositor(),
+  completedArtworkGenerator: createCanvasCompletedArtworkGenerator(),
+  completedArtworkShare: createBrowserCompletedArtworkShare(),
+  clipboard: createBrowserClipboard(),
   mapCameraFailure: toCameraFailure,
   isDocumentHidden: () => document.visibilityState === 'hidden',
   now: () => new Date(),

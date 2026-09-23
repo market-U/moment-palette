@@ -1,6 +1,6 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: フェーズ5進行中・次のchangeは`implement-completed-artwork`
+> ステータス: フェーズ5進行中・次のchangeは`implement-photo-fill`
 >
 > 最終更新日: 2026-09-23
 
@@ -31,6 +31,7 @@
 - フェーズ5の最初のchange `establish-creation-session`は、Startからtemplate選択、初期作品を表示する制作画面までの実装、verify、main specsへの同期、archiveを完了した。
 - フェーズ5の`implement-camera-fill`は、Artwork更新、camera resource所有、製品camera導線、中央固定Area selector、F/Sコード移行を実装し、iPhoneのSafari・Chromeによる実機確認、verify、main specsへの同期、archiveを完了した。
 - `unify-screen-layout`は、既存画面で判明したheader位置と戻る操作の重複の共通化、iPhone Safari・Chromeによる実機確認、verify、main specsへの同期、archiveを完了した。
+- `implement-completed-artwork`は、現在のArtworkからの1080×1080 PNG生成、完成確認、長押し保存、Web Share、共有文コピー、作品更新・session終了時の完成PNG resource破棄を実装し、format、lint、型検査、単体テスト、production build、iPhone Safari・Chromeでの実機確認、verify、main specsへの同期を完了した。Web Share非対応・失敗は実機で再現できなかったため、`navigator.canShare()`がfalseの場合と共有Promiseの失敗を分類し、画像と手動コピー可能な共有文を維持する単体テストで確認した。Android Chromeは端末確保後の回帰項目とする。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序
@@ -253,7 +254,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ### 5. 主要導線を本実装する
 
-ステータス: 進行中（1〜3を完了・archive済み）
+ステータス: 進行中（1〜4を完了・archive済み）
 
 本実装は、ユーザーが確認できる能力と画面横断の整備を次の六つの通常changeへ分ける。各changeを単独で検証可能にし、`unify-screen-layout`を挟みつつ、`establish-creation-session`、`implement-camera-fill`、`implement-completed-artwork`でタイトルからカメラ撮影、完成、保存・共有までの縦切りを完成させる。
 
@@ -269,7 +270,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
    - 戻るボタンの見た目とclick通知を再利用componentへまとめ、遷移先の決定、遷移前のsession破棄、router操作は各pageの責務として渡せる構造にする。
    - 共通に保つ寸法をCSS custom propertiesへまとめ、画面固有の配置との差を明示する。
    - 言語切替は正式な画面仕様に従ってタイトル画面だけへ配置し、既存三画面のレイアウトを揃える。
-4. `implement-completed-artwork`
+4. `implement-completed-artwork`（完了・archive済み）
    - 1080×1080 PNG生成、完成確認、長押し保存、Web Share、共有キャンセル・失敗分類、Clipboard fallbackを実装する。
    - 作品変更と画面離脱に応じたPNG Blob、object URLの再利用・破棄を実装する。
 5. `implement-photo-fill`
@@ -336,7 +337,7 @@ template catalogの運用支援は、本番用schemaとasset更新手順の確�
 
 ## 次のセッションで行うこと
 
-1. `implement-completed-artwork`を開始する。
+1. `implement-photo-fill`を開始する。
 
 ## 更新ルール
 

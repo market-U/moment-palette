@@ -15,6 +15,7 @@ import type { ReleasePort } from '@/features/creation-session/releasePort'
 import type {
   ActiveCreationView,
   CameraViewState,
+  CompletedArtworkViewState,
   CreationSessionFacade,
   StartViewState,
   TemplateSelectionViewState,
@@ -34,6 +35,15 @@ import {
   type TemplateSelectionState,
 } from '@/features/template-selection/state'
 import type { TemplateCatalogPort } from '@/features/template-selection/templateCatalogPort'
+import type { ClipboardPort } from '@/features/completed-artwork/clipboardPort'
+import { CompletedArtworkOwner } from '@/features/completed-artwork/completedArtworkOwner'
+import type { CompletedArtworkGeneratorPort } from '@/features/completed-artwork/completedArtworkPort'
+import {
+  createCompletedArtworkShareText,
+  prepareCompletedArtworkShare,
+  type CompletedArtworkShareCopy,
+} from '@/features/completed-artwork/sharePayload'
+import type { CompletedArtworkSharePort } from '@/features/completed-artwork/sharePort'
 
 type Dependencies = {
   frontend: BuildIdentity
@@ -44,6 +54,9 @@ type Dependencies = {
   cameraPort: CameraStreamPort
   cameraPermission: CameraPermissionPort
   cameraCompositor: CameraCompositorPort
+  completedArtworkGenerator: CompletedArtworkGeneratorPort
+  completedArtworkShare: CompletedArtworkSharePort
+  clipboard: ClipboardPort
   mapCameraFailure: (error: unknown) => CameraFailure
   isDocumentHidden: () => boolean
   now: () => Date
@@ -107,6 +120,11 @@ export const createCreationSessionAppService = (
   const owner = new CreationSessionOwner<ActiveCreationSession>()
   const activeSession = shallowRef<ActiveCreationSession | null>(null)
   const cameraState = shallowRef<CameraViewState>({ phase: 'closed' })
+  const completedArtwork = shallowRef<CompletedArtworkViewState>({
+    phase: 'idle',
+  })
+  const completedArtworkOwner = new CompletedArtworkOwner()
+  let completionGeneration = 0
   let cameraTarget: HTMLVideoElement | undefined
   const cameraController = createCameraFillController({
     camera: dependencies.cameraPort,
@@ -128,6 +146,9 @@ export const createCreationSessionAppService = (
   const clearActiveSession = () => {
     // 所有者と画面用参照を同じ境界で消し、解放済みsessionの参照を残さない。
     cameraController.resetSession()
+    completionGeneration += 1
+    completedArtworkOwner.dispose()
+    completedArtwork.value = { phase: 'idle' }
     owner.clear()
     activeSession.value = null
   }
@@ -203,12 +224,119 @@ export const createCreationSessionAppService = (
     }
   }
 
+  const completedArtworkView = () => {
+    const resource = completedArtworkOwner.current
+    if (!resource) return { phase: 'idle' } as const
+    return {
+      phase: 'ready' as const,
+      objectUrl: resource.objectUrl,
+      width: resource.width,
+      height: resource.height,
+      sharing: completedArtworkOwner.isSharing,
+    }
+  }
+
+  const readyCompletedArtworkView = () => {
+    const view = completedArtworkView()
+    if (view.phase !== 'ready') {
+      throw new Error('完成画像resourceがありません。')
+    }
+    return view
+  }
+
+  const completeArtwork = async (): Promise<boolean> => {
+    const current = completedArtworkOwner.current
+    if (current) {
+      completedArtwork.value = completedArtworkView()
+      return true
+    }
+    if (completedArtwork.value.phase === 'generating') return false
+    const session = activeSession.value
+    if (!session) return false
+
+    const generation = completionGeneration + 1
+    completionGeneration = generation
+    completedArtwork.value = { phase: 'generating' }
+    try {
+      const resource = await dependencies.completedArtworkGenerator.generate({
+        template: session.template,
+        artwork: session.artwork,
+        assets: {
+          lineArt: session.assets.lineArt.source,
+          masks: session.assets.masks.map((mask) => ({
+            id: mask.id,
+            source: mask.source,
+          })),
+        },
+        areaResources: session.areaResources,
+      })
+      if (
+        generation !== completionGeneration ||
+        activeSession.value !== session
+      ) {
+        resource.dispose()
+        return false
+      }
+      completedArtworkOwner.replace(resource)
+      completedArtwork.value = completedArtworkView()
+      return true
+    } catch {
+      if (generation === completionGeneration) {
+        completedArtwork.value = { phase: 'error' }
+      }
+      return false
+    }
+  }
+
+  const invalidateCompletedArtwork = () => {
+    completionGeneration += 1
+    completedArtworkOwner.dispose()
+    completedArtwork.value = { phase: 'idle' }
+  }
+
+  const shareCompletedArtwork = async (
+    copy: CompletedArtworkShareCopy,
+  ): Promise<void> => {
+    const resource = completedArtworkOwner.current
+    if (!resource || !completedArtworkOwner.beginShare()) return
+    const prepared = prepareCompletedArtworkShare(resource.blob, copy)
+    const capability = dependencies.completedArtworkShare.canShare(prepared)
+    if (!capability.available) {
+      completedArtworkOwner.finishShare()
+      completedArtwork.value = {
+        ...readyCompletedArtworkView(),
+        shareOutcome: { kind: 'unsupported', reason: capability.reason },
+      }
+      return
+    }
+    completedArtwork.value = readyCompletedArtworkView()
+    const outcome = await dependencies.completedArtworkShare.share(prepared)
+    completedArtworkOwner.finishShare()
+    completedArtwork.value = {
+      ...readyCompletedArtworkView(),
+      shareOutcome: outcome,
+    }
+  }
+
+  const copyCompletedArtworkShareText = async (
+    copy: CompletedArtworkShareCopy,
+  ): Promise<void> => {
+    const outcome = await dependencies.clipboard.copy(
+      createCompletedArtworkShareText(copy),
+    )
+    completedArtwork.value = {
+      ...readyCompletedArtworkView(),
+      copyOutcome: outcome,
+    }
+  }
+
   return {
     appVersion: dependencies.frontend.appVersion,
     startState: readonly(startState),
     templateSelection: readonly(templateSelection),
     activeCreation: readonly(activeCreation),
     cameraState: readonly(cameraState),
+    completedArtwork: readonly(completedArtwork),
     start,
     selectTemplate,
     retryTemplate,
@@ -285,6 +413,7 @@ export const createCreationSessionAppService = (
               areaResources,
             }),
         )
+        invalidateCompletedArtwork()
         triggerRef(activeSession)
         cameraController.finishCapture()
         return true
@@ -297,6 +426,11 @@ export const createCreationSessionAppService = (
     cancelCamera: () => cameraController.cancel(),
     handleCameraVisibilityChange: () =>
       cameraController.handleVisibilityChange(),
+    completeArtwork,
+    retryCompletedArtwork: completeArtwork,
+    shareCompletedArtwork,
+    copyCompletedArtworkShareText,
+    hasCompletedArtwork: () => completedArtworkOwner.current !== undefined,
     hasCatalog: () => snapshot.value !== null,
     hasActiveSession: () => activeSession.value !== null,
     dispose: resetToStart,
