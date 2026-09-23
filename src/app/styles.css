@@ -54,3 +54,7 @@ button {
   height: 100dvh;
   isolation: isolate;
 }
+
+.shadow-lg {
+    box-shadow: 0 1rem 3rem rgb(65 54 76 / 14%);
+}

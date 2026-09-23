@@ -147,7 +147,6 @@ h1 {
   object-fit: contain;
   background: #fff;
   border-radius: 1.5rem;
-  /* box-shadow: 0 1rem 3rem rgb(65 54 76 / 14%); */
 }
 
 .area-panel {
