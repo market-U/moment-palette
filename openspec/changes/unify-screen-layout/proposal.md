@@ -8,6 +8,7 @@
 - `shared/ui/BackButton.vue`を追加し、戻る操作の見た目、アイコン、操作領域、無効状態、click通知を共通化する。遷移先の決定と制作sessionの操作はpageに残す。
 - タイトル、テンプレート選択、制作画面を共通shellへ移行し、共通の余白・ヘッダー・本文幅をCSS custom propertiesで定義する。
 - 言語切替は仕様どおりタイトル画面のヘッダー右側だけに配置し、テンプレート選択と制作画面からは除去する。
+- `AreaSelector`内にベタ書きしている撮影対象Areaの選択ボタンを、`camera-fill` feature内の表示部品へ切り出す。
 
 ## Capabilities
 
@@ -21,5 +22,5 @@
 
 ## Impact
 
-- 影響範囲は`src/shared/ui/`、タイトル・テンプレート選択・制作のpage、および共通スタイルである。
+- 影響範囲は`src/shared/ui/`、`camera-fill` feature、タイトル・テンプレート選択・制作のpage、および共通スタイルである。
 - ルーター、制作sessionの所有権、外部API、依存パッケージは変更しない。

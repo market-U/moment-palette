@@ -42,6 +42,7 @@ html {
 
 body {
   min-width: 20rem;
+  background: var(--surface-gradient);
 }
 
 button {

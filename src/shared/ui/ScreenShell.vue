@@ -35,13 +35,14 @@ withDefaults(
 <style scoped>
 .screen-shell {
   display: grid;
-  grid-template-rows: var(--screen-header-min-height) minmax(0, 1fr);
+  grid-template-rows:
+    calc(
+      var(--screen-header-min-height) + var(--screen-padding-block-start) +
+        env(safe-area-inset-top)
+    )
+    minmax(0, 1fr);
   width: 100%;
   height: 100%;
-  padding: calc(env(safe-area-inset-top) + var(--screen-padding-block-start))
-    calc(env(safe-area-inset-right) + var(--screen-padding-inline))
-    calc(env(safe-area-inset-bottom) + var(--screen-padding-block-end))
-    calc(env(safe-area-inset-left) + var(--screen-padding-inline));
   overflow: hidden;
 }
 
@@ -53,6 +54,9 @@ withDefaults(
   width: min(100%, var(--screen-header-max-width));
   min-height: var(--screen-header-min-height);
   margin: 0 auto;
+  padding: calc(env(safe-area-inset-top) + var(--screen-padding-block-start))
+    calc(env(safe-area-inset-right) + var(--screen-padding-inline)) 0
+    calc(env(safe-area-inset-left) + var(--screen-padding-inline));
 }
 
 .screen-shell__header-side,
@@ -78,6 +82,9 @@ withDefaults(
   width: min(100%, var(--screen-content-max-width));
   min-height: 0;
   margin: 0 auto;
+  padding: 0 calc(env(safe-area-inset-right) + var(--screen-padding-inline))
+    calc(env(safe-area-inset-bottom) + var(--screen-padding-block-end))
+    calc(env(safe-area-inset-left) + var(--screen-padding-inline));
 }
 
 .screen-shell__body--scrollable {

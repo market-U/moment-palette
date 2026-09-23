@@ -118,8 +118,6 @@ const openCamera = async () => {
 <style scoped>
 .creation-page {
   --screen-content-max-width: 36rem;
-
-  background: var(--surface-gradient);
 }
 
 .creation-page__content {

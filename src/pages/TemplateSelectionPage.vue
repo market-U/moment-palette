@@ -72,6 +72,7 @@ const restart = async () => {
         v-else-if="state.phase === 'ready' || state.phase === 'preparing'"
         class="template-grid"
       >
+        <!-- テンプレートカードリスト -->
         <li v-for="template in state.templates" :key="template.id">
           <button
             class="template-card"
@@ -100,7 +101,7 @@ const restart = async () => {
 
 <style scoped>
 .selection-page {
-  background: var(--surface-gradient);
+  background: transparent;
 }
 
 .selection-page__content {
@@ -142,9 +143,10 @@ h1 {
   text-align: left;
   cursor: pointer;
   background: rgb(255 255 255 / 82%);
-  border: 1px solid rgb(65 54 76 / 12%);
+  /* border: 1px solid rgb(65 54 76 / 12%); */
+  border: none;
   border-radius: 1.5rem;
-  box-shadow: 0 1rem 2.5rem rgb(65 54 76 / 10%);
+  /* box-shadow: 0 1rem 2.5rem rgb(65 54 76 / 10%); */
 }
 
 .template-card img {

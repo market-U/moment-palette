@@ -44,6 +44,12 @@ routerを部品へ注入する案や、遷移先・callbackをpropsとして受�
 
 画面ごとに言語切替を残す案は、画面仕様と異なり、共通header上の操作位置を再び不揃いにするため採用しない。
 
+### Area選択ボタンはfeature内の表示部品へ分割する
+
+`AreaSelector`は中央へのscroll、中央Areaの判定、選択通知を担い、各Areaのbutton markupと表示styleは`AreaSelectorItem.vue`へ分割する。Areaのラベル、初期色、撮影済み状態は`camera-fill`固有の表示情報であるため、`shared/ui`ではなく同feature内へ置く。親は選択通知を受けて既存どおり中央へscrollし、Areaの選択確定を行う。
+
+汎用buttonへ抽象化する案は、Area固有の状態と表示をpropsへ漏らして`shared/ui`の責務を曖昧にするため採用しない。mask thumbnailまたは選択Areaの斜線表示は、現行catalog・view model・正式specにない別の製品要件であり、このrefactorでは追加しない。
+
 ## Risks / Trade-offs
 
 - [既存pageのスクロール領域がshellと二重になる] → pageから全画面paddingとoverflowを外し、shellだけが縦スクロールを持つことを単体テストと手動確認で確認する。
@@ -57,6 +63,7 @@ routerを部品へ注入する案や、遷移先・callbackをpropsとして受�
 2. タイトル、テンプレート選択、制作を順にshellへ移行し、page固有の背景と本文レイアウトを保持する。
 3. 言語切替をタイトル以外から除去し、戻るhandlerが従来どおりsession処理後にroute遷移することを確認する。
 4. 静的検査、単体テスト、production buildと、iPhone Safari・Chromeの手動確認を実行する。
+5. Area選択buttonの表示部品を分割し、既存の選択通知と中央snapを維持することを確認する。
 
 変更は純粋なクライアントUIであり、データ移行や段階的配信は不要である。不具合時はpageを従来の個別レイアウトへ戻せる。
 

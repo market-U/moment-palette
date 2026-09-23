@@ -19,3 +19,9 @@
 - [x] 3.1 既存テストを更新し、戻る操作でpage側のsession処理とroute遷移が維持されることを確認する。
 - [x] 3.2 `pnpm test:run`、`pnpm typecheck`、`pnpm lint`、`pnpm format:check`、`pnpm build`を実行する。
 - [ ] 3.3 iPhone Safari・Chromeでタイトル、テンプレート選択、制作のheader位置、safe area、スクロール、言語切替の配置、戻る操作を確認する。
+
+## 4. 撮影対象選択部品の分割
+
+- [x] 4.1 `AreaSelector`内のArea選択button markupとstyleを、`camera-fill` feature内の`AreaSelectorItem`へ切り出す。
+- [x] 4.2 選択状態、撮影済み表示、選択通知を確認する`AreaSelectorItem`の単体テストを追加する。
+- [x] 4.3 `pnpm test:run`、`pnpm typecheck`、`pnpm lint`、`pnpm format:check`、`pnpm build`を実行する。
