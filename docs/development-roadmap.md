@@ -1,6 +1,6 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: フェーズ5進行中・`implement-solid-color-fill`はverify・archive前
+> ステータス: フェーズ5完了・次はフェーズ6の本番用Azure配信・テンプレート配信基盤
 >
 > 最終更新日: 2026-09-24
 
@@ -33,7 +33,7 @@
 - `unify-screen-layout`は、既存画面で判明したheader位置と戻る操作の重複の共通化、iPhone Safari・Chromeによる実機確認、verify、main specsへの同期、archiveを完了した。
 - `implement-completed-artwork`は、現在のArtworkからの1080×1080 PNG生成、完成確認、長押し保存、Web Share、共有文コピー、作品更新・session終了時の完成PNG resource破棄を実装し、format、lint、型検査、単体テスト、production build、iPhone Safari・Chromeでの実機確認、verify、main specsへの同期を完了した。Web Share非対応・失敗は実機で再現できなかったため、`navigator.canShare()`がfalseの場合と共有Promiseの失敗を分類し、画像と手動コピー可能な共有文を維持する単体テストで確認した。Android Chromeは端末確保後の回帰項目とする。
 - `implement-photo-fill`は、OS画像選択、標準APIによるdecode、EXIF Orientation、4096px・12MP正規化、写真のpan・pinch・余白を許す調整、作品・完成PNGへの反映、resource解放、F/S専用実装の移設と削除を実装し、iPhone Safari・ChromeのPRプレビュー実機確認、verify、main specsへの同期を完了した。Android Chromeは端末確保後の回帰項目とする。
-- `implement-solid-color-fill`は、標準`input[type="color"]`による全画面の単色調整、色の再選択、作品全体の一時preview、反映・キャンセル、Artwork・完成PNGへの単色合成、既存camera・photo resourceの上書き時解放を実装した。iPhone Safari・ChromeのPRプレビュー実機確認で、初期パレットなしの標準pickerに大きな操作性の問題は確認されなかった。プリセットまたは専用pickerは、完成後の利用で必要性が判明した場合にIssueとして検討する。verify・archiveは未完了である。
+- `implement-solid-color-fill`は、標準`input[type="color"]`による全画面の単色調整、色の再選択、作品全体の一時preview、反映・キャンセル、Artwork・完成PNGへの単色合成、既存camera・photo resourceの上書き時解放を実装した。iPhone Safari・ChromeのPRプレビュー実機確認で、初期パレットなしの標準pickerに大きな操作性の問題は確認されなかった。プリセットまたは専用pickerは、完成後の利用で必要性が判明した場合にIssueとして検討する。verify、main specsへの同期、archiveを完了した。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序
@@ -256,7 +256,7 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
 
 ### 5. 主要導線を本実装する
 
-ステータス: 進行中（1〜5を完了・archive済み、6はverify・archive前）
+ステータス: 完了（1〜6をarchive済み）
 
 本実装は、ユーザーが確認できる能力と画面横断の整備を次の六つの通常changeへ分ける。各changeを単独で検証可能にし、`unify-screen-layout`を挟みつつ、`establish-creation-session`、`implement-camera-fill`、`implement-completed-artwork`でタイトルからカメラ撮影、完成、保存・共有までの縦切りを完成させる。
 
@@ -277,9 +277,9 @@ F/Sコードは本番コードから隔離する。完了時にはファイル�
    - 作品変更と画面離脱に応じたPNG Blob、object URLの再利用・破棄を実装する。
 5. `implement-photo-fill`（完了・archive済み）
    - 写真ライブラリ・ファイル選択、標準APIによるdecode、4096px・12MP上限への正規化、位置・倍率調整、余白を含む反映、選び直し、失敗からの復帰を実装する。
-6. `implement-solid-color-fill`（実装・iPhone実機確認済み、verify・archive前）
+6. `implement-solid-color-fill`（完了・archive済み）
    - 初期パレットなしの標準`input[type="color"]`を全画面の単色調整画面へ配置し、単色の反映・上書き、キャンセルを実装した。
-   - iPhone Safari・Chromeで大きな操作性の問題は確認されなかった。必要に応じたプリセットまたは専用pickerは後続Issueで検討する。
+   - iPhone Safari・Chromeで大きな操作性の問題は確認されなかった。必要に応じたプリセットまたは専用pickerは後続Issueで検討する。verify、main specsへの同期、archiveを完了した。
 
 このフェーズでは、開発用カタログと抽象化したテンプレート取得処理を使ってフロントエンドの主要導線を優先する。Azure上の本番リソースとの接続はフェーズ6で行う。
 

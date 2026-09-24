@@ -1,0 +1,61 @@
+# solid-color-fill Specification
+
+## Purpose
+TBD - created by archiving change implement-solid-color-fill. Update Purpose after archive.
+## Requirements
+### Requirement: 気持ちからつくる単色調整導線
+
+アプリケーションは、制作画面で選択中Areaに対する「気持ちからつくる」操作を提供し、不透明な全画面の単色調整画面を表示しなければならない（SHALL）。単色調整画面は制作画面を背後に見せず、制作sessionと選択Areaを維持しなければならない（MUST）。
+
+#### Scenario: 単色調整を開始する
+
+- **WHEN** 利用者が選択中Areaで「気持ちからつくる」を操作する
+- **THEN** アプリケーションは同じAreaを対象とする全画面の単色調整画面を表示し、Artworkを変更しない
+
+#### Scenario: 色調整画面を開いた直後
+
+- **WHEN** 単色調整画面が表示される
+- **THEN** アプリケーションはOSまたはbrowserのcolor pickerを自動で開かず、利用者が明示操作できる色選択controlを表示する
+
+### Requirement: 標準カラーピッカーによる不透明色の選択
+
+アプリケーションは、単色調整画面にラベル付きの標準`input[type="color"]`を配置し、不透明なsRGBの`#RRGGBB`形式だけをArtwork候補として扱わなければならない（SHALL）。透明度、Display P3、推奨色またはプリセットパレット、独自カラーピッカーライブラリを提供してはならない（MUST NOT）。
+
+#### Scenario: 初期選択色を表示する
+
+- **WHEN** 利用者が単色調整画面を開く
+- **THEN** 対象Areaが既に単色ならアプリケーションはその単色を初期選択色として表示し、それ以外なら対象Areaの`initialColor`を表示する
+
+#### Scenario: 色を何度でも選び直す
+
+- **WHEN** 利用者が単色調整画面で標準color pickerを操作し、色を複数回変更する
+- **THEN** アプリケーションは各有効な不透明色を一時色として保持し、利用者が同じ画面で再びcolor pickerを開いて選び直せるようにする
+
+### Requirement: 単色の全体プレビューと確定
+
+アプリケーションは、単色調整画面で選択Areaだけへ一時色を適用した1080×1080座標系の作品全体previewを表示しなければならない（SHALL）。他Areaは現在確定しているArtworkのまま表示し、比較slider、pan、pinchを表示してはならない（MUST NOT）。一時色の変更は反映操作までArtwork、制作画面のpreview、完成PNGを変更してはならない（MUST NOT）。
+
+#### Scenario: 一時色を作品全体へプレビューする
+
+- **WHEN** 利用者が標準color pickerで有効な色を選ぶ
+- **THEN** アプリケーションは選択Areaを一時色でmask内に描き、他Areaとline artを含む作品全体previewを更新する
+
+#### Scenario: 単色を反映する
+
+- **WHEN** 利用者が単色調整画面で反映を操作し、更新済みpreviewの生成に成功する
+- **THEN** アプリケーションは選択Areaだけを単色fillへ原子的に更新し、制作画面へ戻る
+
+#### Scenario: 単色調整をキャンセルする
+
+- **WHEN** 利用者が単色調整画面でキャンセルを操作する
+- **THEN** アプリケーションは一時色を破棄し、Artwork、Area resource、制作画面のpreviewを変更せず同じAreaを選択した制作画面へ戻る
+
+### Requirement: 単色塗りの多言語表示
+
+アプリケーションは、「気持ちからつくる」、単色調整、色選択、反映、キャンセルを日本語と英語で提供しなければならない（SHALL）。
+
+#### Scenario: 選択中の言語で単色調整を表示する
+
+- **WHEN** 利用者が日本語または英語を選択した状態で単色調整を開始する
+- **THEN** アプリケーションは選択中の言語で単色調整画面の見出し、色選択control、反映、キャンセルを表示する
+

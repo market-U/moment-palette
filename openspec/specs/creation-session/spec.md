@@ -3,9 +3,7 @@
 ## Purpose
 
 タイトル画面のStartから制作画面まで、build互換性、catalog snapshot、単一制作session、route保護、resource解放を一貫して管理する。
-
 ## Requirements
-
 ### Requirement: Start時の互換性確認
 
 アプリケーションは、利用者がタイトル画面でStartを実行したとき、読み込み済みfrontend、release情報、template catalog responseのapp versionとbuild IDを照合しなければならない（SHALL）。照合とcatalog validationが完了するまで制作状態を生成してはならない（MUST NOT）。
@@ -51,7 +49,7 @@
 
 ### Requirement: 制作sessionの単一所有権
 
-アプリケーションは、tabごとに同時に一つだけ有効な制作sessionを所有しなければならない（SHALL）。制作sessionはtemplate metadata、更新可能な現在のArtwork、decode済みline art・mask、Areaごとの撮影frameと正規化済み写真、現在の表示resource、完成確認中の完成PNG resourceを所有し、個別resourceの上書き、完成PNGの無効化、sessionの置換または終了時に不要になったresourceを一度だけ解放しなければならない（MUST）。
+アプリケーションは、tabごとに同時に一つだけ有効な制作sessionを所有しなければならない（SHALL）。制作sessionはtemplate metadata、更新可能な現在のArtwork、decode済みline art・mask、Areaごとの撮影frameと正規化済み写真、現在の表示resource、完成確認中の完成PNG resourceを所有し、個別resourceの上書き、単色による画像resourceの置換、完成PNGの無効化、sessionの置換または終了時に不要になったresourceを一度だけ解放しなければならない（MUST）。
 
 #### Scenario: 最初の制作sessionを設定する
 
@@ -68,6 +66,11 @@
 - **WHEN** 選択Areaの写真調整と更新済みpreview生成が成功する
 - **THEN** session ownerは更新後のArtwork、Areaに対応する正規化済み写真とtransform、新previewを同じsessionへcommitし、置換された旧camera frameまたは写真resourceと旧previewを一度だけ解放する
 
+#### Scenario: 単色と表示resourceを追加する
+
+- **WHEN** 選択Areaの単色反映と更新済みpreview生成が成功する
+- **THEN** session ownerは更新後のArtworkと新previewを同じsessionへcommitし、対象Areaにあったcamera frameまたは写真resourceと旧previewを一度だけ解放する
+
 #### Scenario: 撮影frameの追加に失敗する
 
 - **WHEN** 新しい撮影frameの取得後にArtworkまたはpreviewの更新が失敗する
@@ -77,6 +80,11 @@
 
 - **WHEN** 新しい正規化済み写真の準備後にArtworkまたはpreviewの更新が失敗する
 - **THEN** session ownerは新しく生成した写真resourceを解放し、更新前のArtwork、Area resource、表示resourceを有効な状態で保持する
+
+#### Scenario: 単色とpreviewの更新に失敗する
+
+- **WHEN** 単色候補から更新済みpreviewを生成できない
+- **THEN** session ownerは単色候補をcommitせず、更新前のArtwork、Area resource、表示resourceを有効な状態で保持する
 
 #### Scenario: 完成PNGを生成する
 

@@ -3,9 +3,7 @@
 ## Purpose
 
 制作中のArtworkを完成PNGとして生成し、端末への保存とOS共有までを、制作session内のresourceだけで完結させる。
-
 ## Requirements
-
 ### Requirement: 完成PNGの生成
 
 アプリケーションは、利用者が制作画面で完成操作をしたとき、有効な制作sessionが所有する現在のArtwork、decode済みtemplate asset、Area resourceだけを使用して、各Areaとline artを1080×1080の一枚のPNG Blobへ合成しなければならない（SHALL）。この処理はブラウザ内で完結し、catalog、template asset、release情報、CSSを追加取得せず、画像をserverまたは外部serviceへ送信・永続保存してはならない（MUST NOT）。
@@ -24,6 +22,11 @@
 
 - **WHEN** Artworkに正規化済み写真と調整済みtransformを持つArea resourceを含む利用者が完成操作をする
 - **THEN** アプリケーションは選択Areaの初期色を写真の下に描き、catalog順のmaskで写真を切り抜き、line artを最前面へ描画したPNGを生成する
+
+#### Scenario: 単色fillを含む作品を完成する
+
+- **WHEN** Artworkに不透明な単色fillを持つAreaを含む利用者が完成操作をする
+- **THEN** アプリケーションは単色を対象Areaのmask内へ描き、他Areaをcatalog順に合成し、line artを最前面へ描画したPNGを生成する
 
 #### Scenario: PNG生成中に完成操作を重ねる
 
