@@ -1,12 +1,13 @@
-name: F/S preview deployment
+name: Production and PR preview deployment
 
 on:
   push:
     branches:
-      - main
+      - release
   pull_request:
     branches:
       - main
+      - release
     types:
       - opened
       - synchronize
@@ -17,7 +18,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: fs-preview-${{ github.event.pull_request.number || github.ref }}
+  group: moment-palette-deployment-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -100,7 +101,7 @@ jobs:
           github.event.pull_request.user.login != 'dependabot[bot]')
         uses: Azure/static-web-apps-deploy@4d27395796ac319302594769cfe812bd207490b1 # v1 (2026-09-21確認)
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_FS }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PRODUCTION }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: upload
           app_location: dist
@@ -108,6 +109,7 @@ jobs:
           api_build_command: npm run build
           output_location: ''
           skip_app_build: true
+          production_branch: release
 
   close-preview:
     name: PRプレビューを終了
@@ -124,6 +126,6 @@ jobs:
       - name: SWAのPRプレビューを閉じる
         uses: Azure/static-web-apps-deploy@4d27395796ac319302594769cfe812bd207490b1 # v1 (2026-09-21確認)
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_FS }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PRODUCTION }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: close

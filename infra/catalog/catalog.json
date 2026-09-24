@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "catalogRevision": "production-2026-09-24-r1",
+  "templates": [
+    {
+      "id": "buncho-01",
+      "assetRevision": "r1",
+      "name": {
+        "ja": "文鳥",
+        "en": "Java sparrow"
+      },
+      "published": true,
+      "publishFrom": "2026-01-01T00:00:00.000Z",
+      "publishUntil": null,
+      "tags": ["bird"],
+      "thumbnail": {
+        "path": "templates/buncho-01/r1/thumbnail.png",
+        "mimeType": "image/png"
+      },
+      "lineArt": {
+        "path": "templates/buncho-01/r1/line-art.png",
+        "mimeType": "image/png"
+      },
+      "masks": [
+        {
+          "id": "background",
+          "label": { "ja": "背景", "en": "Background" },
+          "initialColor": "#F3E8DC",
+          "path": "templates/buncho-01/r1/masks/background.png",
+          "mimeType": "image/png"
+        },
+        {
+          "id": "body",
+          "label": { "ja": "ボディ", "en": "Body" },
+          "initialColor": "#E8DED2",
+          "path": "templates/buncho-01/r1/masks/body.png",
+          "mimeType": "image/png"
+        },
+        {
+          "id": "beak",
+          "label": { "ja": "くちばし", "en": "Beak" },
+          "initialColor": "#EFB16F",
+          "path": "templates/buncho-01/r1/masks/beak.png",
+          "mimeType": "image/png"
+        },
+        {
+          "id": "mouth",
+          "label": { "ja": "口の中", "en": "Mouth" },
+          "initialColor": "#C9787F",
+          "path": "templates/buncho-01/r1/masks/mouth.png",
+          "mimeType": "image/png"
+        }
+      ]
+    }
+  ]
+}

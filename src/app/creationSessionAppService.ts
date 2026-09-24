@@ -11,8 +11,8 @@ import { createBrowserCompletedArtworkShare } from '@/infrastructure/completed-a
 import { createCanvasCompletedArtworkGenerator } from '@/infrastructure/completed-artwork/canvasCompletedArtworkGenerator'
 import { createBrowserProductPhotoDecoder } from '@/infrastructure/photo-import/browserProductPhotoDecoder'
 import { createBrowserTemplateAssetLoader } from '@/infrastructure/template-selection/browserTemplateAssetLoader'
+import { createBrowserTemplateCatalogAdapter } from '@/infrastructure/template-selection/browserTemplateCatalogAdapter'
 import { createCanvasArtworkPreview } from '@/infrastructure/template-selection/canvasArtworkPreview'
-import { createDevelopmentTemplateCatalogAdapter } from '@/infrastructure/template-selection/developmentTemplateCatalogAdapter'
 
 import { createCreationSessionAppService } from './createCreationSessionAppService'
 
@@ -22,7 +22,7 @@ const frontend = { appVersion: APP_VERSION, buildId: BUILD_ID }
 export const creationSessionAppService = createCreationSessionAppService({
   frontend,
   releasePort: createBrowserReleaseAdapter(),
-  catalogPort: createDevelopmentTemplateCatalogAdapter(frontend),
+  catalogPort: createBrowserTemplateCatalogAdapter(),
   assetLoader: createBrowserTemplateAssetLoader(),
   previewPort: createCanvasArtworkPreview(),
   cameraPort: createBrowserCameraStream(),

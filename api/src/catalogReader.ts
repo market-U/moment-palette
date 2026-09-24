@@ -7,6 +7,7 @@ export type CatalogReader = {
   read: () => Promise<TemplateCatalog>
 }
 
+/** Blobから取得したcatalog JSONを製品schemaとして検証する。 */
 export const parseCatalogJson = (text: string): TemplateCatalog => {
   let value: unknown
   try {
@@ -21,6 +22,7 @@ export const parseCatalogJson = (text: string): TemplateCatalog => {
   return parseCatalog(value)
 }
 
+/** private containerから固定prefix配下の製品catalogを読み取るreaderを生成する。 */
 export const createAzureCatalogReader = (config: ApiConfig): CatalogReader => ({
   async read() {
     try {
@@ -28,7 +30,7 @@ export const createAzureCatalogReader = (config: ApiConfig): CatalogReader => ({
         config.storageConnectionString,
       )
         .getContainerClient(config.containerName)
-        .getBlobClient(config.catalogBlobName)
+        .getBlobClient(`catalog/${config.catalogFileName}`)
       const response = await client.download()
       if (!response.readableStreamBody) {
         throw new Error('catalog response body is empty')

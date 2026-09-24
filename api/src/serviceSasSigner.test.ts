@@ -10,7 +10,7 @@ const connectionString = `DefaultEndpointsProtocol=https;AccountName=fstest;Acco
 const config = {
   storageConnectionString: connectionString,
   containerName: 'templates',
-  catalogBlobName: 'catalog/catalog.json',
+  catalogFileName: 'catalog.json',
 }
 
 describe('Service SAS signer', () => {

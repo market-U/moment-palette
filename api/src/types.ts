@@ -11,12 +11,14 @@ export type CatalogAsset = {
 export type CatalogMask = CatalogAsset & {
   id: string
   label: LocalizedText
+  initialColor: string
 }
 
 export type CatalogTemplate = {
   id: string
   assetRevision: string
   name: LocalizedText
+  tags: string[]
   published: boolean
   publishFrom: string | null
   publishUntil: string | null
@@ -45,18 +47,21 @@ export type SignedAsset = CatalogAsset & {
 export type SignedMask = SignedAsset & {
   id: string
   label: LocalizedText
+  initialColor: string
 }
 
 export type PublishedTemplate = {
   id: string
   assetRevision: string
   name: LocalizedText
+  tags: string[]
   thumbnail: SignedAsset
   lineArt: SignedAsset
   masks: SignedMask[]
 }
 
 export type TemplatesResponse = {
+  schemaVersion: 1
   apiVersion: string
   buildId: string
   serverTime: string
@@ -69,7 +74,7 @@ export type TemplatesResponse = {
 export type ApiConfig = {
   storageConnectionString: string
   containerName: string
-  catalogBlobName: string
+  catalogFileName: string
 }
 
 export type PublicErrorCode =
