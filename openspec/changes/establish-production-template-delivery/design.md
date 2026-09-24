@@ -122,6 +122,7 @@ Productionのリリースは`main`から`release`へのPRとして確認し、me
 - 2026-09-24に、`main`へPR #20をmergeしてもProductionのbuild IDが更新されないこと、PR #21の`main`から`release`へのmergeでProductionが`release`のmerge commitへ更新されることを確認した。
 - PR #22は、開始済み制作sessionを同じPR previewの再デプロイ後も継続できることをiPhone Safari・Chromeで確認するための検証用PRである。
 - 2026-09-24のPR #22再デプロイ検証では、完成画面が遅延chunkだったため、開始済みtabが削除済みの旧chunkを取得して完成へ遷移できないことを確認した。製品routeの静的importと回帰testを追加して再検証する。
+- 修正済みPR #22のpreviewで新しい制作sessionを開始し、同じpreviewへの再デプロイ後に完成・保存・共有を確認する再検証を開始した。
 
 ## Open Questions
 
