@@ -34,11 +34,6 @@ export const router = createRouter({
       meta: { requiresSession: true, requiresCompletedArtwork: true },
     },
     {
-      path: '/spikes/azure-template-delivery',
-      name: 'azure-template-delivery-spike',
-      component: () => import('./spikes/AzureTemplateDeliverySpikeRoute.vue'),
-    },
-    {
       path: '/:pathMatch(.*)*',
       redirect: { name: 'title' },
     },

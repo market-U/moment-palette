@@ -27,12 +27,12 @@
 - [x] 4.1 GitHub Actionsのpush triggerを`release`だけ、pull request triggerを`main`と`release`へ変更し、SWA actionのuploadに`production_branch: release`を設定する。
 - [x] 4.2 本番用途のSWA deployment secretへ移行し、外部forkとDependabot PRには品質検査だけを行いsecretを渡さない既存境界を維持する。
 - [x] 4.3 `main`向けPR、`main`から`release`へのPR、`release`へのmergeで、それぞれ一時preview、リリース候補preview、Production配信になることを実環境で確認する。
-- [ ] 4.4 ProductionとPR previewでAPIの環境別catalog、frontend・release・APIのbuild ID、CORS/SAS、Start済みtabの配信更新後・SAS期限後の継続をiPhone SafariとChromeで確認する。
+- [x] 4.4 ProductionとPR previewでAPIの環境別catalog、frontend・release・APIのbuild ID、CORS/SAS、Start済みtabの配信更新後・SAS期限後の継続をiPhone SafariとChromeで確認する。
 - [x] 4.5 `TEMPLATE_CATALOG_FILE`だけを読む製品APIのProduction・PR preview確認後に、各環境から旧`TEMPLATE_CATALOG_BLOB`を削除する。
 
 ## 5. F/S資産を整理し、運用記録を更新する
 
-- [ ] 5.1 製品経路のunit test、全自動品質検査、ProductionとPR previewの実機確認証跡がそろったことを確認してから、F/S専用route、page、UI、diagnostic、port、adapterと関連testを削除する。
+- [x] 5.1 製品経路のunit test、全自動品質検査、ProductionとPR previewの実機確認証跡がそろったことを確認してから、F/S専用route、page、UI、diagnostic、port、adapterと関連testを削除する。
 - [ ] 5.2 製品実装が利用しないF/S catalog/fixtureとApplication Settingsを削除するか、運用fixtureとして残すかを判定し、削除する場合は24時間のasset削除猶予と復旧可能性を確認する。
 - [ ] 5.3 `docs/architecture/`のMermaid図、template API契約、`infra/README.md`、ルートREADME、F/S結果記録を、既存リソースを昇格したProduction構成、catalog切替、release配信、secret、asset更新、ロールバックへ更新する。
 - [ ] 5.4 `docs/development-roadmap.md`のフェーズ6状態と次の作業を更新し、全品質検査、Bicep検査、OpenSpec validation、実環境・実機確認の結果を記録する。

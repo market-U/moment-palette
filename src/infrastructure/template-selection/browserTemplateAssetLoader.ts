@@ -4,7 +4,7 @@ import type {
   TemplateAssetLoaderPort,
 } from '@/features/template-selection/assetLoaderPort'
 
-import { loadDecodedAsset } from '@/infrastructure/azure-template-delivery/loadDecodedAsset'
+import { loadDecodedAsset } from './loadDecodedAsset'
 
 /** Templateの線画と全maskを並列取得し、一括解放できるbrowser loaderを生成する。 */
 export const createBrowserTemplateAssetLoader = (
