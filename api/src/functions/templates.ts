@@ -30,6 +30,7 @@ const errorResponse = (error: unknown): HttpResponseInit => {
   }
 }
 
+/** `GET /api/templates`の公開可能なresponseまたは正規化済みerrorを返す。 */
 export const templatesHandler: HttpHandler = async () => {
   try {
     const config = readApiConfig(process.env)

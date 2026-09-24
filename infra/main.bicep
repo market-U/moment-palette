@@ -1,15 +1,15 @@
 targetScope = 'resourceGroup'
 
-@description('F/S用Azure Static Web Appsのグローバルに一意なリソース名。')
+@description('初期Productionとして運用する既存Azure Static Web Appsのグローバルに一意なリソース名。')
 param staticWebAppName string
 
 @description('Azure Static Web Appsを作成するリージョン。')
 param location string
 
-@description('F/S用途と管理元を識別するリソースタグ。')
+@description('Production用途と管理元を識別するStorage Accountのリソースタグ。')
 param tags object
 
-@description('F/S用テンプレートを保存するグローバルに一意なStorage Account名。')
+@description('Production用テンプレートを保存するグローバルに一意なStorage Account名。')
 @minLength(3)
 @maxLength(24)
 param storageAccountName string
@@ -83,10 +83,10 @@ resource templateContainer 'Microsoft.Storage/storageAccounts/blobServices/conta
   }
 }
 
-@description('作成したF/S用Azure Static Web Appsの既定ホスト名。')
+@description('Productionとして運用する既存Azure Static Web Appsの既定ホスト名。')
 output defaultHostname string = staticWebApp.properties.defaultHostname
 
-@description('秘密値を含まないF/S用Storage Account名。')
+@description('秘密値を含まないProduction用Storage Account名。')
 output deployedStorageAccountName string = storageAccount.name
 
 @description('秘密値を含まないprivate Blob container名。')

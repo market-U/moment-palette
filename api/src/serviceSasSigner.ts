@@ -17,6 +17,7 @@ type ConnectionParts = {
   blobEndpoint: string
 }
 
+/** Storage接続文字列からService SASの署名に必要な情報だけを取り出す。 */
 export const parseStorageConnectionString = (
   connectionString: string,
 ): ConnectionParts => {
@@ -51,6 +52,7 @@ export const parseStorageConnectionString = (
   }
 }
 
+/** private Blobへ最小権限の読み取りSASを発行するsignerを生成する。 */
 export const createServiceSasSigner = (config: ApiConfig): ServiceSasSigner => {
   const parts = parseStorageConnectionString(config.storageConnectionString)
   const credential = new StorageSharedKeyCredential(

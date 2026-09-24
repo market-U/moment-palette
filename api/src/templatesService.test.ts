@@ -11,6 +11,7 @@ const catalog: TemplateCatalog = {
       id: 'buncho-01',
       assetRevision: 'r1',
       name: { ja: '文鳥', en: 'Java sparrow' },
+      tags: ['bird'],
       published: true,
       publishFrom: null,
       publishUntil: null,
@@ -22,12 +23,21 @@ const catalog: TemplateCatalog = {
         path: 'templates/buncho-01/r1/line-art.png',
         mimeType: 'image/png',
       },
-      masks: [],
+      masks: [
+        {
+          id: 'background',
+          label: { ja: '背景', en: 'Background' },
+          initialColor: '#F3E8DC',
+          path: 'templates/buncho-01/r1/masks/background.png',
+          mimeType: 'image/png',
+        },
+      ],
     },
     {
       id: 'hidden',
       assetRevision: 'r1',
       name: { ja: '非公開', en: 'Hidden' },
+      tags: ['fixture'],
       published: false,
       publishFrom: null,
       publishUntil: null,
@@ -57,6 +67,11 @@ describe('templates service', () => {
     ])
     expect(JSON.stringify(result)).not.toContain('secret/')
     expect(result.sasExpiresAt).toBe('2026-09-21T01:00:00.000Z')
+    expect(result.schemaVersion).toBe(1)
+    expect(result.templates[0]).toMatchObject({
+      tags: ['bird'],
+      masks: [{ id: 'background', initialColor: '#F3E8DC' }],
+    })
     expect(result.publicationCounts).toEqual({
       published: 1,
       unpublished: 1,
