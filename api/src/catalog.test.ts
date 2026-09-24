@@ -15,12 +15,20 @@ const baseTemplate: CatalogTemplate = {
   id: 'buncho-01',
   assetRevision: 'r1',
   name: { ja: '文鳥', en: 'Java sparrow' },
+  tags: ['bird'],
   published: true,
   publishFrom: null,
   publishUntil: null,
   thumbnail: asset,
   lineArt: asset,
-  masks: [],
+  masks: [
+    {
+      ...asset,
+      id: 'background',
+      label: { ja: '背景', en: 'Background' },
+      initialColor: '#F3E8DC',
+    },
+  ],
 }
 
 const catalogValue = (templates: unknown[]) => ({
@@ -60,6 +68,20 @@ describe('parseCatalog', () => {
         catalogValue([{ ...baseTemplate, publishFrom: '2026-01-01' }]),
       ),
     ).toThrow(/publishFrom/)
+  })
+
+  it.each([
+    ['tags', ['bird', 'bird']],
+    ['masks[0].initialColor', '#12345G'],
+  ])('%s が不正なcatalogを拒否する', (field, value) => {
+    const template =
+      field === 'tags'
+        ? { ...baseTemplate, tags: value }
+        : {
+            ...baseTemplate,
+            masks: [{ ...baseTemplate.masks[0], initialColor: value }],
+          }
+    expect(() => parseCatalog(catalogValue([template]))).toThrow()
   })
 })
 

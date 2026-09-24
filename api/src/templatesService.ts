@@ -29,6 +29,7 @@ const signMask = (
   signer: ServiceSasSigner,
 ): SignedMask => ({ ...mask, url: signer.signReadUrl(mask.path, expiresOn) })
 
+/** 検証済みcatalogから公開中templateのAPI responseを組み立てるサービスを生成する。 */
 export const createTemplatesService = (
   dependencies: TemplatesServiceDependencies,
 ) => ({
@@ -39,6 +40,7 @@ export const createTemplatesService = (
     const expiresOn = new Date(now.getTime() + 60 * 60 * 1000)
 
     return {
+      schemaVersion: 1,
       apiVersion: dependencies.apiVersion,
       buildId: dependencies.buildId,
       serverTime: now.toISOString(),
@@ -50,15 +52,17 @@ export const createTemplatesService = (
         id: template.id,
         assetRevision: template.assetRevision,
         name: template.name,
+        tags: template.tags,
         thumbnail: signAsset(
           template.thumbnail,
           expiresOn,
           dependencies.sasSigner,
         ),
         lineArt: signAsset(template.lineArt, expiresOn, dependencies.sasSigner),
-        masks: template.masks.map((mask) =>
-          signMask(mask, expiresOn, dependencies.sasSigner),
-        ),
+        masks: template.masks.map((mask) => ({
+          ...signMask(mask, expiresOn, dependencies.sasSigner),
+          initialColor: mask.initialColor,
+        })),
       })),
     }
   },
