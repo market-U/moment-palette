@@ -6,18 +6,18 @@
 pnpm dev
 ```
 
-`http://localhost:5173`を開き、Start、テンプレート選択、初期作品を表示する制作画面まで確認できる。フェーズ5では製品schemaと同じvalidationを通る開発用catalogを使用し、画像にはF/Sで作成したrevision相当の固定assetを流用する。`/templates`と`/create`を直接開いた場合は、tab内snapshotまたは制作sessionがないためタイトルへ戻る。
+`http://localhost:5173`を開き、Start、テンプレート選択、制作、完成まで確認できる。通常の製品導線はsame-originの`GET /api/templates`を利用するため、APIを伴う確認は後述のSWA CLI手順を使用する。`/templates`、`/create`、`/complete`を直接開いた場合は、tab内snapshotまたは制作sessionがないためタイトルへ戻る。
 
 この導線は`release.json`を取得する。`pnpm build`または`pnpm metadata:local`の後は、frontend metadataと`public/release.json`が`local-development`で一致する。
 
-## Azureテンプレート配信F/Sのローカル起動
+## Azureテンプレート配信のローカル起動
 
 本番相当のruntime差を確認するため、APIとSWA CLIを別terminalで起動する。
 
 1. Node.js 24で`pnpm build`を実行する。
 2. Node.js 22へ切り替え、`pnpm api:install`、`pnpm api:build`、`pnpm api:start`を実行する。秘密値はgitignore済みの`api/local.settings.json`へだけ設定する。
 3. 別terminalをNode.js 24にし、`pnpm preview:swa`を実行する。
-4. `http://localhost:4280/spikes/azure-template-delivery`と`http://localhost:4280/api/templates`を確認する。
+4. `http://localhost:4280/api/templates`と製品導線を確認する。
 
 SWA CLIはproduction build済み`dist`を配信し、`--api-devserver-url http://localhost:7071`でNode.js 22のFunctions hostを同一originの`/api`へproxyする。SWA CLIの`--api-location`による自動起動はruntime分離を保証しないため、このF/Sの合否確認には使わない。
 
@@ -80,17 +80,17 @@ pnpm preview:swa
 
 SWA CLIはローカルエミュレーターの`start`だけに使用し、`login`や`deploy`には使用しない。そのため、認証情報をOSのkeychainへ保存する任意依存`keytar`のネイティブbuildは[`pnpm-workspace.yaml`](pnpm-workspace.yaml)で無効化している。Azureの構築とデプロイは、後述のBicepとGitHub Actionsで行う。
 
-## F/S用SWA検証環境
+## 初期Production環境
 
-この手順は、後続の技術F/Sをモバイル実機で確認するためのAzure Static Web Apps（SWA）Free環境を構築する。SWA上のProduction環境は`main`のマージ済み状態を置くF/S用固定環境であり、実サービス本番ではない。構成と外部仕様は[`docs/architecture/fs-preview-deployment.md`](docs/architecture/fs-preview-deployment.md)を参照する。
+既存のAzure Static Web Apps（SWA）Freeとprivate Blob Storageを、再作成せず初期Production環境として利用する。現行構成と運用手順は[`docs/architecture/production-template-delivery.md`](docs/architecture/production-template-delivery.md)を参照する。
 
 ### 実装済み環境
 
 - リソースグループ: `rg-moment-palette-fs`
 - SWA: `moment-palette-fs-market-u-20260918`（Free、East Asia）
-- 固定F/S URL: <https://icy-mushroom-0c0e42e00.5.azurestaticapps.net/>
-- `main`へのpushで固定環境を更新し、`main`向けの通常PRでは一時プレビュー環境を作成・更新・終了する。
-- PR #3のmerge時に、固定環境へのデプロイとPRプレビューの削除が成功した。
+- Production URL: <https://icy-mushroom-0c0e42e00.5.azurestaticapps.net/>
+- `main`は統合候補、`release`だけがProductionを更新する。`main`または`release`向けPRでは一時preview環境を作成・更新・終了する。
+- Production、PR preview、再デプロイ後およびSAS期限後の制作継続をiPhone Safari・ChromeとPCで確認した。
 - iPhone 15（iOS 26）のSafariとChromeで、PRプレビューおよび固定URLを証明書エラーなしで表示できることを確認した。任意のアプリ内URLへの直接アクセスでもアプリが起動し、現在のルーティング規則に従って固定URLへ戻る。
 - Android Chromeは今回利用できる実機がないため、端末を確保できるリリース後に確認する。
 - Dependabotは`github-actions`の週次設定を認識し、初回確認を実行済みである。

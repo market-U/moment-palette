@@ -1,14 +1,14 @@
-# F/S用Azureインフラストラクチャ
+# 初期Production Azureインフラストラクチャ
 
-このディレクトリは、実サービス本番ではなく技術F/S専用のAzure Static Web Apps（SWA）とprivate Blob Storageを定義する。
+このディレクトリは、既存のAzure Static Web Apps（SWA）とprivate Blob Storageを、再作成せず初期Production環境として検査・管理する。
 
 ## 採用したリソース定義
 
 2026-09-18にMicrosoft公式の[`Microsoft.Web/staticSites` Bicepリファレンス](https://learn.microsoft.com/azure/templates/microsoft.web/staticsites)を確認し、安定版API `2025-03-01`とFree SKU（`name: Free`、`tier: Free`）を採用した。
 
-- [`static-web-app.bicep`](static-web-app.bicep): F/S用SWAを初回作成するときだけ使用する。Portal相当のworkflowは生成しない。
+- [`static-web-app.bicep`](static-web-app.bicep): 過去の初回SWA作成用定義。現行運用では既存SWAを再作成しない。
 - [`main.bicep`](main.bicep): 既存SWAは参照だけにし、private Blob Storageを管理する。Storage追加時にSWAのGitHub連携を変更しない。
-- [`environments/fs.bicepparam`](environments/fs.bicepparam): F/S用の名前、確定したリージョン、識別タグを保持する。
+- [`environments/production.bicepparam`](environments/production.bicepparam): 既存resource名、確定したリージョン、本番用途タグを保持する。
 
 2026-09-21にMicrosoft公式の[`Microsoft.Storage` Bicepリファレンス](https://learn.microsoft.com/azure/templates/microsoft.storage/allversions)を再確認し、安定版API `2025-06-01`で次を宣言した。
 
@@ -18,7 +18,7 @@
 - blob soft deleteとcontainer soft deleteは14日、Blob versioning有効
 - `moment-palette-templates` containerは`publicAccess: None`
 
-CORSは認可ではない。containerはprivateのまま保ち、SWA managed APIが公開中assetへ発行したBlob単位・read-only・60分のService SASを認可境界とする。SWA managed APIがManaged Identityに対応しないため、このF/SではShared Keyを許可するが、Bicepは接続文字列、account key、SASをparameterまたはoutputへ含めない。
+CORSは認可ではない。containerはprivateのまま保ち、SWA managed APIが公開中assetへ発行したBlob単位・read-only・60分のService SASを認可境界とする。Managed APIはShared Keyを使用するが、Bicepは接続文字列、account key、SASをparameterまたはoutputへ含めない。
 
 2026-09-18にAzure CLIで対象サブスクリプションを確認し、SWAの利用可能リージョンにEast Asiaが含まれること、Azure内部名が`eastasia`であること、`moment-palette-fs-market-u-20260918`と同名のSWAが対象サブスクリプション内に存在しないことを確認した。値はいずれも秘密情報ではない。リソース名は衝突を避けるため、プロジェクト、用途、所有者、確認日を組み合わせている。
 
@@ -36,8 +36,8 @@ BicepはSWAとStorageのresourceだけを扱い、GitHub連携、GitHub Actions 
 az account show --query '{subscription:id,name:name}' -o table
 az bicep format --file infra/main.bicep
 az bicep build --file infra/main.bicep
-az deployment group validate --resource-group rg-moment-palette-fs --template-file infra/main.bicep --parameters infra/environments/fs.bicepparam
-az deployment group what-if --resource-group rg-moment-palette-fs --template-file infra/main.bicep --parameters infra/environments/fs.bicepparam
+az deployment group validate --resource-group rg-moment-palette-fs --template-file infra/main.bicep --parameters infra/environments/production.bicepparam
+az deployment group what-if --resource-group rg-moment-palette-fs --template-file infra/main.bicep --parameters infra/environments/production.bicepparam
 ```
 
 ## asset更新・公開停止・復旧

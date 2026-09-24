@@ -124,6 +124,8 @@ Productionのリリースは`main`から`release`へのPRとして確認し、me
 - 2026-09-24のPR #22再デプロイ検証では、完成画面が遅延chunkだったため、開始済みtabが削除済みの旧chunkを取得して完成へ遷移できないことを確認した。製品routeの静的importと回帰testを追加して再検証する。
 - 修正済みPR #22のpreviewで新しい制作sessionを開始し、同じpreviewへの再デプロイ後にiPhoneの各ブラウザおよびPCで完成・保存・共有まで成功した。さらにSASの60分期限を経過したsessionでも同じ操作を完了できた。
 - 製品経路のunit testと全自動品質検査、ProductionおよびPR previewの実機確認がそろったため、F/S専用route、page、UI、diagnostic、port、adapterと関連testを削除した。製品で共有するasset decoderは`src/infrastructure/template-selection/`へ移設した。
+- 文鳥01のrevision付きassetとcatalog例は、catalog更新・復旧手順を示す運用fixtureとして保持する。参照を外したassetを削除する場合は、すべてのcatalogを確認してから24時間の削除猶予と14日の復旧可能性を満たす。
+- `infra/environments/production.bicepparam`によるBicep validateは成功した。what-ifでは既存SWAの変更・再作成はなく、Storage Blob serviceのstatic websiteを`false`へ収束させる差分だけを確認した。
 
 ## Open Questions
 

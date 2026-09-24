@@ -1,6 +1,6 @@
 # Template API製品契約
 
-> ステータス: フェーズ5で確定した製品契約・API実装はフェーズ6
+> ステータス: 実装・ProductionおよびPR preview確認済み
 >
 > 最終更新日: 2026-09-22
 
@@ -8,7 +8,7 @@
 
 この文書は、Moment Paletteのfrontendが公開中templateを取得する`GET /api/templates`の製品契約を一元化する。Blob catalog自体のschemaと画像不変条件は[`template-format.md`](template-format.md)、F/Sで実装した配信構成は[`azure-template-delivery.md`](azure-template-delivery.md)を参照する。
 
-フェーズ5ではこの契約に対応するfrontendのvalidationと開発用catalogを実装する。Azure上の製品API、Blob、Application Settings、IaCへの反映はフェーズ6で行う。
+frontend、Azure上の製品API、private Blob、Application Settings、IaCへの反映は完了している。現行の配信構成は[`production-template-delivery.md`](production-template-delivery.md)を参照する。
 
 ## Request
 
@@ -120,7 +120,7 @@ APIは固定prefixの`catalog/`と設定値を結合する。値は小文字英�
 
 APIは環境名からファイル名を推測せず、不正設定時に既定catalogへfallbackしない。catalogのファイル名と組み立て後のBlob名はsuccess・error response、frontendの型、作品状態へ含めない。frontendが保持する配信識別子は`catalogRevision`である。
 
-F/S APIでは`TEMPLATE_CATALOG_BLOB`へ`catalog/catalog.json`のような相対Blob名を設定している。フェーズ6の製品移行では、設定注入とcatalog readerの構造を再利用しながら、`TEMPLATE_CATALOG_FILE`と固定prefixへ変更する。
+旧F/S設定`TEMPLATE_CATALOG_BLOB`は削除済みである。製品APIは`TEMPLATE_CATALOG_FILE`だけを受け付け、旧設定へのfallbackを行わない。
 
 ## 画像assetの共有
 
@@ -162,4 +162,4 @@ SAS URL自体はasset取得に必要なためsuccess responseへ含めるが、f
 | 内部path | 各assetの`path`を返す | frontendの契約から除外 |
 | catalog選択 | `TEMPLATE_CATALOG_BLOB`へ相対Blob名 | `TEMPLATE_CATALOG_FILE`へファイル名だけを指定 |
 
-現行F/S routeはフェーズ6まで既存responseを使用する。製品frontendはこの文書のschemaをdevelopment adapterでも同じvalidatorへ通しており、本番adapterへ差し替えてもdomainとpageを変更しない。
+F/S routeは製品経路の実機確認後に削除した。製品frontendはsame-origin API responseをこの文書のschemaとして検証する。

@@ -1,6 +1,6 @@
 # Moment Palette 開発ロードマップ
 
-> ステータス: フェーズ5完了・次はフェーズ6の本番用Azure配信・テンプレート配信基盤
+> ステータス: フェーズ6の最終検証中
 >
 > 最終更新日: 2026-09-24
 
@@ -34,6 +34,8 @@
 - `implement-completed-artwork`は、現在のArtworkからの1080×1080 PNG生成、完成確認、長押し保存、Web Share、共有文コピー、作品更新・session終了時の完成PNG resource破棄を実装し、format、lint、型検査、単体テスト、production build、iPhone Safari・Chromeでの実機確認、verify、main specsへの同期を完了した。Web Share非対応・失敗は実機で再現できなかったため、`navigator.canShare()`がfalseの場合と共有Promiseの失敗を分類し、画像と手動コピー可能な共有文を維持する単体テストで確認した。Android Chromeは端末確保後の回帰項目とする。
 - `implement-photo-fill`は、OS画像選択、標準APIによるdecode、EXIF Orientation、4096px・12MP正規化、写真のpan・pinch・余白を許す調整、作品・完成PNGへの反映、resource解放、F/S専用実装の移設と削除を実装し、iPhone Safari・ChromeのPRプレビュー実機確認、verify、main specsへの同期を完了した。Android Chromeは端末確保後の回帰項目とする。
 - `implement-solid-color-fill`は、標準`input[type="color"]`による全画面の単色調整、色の再選択、作品全体の一時preview、反映・キャンセル、Artwork・完成PNGへの単色合成、既存camera・photo resourceの上書き時解放を実装した。iPhone Safari・ChromeのPRプレビュー実機確認で、初期パレットなしの標準pickerに大きな操作性の問題は確認されなかった。プリセットまたは専用pickerは、完成後の利用で必要性が判明した場合にIssueとして検討する。verify、main specsへの同期、archiveを完了した。
+- `establish-production-template-delivery`は、既存Azure resourceの初期Production環境への昇格、`TEMPLATE_CATALOG_FILE`だけを使う製品API、`release`起点のProduction配信、main/release向けPR preview、制作開始後の配信更新・SAS期限後の継続、F/S専用配信UIの削除を完了した。ProductionとPR previewでiPhone Safari・ChromeおよびPCの完成・保存・共有を確認した。
+- 同changeのBicep validateは成功し、what-ifでは既存SWAの変更・再作成なし、Storage Blob serviceのstatic websiteを`false`へ収束させる差分だけを確認した。ローカルSWA CLIの製品導線確認は、Node.js 22と未作成の`api/local.settings.json`を準備してから実施する。
 - Android Chromeの実機確認は端末を確保できるリリース後のフォロー項目とし、今回のF/SはiPhone 15（iOS 26）のSafari・Chromeを完了条件とする。
 
 ## 実行順序

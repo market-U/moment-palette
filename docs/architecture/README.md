@@ -9,13 +9,18 @@
 ## 現在の資料
 
 - [`frontend-application.md`](frontend-application.md): Vueフロントエンドのソース構成、責務、依存規則、外部入出力の追加方針。
-- [`fs-preview-deployment.md`](fs-preview-deployment.md): 実装済みF/S用SWAのMermaid構成図、外部仕様、固定したGitHub Action、デプロイ・実機確認結果。
+- [`production-template-delivery.md`](production-template-delivery.md): `release`起点のProduction配信、PR preview、private Blob、Managed APIの現行構成と運用手順。
+- [`fs-preview-deployment.md`](fs-preview-deployment.md): 初期F/S用SWA構成の履歴。
 - [`azure-template-delivery.md`](azure-template-delivery.md): private Blob、SWAマネージドAPI、SAS、cache、release継続性を検証した構成。
 - [`template-format.md`](template-format.md): 初期リリースで採用するcatalog schema、asset不変条件、API response境界。
 - [`template-api.md`](template-api.md): `GET /api/templates`の製品契約、環境別catalog、SAS、cache、秘密情報境界。
 - このREADME: Azureを含む初期構成案と、アーキテクチャ図の管理方針。
 
-## F/S用SWAプレビュー構成
+## 現行の配信構成
+
+現行構成は[`初期Productionテンプレート配信構成`](production-template-delivery.md)を正本とする。`main`は統合候補、`release`だけがProductionを更新し、両branch向けPRには一時previewを提供する。F/S用の固定`main`配信構成は履歴として`fs-preview-deployment.md`に残す。
+
+## F/S用SWAプレビュー構成（履歴）
 
 現在のデプロイ対象は、後続の技術F/Sをモバイル実機で確認するためのAzure Static Web Apps Free一つだけである。[F/S用SWA実装済み構成図](fs-preview-deployment.md#実装済み構成図)は次の経路を示す。
 

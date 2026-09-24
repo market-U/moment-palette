@@ -1,5 +1,7 @@
 # Azureテンプレート配信F/S
 
+> 後続の`establish-production-template-delivery`で、既存resourceを初期Production環境へ昇格し、製品API、`release`起点の配信、実機確認を完了した。F/S専用route・診断UI・adapterは削除済みである。この文書は採用判断の履歴として残す。
+
 ## 対応するOpenSpec change
 
 `validate-azure-template-delivery`
