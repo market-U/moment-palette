@@ -115,6 +115,11 @@ Productionのリリースは`main`から`release`へのPRとして確認し、me
 
 ロールバックは、配信コードなら`release`へのrevert PR、catalogなら直前revisionへのcatalog復元、assetならBlob versionまたはsoft deleteからの復元を使う。Azureリソース自体は削除しない。
 
+## 実環境検証記録
+
+- 2026-09-24に、`main`へPR #20をmergeしてもProductionのbuild IDが更新されないこと、PR #21の`main`から`release`へのmergeでProductionが`release`のmerge commitへ更新されることを確認した。
+- PR #22は、開始済み制作sessionを同じPR previewの再デプロイ後も継続できることをiPhone Safari・Chromeで確認するための検証用PRである。
+
 ## Open Questions
 
 - なし。初期Productionは既存resourceの昇格、同一Storageの共有、環境別catalog、`release`起点の本番配信として合意済みである。
