@@ -87,6 +87,11 @@ const drawFill = (
     context.fillRect(0, 0, artworkSize, artworkSize)
     return
   }
+  if (fill.kind === 'solid') {
+    context.fillStyle = fill.color
+    context.fillRect(0, 0, artworkSize, artworkSize)
+    return
+  }
 
   const resource = areaResources.get(areaId)
   if (!resource) throw new Error(`camera fillのresourceがありません: ${areaId}`)
@@ -328,6 +333,20 @@ export const createCanvasCameraCompositor = (
       context.globalAlpha = alphas.artwork
       context.drawImage(artworkPlane, 0, 0)
       context.globalAlpha = alphas.lineArt
+      drawLineArt(context, state)
+      context.restore()
+    },
+    renderArtworkPreview(canvas, state) {
+      const artworkContext = requireContext(artworkPlane)
+      drawArtwork(artworkContext, state)
+      const context = requireContext(canvas)
+      context.save()
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.fillStyle = '#FFFFFF'
+      context.fillRect(0, 0, canvas.width, canvas.height)
+      context.scale(canvas.width / artworkSize, canvas.height / artworkSize)
+      context.globalAlpha = 1
+      context.drawImage(artworkPlane, 0, 0)
       drawLineArt(context, state)
       context.restore()
     },

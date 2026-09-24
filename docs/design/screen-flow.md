@@ -35,9 +35,11 @@ flowchart TD
   adjust -->|反映| coloring
   adjust -->|キャンセル| coloring
 
-  coloring -->|気持ちからつくる| palette["カラーパレット"]
-  palette -->|反映| coloring
-  palette -->|キャンセル| coloring
+  coloring -->|気持ちからつくる| solid["単色調整"]
+  solid -->|色を選ぶ| colorPicker["標準カラーピッカー"]
+  colorPicker -->|選び直す| solid
+  solid -->|反映| coloring
+  solid -->|キャンセル| coloring
 
   coloring -->|完成| generating["PNG生成"]
   generating -->|成功| complete["完成確認・保存・共有"]
@@ -49,6 +51,8 @@ flowchart TD
 ```
 
 未着色エリアが残っていても、制作画面から完成確認へ進める。テンプレート選択画面へ戻る操作、ブラウザの戻る操作、別画面へ移る操作で制作内容が失われる場合は、破棄確認を表示する。
+
+単色調整は、カメラ・写真調整と同じく制作画面を背後に見せない全画面表示とする。画面内の不透明色用標準`input[type="color"]`を利用者が操作してOSまたはbrowserのpickerを開き、選択中の一時色を作品全体へ表示する。反映するまでArtworkと制作画面のpreviewを変更せず、キャンセル時は一時色を破棄する。
 
 ## セッション境界
 

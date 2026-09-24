@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { applyCameraFill } from '@/domain/template'
+import { applyCameraFill, applySolidColorFill } from '@/domain/template'
 
 import { parseTemplateCatalog } from './catalog'
 import { prepareTemplate } from './prepareTemplate'
@@ -194,5 +194,97 @@ describe('prepare template', () => {
     expect(session.preview.url).toBe('blob:initial')
     expect(initialPreviewRelease).not.toHaveBeenCalled()
     expect(session.areaResources.size).toBe(0)
+  })
+
+  it('単色への置換は成功時だけ画像resourceと旧previewを解放する', async () => {
+    const initialPreviewRelease = vi.fn()
+    const cameraPreviewRelease = vi.fn()
+    const solidPreviewRelease = vi.fn()
+    const frameRelease = vi.fn()
+    const session = await prepareTemplate(snapshot, 'buncho-01', {
+      assetLoader: { load: vi.fn().mockResolvedValue(assets()) },
+      previewPort: {
+        generate: vi.fn().mockResolvedValue({
+          url: 'blob:initial',
+          width: 1080,
+          height: 1080,
+          release: initialPreviewRelease,
+        }),
+      },
+      now: () => new Date('2026-09-22T00:00:00.000Z'),
+    })
+    await session.replaceAreaResource(
+      'body',
+      applyCameraFill(session.artwork, 'body'),
+      { source: {} as CanvasImageSource, release: frameRelease },
+      async () => ({
+        url: 'blob:camera',
+        width: 1080,
+        height: 1080,
+        release: cameraPreviewRelease,
+      }),
+    )
+
+    await session.replaceAreaWithoutResource(
+      'body',
+      applySolidColorFill(session.artwork, 'body', '#B35F91'),
+      async () => ({
+        url: 'blob:solid',
+        width: 1080,
+        height: 1080,
+        release: solidPreviewRelease,
+      }),
+    )
+
+    expect(session.artwork.areas[0]?.fill).toEqual({
+      kind: 'solid',
+      color: '#B35F91',
+    })
+    expect(session.areaResources.size).toBe(0)
+    expect(frameRelease).toHaveBeenCalledOnce()
+    expect(cameraPreviewRelease).toHaveBeenCalledOnce()
+    expect(solidPreviewRelease).not.toHaveBeenCalled()
+  })
+
+  it('単色previewの生成に失敗すると既存のresourceと作品を保持する', async () => {
+    const frameRelease = vi.fn()
+    const session = await prepareTemplate(snapshot, 'buncho-01', {
+      assetLoader: { load: vi.fn().mockResolvedValue(assets()) },
+      previewPort: {
+        generate: vi.fn().mockResolvedValue({
+          url: 'blob:initial',
+          width: 1080,
+          height: 1080,
+          release: vi.fn(),
+        }),
+      },
+      now: () => new Date(),
+    })
+    await session.replaceAreaResource(
+      'body',
+      applyCameraFill(session.artwork, 'body'),
+      { source: {} as CanvasImageSource, release: frameRelease },
+      async () => ({
+        url: 'blob:camera',
+        width: 1080,
+        height: 1080,
+        release: vi.fn(),
+      }),
+    )
+    const cameraArtwork = session.artwork
+
+    await expect(
+      session.replaceAreaWithoutResource(
+        'body',
+        applySolidColorFill(cameraArtwork, 'body', '#B35F91'),
+        async () => {
+          throw new Error('preview failed')
+        },
+      ),
+    ).rejects.toThrow('preview failed')
+
+    expect(session.artwork).toBe(cameraArtwork)
+    expect(session.areaResources.size).toBe(1)
+    expect(frameRelease).not.toHaveBeenCalled()
   })
 })

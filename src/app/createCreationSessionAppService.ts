@@ -1,6 +1,10 @@
 import { computed, readonly, ref, shallowRef, triggerRef } from 'vue'
 
-import { applyCameraFill, applyPhotoFill } from '@/domain/template'
+import {
+  applyCameraFill,
+  applyPhotoFill,
+  applySolidColorFill,
+} from '@/domain/template'
 import { createCameraFillController } from '@/features/camera-fill/cameraController'
 import type { CameraCompositorPort } from '@/features/camera-fill/compositorPort'
 import type {
@@ -50,6 +54,7 @@ import type {
 } from '@/features/photo-fill/photoDecoderPort'
 import { LatestSelection } from '@/features/photo-fill/latestSelection'
 import type { PhotoFillState } from '@/features/photo-fill/photoState'
+import type { SolidColorFillState } from '@/features/solid-color-fill/solidColorState'
 import { createCenteredCoverTransform } from '@/shared/lib/mediaTransform'
 
 type Dependencies = {
@@ -129,6 +134,7 @@ export const createCreationSessionAppService = (
   const activeSession = shallowRef<ActiveCreationSession | null>(null)
   const cameraState = shallowRef<CameraViewState>({ phase: 'closed' })
   const photoState = shallowRef<PhotoFillState>({ phase: 'closed' })
+  const solidColorState = shallowRef<SolidColorFillState>({ phase: 'closed' })
   let pendingPhoto: DecodedPhoto | undefined
   const latestPhotoSelection = new LatestSelection<DecodedPhoto>()
   const completedArtwork = shallowRef<CompletedArtworkViewState>({
@@ -161,6 +167,7 @@ export const createCreationSessionAppService = (
     pendingPhoto?.dispose()
     pendingPhoto = undefined
     photoState.value = { phase: 'closed' }
+    solidColorState.value = { phase: 'closed' }
     completionGeneration += 1
     completedArtworkOwner.dispose()
     completedArtwork.value = { phase: 'idle' }
@@ -352,6 +359,7 @@ export const createCreationSessionAppService = (
     activeCreation: readonly(activeCreation),
     cameraState: readonly(cameraState),
     photoState: readonly(photoState),
+    solidColorState: readonly(solidColorState),
     completedArtwork: readonly(completedArtwork),
     start,
     selectTemplate,
@@ -586,6 +594,81 @@ export const createCreationSessionAppService = (
       pendingPhoto?.dispose()
       pendingPhoto = undefined
       photoState.value = { phase: 'closed' }
+    },
+    openSolidColor: (areaId) => {
+      const session = activeSession.value
+      const definition = session?.template.areas.find(
+        (area) => area.id === areaId,
+      )
+      const current = session?.artwork.areas.find(
+        (area) => area.areaId === areaId,
+      )
+      if (!session || !definition || !current) return
+      solidColorState.value = {
+        phase: 'editing',
+        areaId,
+        color:
+          current.fill.kind === 'solid'
+            ? current.fill.color
+            : definition.initialColor,
+      }
+    },
+    setSolidColor: (color) => {
+      const current = solidColorState.value
+      if (current.phase !== 'editing') return
+      solidColorState.value = { ...current, color: color.toUpperCase() }
+    },
+    resizeSolidColorPreview: (canvas, cssPixels, pixelRatio) =>
+      dependencies.cameraCompositor.resizePreview(
+        canvas,
+        cssPixels,
+        pixelRatio,
+      ),
+    renderSolidColorPreview: (canvas) => {
+      const current = solidColorState.value
+      const session = activeSession.value
+      if (current.phase !== 'editing' || !session) return
+      try {
+        dependencies.cameraCompositor.renderArtworkPreview(canvas, {
+          template: session.template,
+          artwork: applySolidColorFill(
+            session.artwork,
+            current.areaId,
+            current.color,
+          ),
+          assets: session.assets,
+          areaResources: session.areaResources,
+        })
+      } catch {
+        // 標準color input外からの不正値は、確定済みArtworkへ反映しない。
+      }
+    },
+    applySolidColor: async () => {
+      const current = solidColorState.value
+      const session = activeSession.value
+      if (current.phase !== 'editing' || !session) return false
+      try {
+        await session.replaceAreaWithoutResource(
+          current.areaId,
+          applySolidColorFill(session.artwork, current.areaId, current.color),
+          (artwork, areaResources) =>
+            dependencies.cameraCompositor.generatePreview({
+              template: session.template,
+              artwork,
+              assets: session.assets,
+              areaResources,
+            }),
+        )
+        invalidateCompletedArtwork()
+        triggerRef(activeSession)
+        solidColorState.value = { phase: 'closed' }
+        return true
+      } catch {
+        return false
+      }
+    },
+    cancelSolidColor: () => {
+      solidColorState.value = { phase: 'closed' }
     },
     completeArtwork,
     retryCompletedArtwork: completeArtwork,

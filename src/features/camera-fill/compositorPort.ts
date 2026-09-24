@@ -50,6 +50,10 @@ export interface CameraCompositorPort {
     video: HTMLVideoElement | undefined,
     state: CameraPreviewState,
   ): void
+  renderArtworkPreview(
+    canvas: HTMLCanvasElement,
+    context: CameraArtworkContext,
+  ): void
   renderPhotoPreview?(
     canvas: HTMLCanvasElement,
     source: CanvasImageSource,

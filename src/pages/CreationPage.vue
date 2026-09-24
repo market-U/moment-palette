@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router'
 import AreaSelector from '@/features/camera-fill/AreaSelector.vue'
 import CameraFillPanel from '@/features/camera-fill/CameraFillPanel.vue'
 import PhotoFillPanel from '@/features/photo-fill/PhotoFillPanel.vue'
+import SolidColorFillPanel from '@/features/solid-color-fill/SolidColorFillPanel.vue'
 import { useCreationSession } from '@/features/creation-session/sessionFacade'
 import BackButton from '@/shared/ui/BackButton.vue'
 import ScreenShell from '@/shared/ui/ScreenShell.vue'
@@ -51,6 +52,10 @@ const openCamera = async () => {
 
 const openPhoto = () => {
   if (selectedAreaId.value) session.openPhoto(selectedAreaId.value)
+}
+
+const openSolidColor = () => {
+  if (selectedAreaId.value) session.openSolidColor(selectedAreaId.value)
 }
 
 const completeArtwork = async () => {
@@ -108,6 +113,14 @@ const completeArtwork = async () => {
             <span>{{ t('creation.photoAction') }}</span>
             <small>{{ t('creation.photoActionHint') }}</small>
           </button>
+          <button
+            class="camera-action solid-color-action"
+            type="button"
+            @click="openSolidColor"
+          >
+            <span>{{ t('creation.solidColorAction') }}</span>
+            <small>{{ t('creation.solidColorActionHint') }}</small>
+          </button>
         </section>
 
         <p
@@ -133,7 +146,6 @@ const completeArtwork = async () => {
           {{ t('creation.complete') }}
         </button>
 
-        <p class="creation-page__next">{{ t('creation.nextChanges') }}</p>
         <button class="start-over" type="button" @click="startOver">
           {{ t('actions.startOver') }}
         </button>
@@ -164,6 +176,14 @@ const completeArtwork = async () => {
       :render-preview="session.renderPhotoPreview"
       :apply="session.applyPhoto"
       :cancel="session.cancelPhoto"
+    />
+    <SolidColorFillPanel
+      :state="session.solidColorState.value"
+      :set-color="session.setSolidColor"
+      :resize-preview="session.resizeSolidColorPreview"
+      :render-preview="session.renderSolidColorPreview"
+      :apply="session.applySolidColor"
+      :cancel="session.cancelSolidColor"
     />
   </template>
 </template>
@@ -240,10 +260,9 @@ h1 {
   opacity: 0.82;
 }
 
-.creation-page__next {
-  margin: 1.25rem 0 0;
-  color: var(--color-muted);
-  text-align: center;
+.solid-color-action {
+  margin-top: 0.65rem;
+  background: #805d85;
 }
 
 .complete-action {

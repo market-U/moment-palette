@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   applyCameraFill,
   applyPhotoFill,
+  applySolidColorFill,
   createInitialArtwork,
   createTemplate,
 } from '@/domain/template'
@@ -189,5 +190,38 @@ describe('createCanvasCompletedArtworkGenerator', () => {
       calls.indexOf('draw:photo-frame'),
     )
     expect(resource).toMatchObject({ width: 1080, height: 1080 })
+  })
+
+  it('単色fillを画像resourceなしでmask内へ合成する', async () => {
+    const calls: string[] = []
+    const canvases = [
+      canvas(context(calls), 'artwork'),
+      canvas(context(calls), 'layer'),
+    ]
+    const generator = createCanvasCompletedArtworkGenerator({
+      createCanvas: () => canvases.shift()!,
+      createObjectUrl: () => 'blob:completed',
+      revokeObjectUrl: vi.fn(),
+    })
+
+    await generator.generate({
+      template,
+      artwork: applySolidColorFill(
+        createInitialArtwork(template),
+        'body',
+        '#B35F91',
+      ),
+      assets: {
+        lineArt: { name: 'line' } as never,
+        masks: [
+          { id: 'background', source: { name: 'background-mask' } as never },
+          { id: 'body', source: { name: 'body-mask' } as never },
+        ],
+      },
+      areaResources: new Map(),
+    })
+
+    expect(calls).toContain('draw:body-mask')
+    expect(calls).toContain('draw:line')
   })
 })
