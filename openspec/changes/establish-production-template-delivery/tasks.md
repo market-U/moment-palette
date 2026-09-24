@@ -13,13 +13,13 @@
 - [x] 2.3 F/S設定`TEMPLATE_CATALOG_BLOB`を製品APIから除去し、fallbackしないこと、構成不備が秘密値なしの500になることをtestする。
 - [x] 2.4 catalog reader、catalog validator、公開判定、templates service、Functions endpointを製品`GET /api/templates`契約へ移行し、schema、HTTP status、`no-store`、version/build、SAS制約のunit testを更新する。
 - [ ] 2.5 Productionと必要なPR preview環境へ`TEMPLATE_CATALOG_FILE`を追加し、同一Storageで環境ごとにcatalogを切り替えられることを確認する。この時点では旧`TEMPLATE_CATALOG_BLOB`を残す。
-- [ ] 2.6 private Blobへの匿名アクセス拒否、公開中templateだけへのread-only・HTTPS限定・60分SAS、CORS、cache headerを実環境で確認する。
+- [x] 2.6 private Blobへの匿名アクセス拒否、公開中templateだけへのread-only・HTTPS限定・60分SAS、CORS、cache headerを実環境で確認する。
 
 ## 3. 製品frontendをtemplate APIへ接続する
 
 - [x] 3.1 F/S browser catalog adapterを製品`TemplateCatalogPort`とcatalog validatorを使う`src/infrastructure/template-selection/`へ移設し、network・HTTP・invalid responseのunit testを移行する。
 - [x] 3.2 `creationSessionAppService`を開発用catalog adapterではなくsame-originの製品`GET /api/templates` adapterへ結線し、明示的なfixtureを使うunit test以外で静的catalogへfallbackしないようにする。
-- [ ] 3.3 release情報・frontend・APIの三者identity照合、assetの全件decode、失敗時のresource解放、Start後のsession継続に関する既存testを製品経路で維持・追加する。
+- [x] 3.3 release情報・frontend・APIの三者identity照合、assetの全件decode、失敗時のresource解放、Start後のsession継続に関する既存testを製品経路で維持・追加する。
 - [ ] 3.4 production buildとSWA CLIで、`/api/templates`、SPA直接アクセス、template選択から完成・保存・共有までの製品経路を確認する。
 
 ## 4. release起点のデプロイを実装する
