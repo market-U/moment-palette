@@ -16,5 +16,8 @@ describe('CreationPage', () => {
     expect(source).not.toContain('LanguageSwitcher')
     expect(source).toContain('session.completeArtwork()')
     expect(source).toContain("router.push({ name: 'completed-artwork' })")
+    expect(source).toContain('session.openSolidColor(selectedAreaId.value)')
+    expect(source).toContain('<SolidColorFillPanel')
+    expect(source).toContain(':state="session.solidColorState.value"')
   })
 })

@@ -31,6 +31,10 @@ export type ArtworkFill =
   | Readonly<{
       kind: 'photo'
     }>
+  | Readonly<{
+      kind: 'solid'
+      color: string
+    }>
 
 /** 作品内の一領域に適用されている塗りの状態を表す。 */
 export type ArtworkArea = Readonly<{
@@ -162,6 +166,35 @@ export const applyPhotoFill = (artwork: Artwork, areaId: string): Artwork => {
           ? Object.freeze({
               areaId: area.areaId,
               fill: Object.freeze({ kind: 'photo' as const }),
+            })
+          : area,
+      ),
+    ),
+  })
+}
+
+/** 指定した領域だけを検証済みの不透明な単色で満たす新しい作品状態を生成する。 */
+export const applySolidColorFill = (
+  artwork: Artwork,
+  areaId: string,
+  color: string,
+): Artwork => {
+  if (!artwork.areas.some((area) => area.areaId === areaId)) {
+    throw new Error(`Artworkに存在しないareaです: ${areaId}`)
+  }
+  const normalizedColor = requireColor(color.toUpperCase())
+
+  return Object.freeze({
+    ...artwork,
+    areas: Object.freeze(
+      artwork.areas.map((area) =>
+        area.areaId === areaId
+          ? Object.freeze({
+              areaId: area.areaId,
+              fill: Object.freeze({
+                kind: 'solid' as const,
+                color: normalizedColor,
+              }),
             })
           : area,
       ),

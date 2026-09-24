@@ -40,6 +40,11 @@ export type ActiveCreationSession = Readonly<{
     resource: ArtworkAreaResource,
     generatePreview: ArtworkPreviewGenerator,
   ) => Promise<void>
+  replaceAreaWithoutResource: (
+    areaId: string,
+    artwork: Artwork,
+    generatePreview: ArtworkPreviewGenerator,
+  ) => Promise<void>
   release: () => void
 }>
 
@@ -138,6 +143,25 @@ export const prepareTemplate = async (
         currentArtwork = nextArtwork
         currentPreview = nextPreview
         areaResources.set(areaId, nextResource)
+        previousResource?.release()
+        previousPreview.release()
+      },
+      async replaceAreaWithoutResource(areaId, nextArtwork, generatePreview) {
+        if (released) {
+          throw new Error('解放済みの制作sessionは更新できません。')
+        }
+        if (!entry.template.areas.some((area) => area.id === areaId)) {
+          throw new Error(`templateに存在しないareaです: ${areaId}`)
+        }
+
+        const pendingResources = new Map(areaResources)
+        pendingResources.delete(areaId)
+        const nextPreview = await generatePreview(nextArtwork, pendingResources)
+        const previousResource = areaResources.get(areaId)
+        const previousPreview = currentPreview
+        currentArtwork = nextArtwork
+        currentPreview = nextPreview
+        areaResources.delete(areaId)
         previousResource?.release()
         previousPreview.release()
       },

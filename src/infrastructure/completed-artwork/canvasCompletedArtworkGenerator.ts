@@ -46,6 +46,11 @@ const drawFill = (
     context.fillRect(0, 0, artworkSize, artworkSize)
     return
   }
+  if (fill.kind === 'solid') {
+    context.fillStyle = fill.color
+    context.fillRect(0, 0, artworkSize, artworkSize)
+    return
+  }
 
   const resource = areaResources.get(areaId)
   if (!resource) throw new Error(`camera fillのresourceがありません: ${areaId}`)

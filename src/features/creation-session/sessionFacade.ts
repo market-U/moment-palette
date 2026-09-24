@@ -5,6 +5,7 @@ import type { ClipboardOutcome } from '@/features/completed-artwork/clipboardPor
 import type { CompletedArtworkShareCopy } from '@/features/completed-artwork/sharePayload'
 import type { CompletedArtworkShareOutcome } from '@/features/completed-artwork/shareOutcome'
 import type { PhotoFillState } from '@/features/photo-fill/photoState'
+import type { SolidColorFillState } from '@/features/solid-color-fill/solidColorState'
 
 export type LocalizedViewText = Readonly<{ ja: string; en: string }>
 
@@ -46,7 +47,7 @@ export type ActiveCreationView = Readonly<{
     id: string
     label: LocalizedViewText
     initialColor: string
-    fillKind: 'initial' | 'camera' | 'photo'
+    fillKind: 'initial' | 'camera' | 'photo' | 'solid'
   }>[]
 }>
 
@@ -101,6 +102,7 @@ export type CreationSessionFacade = {
   readonly activeCreation: Readonly<Ref<ActiveCreationView | null>>
   readonly cameraState: Readonly<Ref<CameraViewState>>
   readonly photoState: Readonly<Ref<PhotoFillState>>
+  readonly solidColorState: Readonly<Ref<SolidColorFillState>>
   readonly completedArtwork: Readonly<Ref<CompletedArtworkViewState>>
   start: () => Promise<boolean>
   selectTemplate: (templateId: string) => Promise<boolean>
@@ -139,6 +141,16 @@ export type CreationSessionFacade = {
   renderPhotoPreview: (canvas: HTMLCanvasElement) => void
   applyPhoto: () => Promise<boolean>
   cancelPhoto: () => void
+  openSolidColor: (areaId: string) => void
+  setSolidColor: (color: string) => void
+  resizeSolidColorPreview: (
+    canvas: HTMLCanvasElement,
+    cssPixels: number,
+    pixelRatio: number,
+  ) => Size
+  renderSolidColorPreview: (canvas: HTMLCanvasElement) => void
+  applySolidColor: () => Promise<boolean>
+  cancelSolidColor: () => void
   completeArtwork: () => Promise<boolean>
   retryCompletedArtwork: () => Promise<boolean>
   shareCompletedArtwork: (copy: CompletedArtworkShareCopy) => Promise<void>

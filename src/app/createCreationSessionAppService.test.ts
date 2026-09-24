@@ -85,6 +85,7 @@ const dependencies = () => {
   const cameraCompositor = {
     resizePreview: vi.fn().mockReturnValue({ width: 540, height: 540 }),
     renderPreview: vi.fn(),
+    renderArtworkPreview: vi.fn(),
     getPhotoAreaBounds: vi.fn().mockReturnValue({
       x: 0,
       y: 0,
@@ -363,5 +364,53 @@ describe('creation session app service', () => {
 
     expect(service.photoState.value).toEqual({ phase: 'closed' })
     expect(releaseLatePhoto).toHaveBeenCalledOnce()
+  })
+
+  it('単色を一時状態で選び直し、反映時だけArtworkと完成PNGを更新する', async () => {
+    const deps = dependencies()
+    const releaseCompleted = vi.fn()
+    deps.completedArtworkGenerator.generate.mockResolvedValue({
+      blob: new Blob(['png'], { type: 'image/png' }),
+      objectUrl: 'blob:completed',
+      width: 1080,
+      height: 1080,
+      dispose: releaseCompleted,
+    })
+    const service = createCreationSessionAppService(deps.values)
+    await service.start()
+    await service.selectTemplate('buncho-01')
+    await service.completeArtwork()
+
+    service.openSolidColor('body')
+    expect(service.solidColorState.value).toEqual({
+      phase: 'editing',
+      areaId: 'body',
+      color: '#E8DED2',
+    })
+    service.setSolidColor('#b35f91')
+    service.setSolidColor('#3478b5')
+    expect(service.activeCreation.value?.areas[0]?.fillKind).toBe('initial')
+
+    await expect(service.applySolidColor()).resolves.toBe(true)
+    expect(service.solidColorState.value).toEqual({ phase: 'closed' })
+    expect(service.activeCreation.value).toMatchObject({
+      previewUrl: 'blob:camera-preview',
+      areas: [{ id: 'body', fillKind: 'solid' }],
+    })
+    expect(releaseCompleted).toHaveBeenCalledOnce()
+  })
+
+  it('単色調整のキャンセルはArtworkを変更しない', async () => {
+    const deps = dependencies()
+    const service = createCreationSessionAppService(deps.values)
+    await service.start()
+    await service.selectTemplate('buncho-01')
+
+    service.openSolidColor('body')
+    service.setSolidColor('#B35F91')
+    service.cancelSolidColor()
+
+    expect(service.solidColorState.value).toEqual({ phase: 'closed' })
+    expect(service.activeCreation.value?.areas[0]?.fillKind).toBe('initial')
   })
 })

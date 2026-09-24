@@ -15,8 +15,8 @@ describe('AreaSelectorItem', () => {
     expect(source).toContain('{{ area.label }}')
   })
 
-  it('撮影済み表示と選択通知を提供する', () => {
-    expect(source).toContain('v-if="area.fillKind === \'camera\'"')
+  it('単色を含む設定済み表示と選択通知を提供する', () => {
+    expect(source).toContain('v-if="area.fillKind !== \'initial\'"')
     expect(source).toContain('{{ capturedLabel }}')
     expect(source).toContain('select: [areaId: string]')
     expect(source).toContain('@click="emit(\'select\', area.id)"')

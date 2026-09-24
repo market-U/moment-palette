@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   applyCameraFill,
   applyPhotoFill,
+  applySolidColorFill,
   createInitialArtwork,
   createTemplate,
 } from './template'
@@ -117,5 +118,28 @@ describe('template domain', () => {
       { areaId: 'background', fill: { kind: 'photo' } },
     ])
     expect(artwork.areas[0]?.fill).toEqual({ kind: 'camera' })
+  })
+
+  it('指定areaだけを大文字の単色fillへ更新し、既存fillを上書きする', () => {
+    const artwork = applyPhotoFill(
+      createInitialArtwork(createTemplate(input())),
+      'background',
+    )
+
+    expect(applySolidColorFill(artwork, 'background', '#b35f91').areas).toEqual(
+      [{ areaId: 'background', fill: { kind: 'solid', color: '#B35F91' } }],
+    )
+    expect(artwork.areas[0]?.fill).toEqual({ kind: 'photo' })
+  })
+
+  it('不透明な#RRGGBB以外の単色と存在しないareaを拒否する', () => {
+    const artwork = createInitialArtwork(createTemplate(input()))
+
+    expect(() => applySolidColorFill(artwork, 'background', '#fff')).toThrow(
+      /#RRGGBB/,
+    )
+    expect(() => applySolidColorFill(artwork, 'missing', '#FFFFFF')).toThrow(
+      /存在しないarea/,
+    )
   })
 })

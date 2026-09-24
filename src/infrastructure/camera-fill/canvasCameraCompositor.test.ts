@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { applyCameraFill, createInitialArtwork } from '@/domain/template'
+import {
+  applyCameraFill,
+  applySolidColorFill,
+  createInitialArtwork,
+} from '@/domain/template'
 import { createTemplate } from '@/domain/template'
 
 import {
@@ -152,6 +156,39 @@ describe('createCanvasCameraCompositor', () => {
       width: 1080,
       height: 1080,
     })
+  })
+
+  it('単色をArea mask内へ描き、Canvasだけで作品previewを更新する', () => {
+    const calls: string[] = []
+    const internalCanvases = [
+      canvas(context(calls), 'source-plane'),
+      canvas(context(calls), 'artwork-plane'),
+      canvas(context(calls), 'area-plane'),
+      canvas(context(calls), 'before-plane'),
+      canvas(context(calls), 'after-plane'),
+    ]
+    const compositor = createCanvasCameraCompositor({
+      createCanvas: () => internalCanvases.shift()!,
+      createObjectUrl: vi.fn(),
+      revokeObjectUrl: vi.fn(),
+    })
+    const preview = canvas(context(calls), 'preview')
+    preview.width = 540
+    preview.height = 540
+
+    compositor.renderArtworkPreview(preview, {
+      template,
+      artwork: applySolidColorFill(
+        createInitialArtwork(template),
+        'body',
+        '#B35F91',
+      ),
+      assets,
+      areaResources: new Map(),
+    })
+
+    expect(calls).toContain('draw:body-mask')
+    expect(calls).toContain('draw:line')
   })
 
   it('表示比率の中間値でsourceを不透明、artworkを比率alphaで重ねる', () => {
