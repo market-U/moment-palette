@@ -12,7 +12,7 @@
 - [x] 2.2 API設定を`TEMPLATE_CATALOG_FILE`と固定`catalog/` prefixへ変更し、安全なJSONファイル名だけを受け付けるvalidationとunit testを追加する。
 - [x] 2.3 F/S設定`TEMPLATE_CATALOG_BLOB`を製品APIから除去し、fallbackしないこと、構成不備が秘密値なしの500になることをtestする。
 - [x] 2.4 catalog reader、catalog validator、公開判定、templates service、Functions endpointを製品`GET /api/templates`契約へ移行し、schema、HTTP status、`no-store`、version/build、SAS制約のunit testを更新する。
-- [ ] 2.5 Productionと必要なPR preview環境へ`TEMPLATE_CATALOG_FILE`を追加し、同一Storageで環境ごとにcatalogを切り替えられることを確認する。この時点では旧`TEMPLATE_CATALOG_BLOB`を残す。
+- [x] 2.5 Productionと必要なPR preview環境へ`TEMPLATE_CATALOG_FILE`を追加し、同一Storageで環境ごとにcatalogを切り替えられることを確認する。この時点では旧`TEMPLATE_CATALOG_BLOB`を残す。
 - [x] 2.6 private Blobへの匿名アクセス拒否、公開中templateだけへのread-only・HTTPS限定・60分SAS、CORS、cache headerを実環境で確認する。
 
 ## 3. 製品frontendをtemplate APIへ接続する
