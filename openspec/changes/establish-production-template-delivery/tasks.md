@@ -26,9 +26,9 @@
 
 - [x] 4.1 GitHub Actionsのpush triggerを`release`だけ、pull request triggerを`main`と`release`へ変更し、SWA actionのuploadに`production_branch: release`を設定する。
 - [x] 4.2 本番用途のSWA deployment secretへ移行し、外部forkとDependabot PRには品質検査だけを行いsecretを渡さない既存境界を維持する。
-- [ ] 4.3 `main`向けPR、`main`から`release`へのPR、`release`へのmergeで、それぞれ一時preview、リリース候補preview、Production配信になることを実環境で確認する。
+- [x] 4.3 `main`向けPR、`main`から`release`へのPR、`release`へのmergeで、それぞれ一時preview、リリース候補preview、Production配信になることを実環境で確認する。
 - [ ] 4.4 ProductionとPR previewでAPIの環境別catalog、frontend・release・APIのbuild ID、CORS/SAS、Start済みtabの配信更新後・SAS期限後の継続をiPhone SafariとChromeで確認する。
-- [ ] 4.5 `TEMPLATE_CATALOG_FILE`だけを読む製品APIのProduction・PR preview確認後に、各環境から旧`TEMPLATE_CATALOG_BLOB`を削除する。
+- [x] 4.5 `TEMPLATE_CATALOG_FILE`だけを読む製品APIのProduction・PR preview確認後に、各環境から旧`TEMPLATE_CATALOG_BLOB`を削除する。
 
 ## 5. F/S資産を整理し、運用記録を更新する
 
