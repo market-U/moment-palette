@@ -19,7 +19,7 @@
 ## 4. 文書化と検証
 
 - [x] 4.1 `docs/design/screen-flow.md`と`docs/design/ui-states.md`を、全画面の単色調整、標準color input、一時preview、反映・キャンセル、プリセットを置かない初期方針へ更新する。
-- [ ] 4.2 `docs/development-roadmap.md`のフェーズ5完了状況と次のchangeを実装完了後の状態へ更新する。
+- [x] 4.2 `docs/development-roadmap.md`のフェーズ5完了状況と次のchangeを実装完了後の状態へ更新する。
 - [x] 4.3 format、lint、型検査、単体テスト、production buildを実行する。
-- [ ] 4.4 iPhone Safari・ChromeのPRプレビューで、単色の選択・再選択・反映・キャンセル・既存camera／photo上書き・完成PNGを確認し、標準pickerの操作性を記録する。
-- [ ] 4.5 OpenSpecのvalidateを実行し、実装・テスト・実機確認がそろった後にverifyとmain specsへの同期・archiveの準備を行う。
+- [x] 4.4 iPhone Safari・ChromeのPRプレビューで、単色の選択・再選択・反映・キャンセル・既存camera／photo上書き・完成PNGを確認し、標準pickerの操作性を記録する。
+- [x] 4.5 OpenSpecのvalidateを実行し、実装・テスト・実機確認がそろった後にverifyとmain specsへの同期・archiveの準備を行う。
