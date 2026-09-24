@@ -19,7 +19,7 @@
 
 - [x] 3.1 F/S browser catalog adapterを製品`TemplateCatalogPort`とcatalog validatorを使う`src/infrastructure/template-selection/`へ移設し、network・HTTP・invalid responseのunit testを移行する。
 - [x] 3.2 `creationSessionAppService`を開発用catalog adapterではなくsame-originの製品`GET /api/templates` adapterへ結線し、明示的なfixtureを使うunit test以外で静的catalogへfallbackしないようにする。
-- [x] 3.3 release情報・frontend・APIの三者identity照合、assetの全件decode、失敗時のresource解放、Start後のsession継続に関する既存testを製品経路で維持・追加する。
+- [x] 3.3 release情報・frontend・APIの三者identity照合、assetの全件decode、失敗時のresource解放、Start後のsession継続に関する既存testを製品経路で維持・追加する。配信更新後に完成画面への遷移で旧buildの遅延chunkを取得しないことを回帰testで保証する。
 - [ ] 3.4 production buildとSWA CLIで、`/api/templates`、SPA直接アクセス、template選択から完成・保存・共有までの製品経路を確認する。
 
 ## 4. release起点のデプロイを実装する

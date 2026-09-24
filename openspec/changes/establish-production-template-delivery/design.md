@@ -57,6 +57,8 @@ APIが画像bytesをproxyする案は、帯域とFunction負荷を増やし、F/
 
 `beginCreation`はrelease情報とcatalog responseを並列取得し、frontend、release、APIのapp version・build IDが一致した場合だけsnapshotを生成する。template選択後はそのsnapshotのSAS URLからline artと全maskをdecodeし、sessionへ所有権を渡す。Start後はAPI、release、Blob、JavaScript、CSSを再取得せず、同じtabでの配信更新とSAS期限経過後も取得済みresourceで作品を完成できる。
 
+製品のtemplate選択、制作、完成画面はrouterから静的にimportし、Start後に遷移する画面が配信更新で削除された旧buildの遅延chunkを取得しないようにする。F/S専用routeは制作sessionの継続に関与しないため遅延読込を維持できる。
+
 ローカルで静的fixtureを常用する案は、実際のAPI契約・設定不備・assetのCORS/SASを検出できないため、製品composition rootでは採用しない。必要なunit test fixtureは各テストの入力として残す。
 
 ### releaseだけをProductionへ配信する
@@ -119,6 +121,7 @@ Productionのリリースは`main`から`release`へのPRとして確認し、me
 
 - 2026-09-24に、`main`へPR #20をmergeしてもProductionのbuild IDが更新されないこと、PR #21の`main`から`release`へのmergeでProductionが`release`のmerge commitへ更新されることを確認した。
 - PR #22は、開始済み制作sessionを同じPR previewの再デプロイ後も継続できることをiPhone Safari・Chromeで確認するための検証用PRである。
+- 2026-09-24のPR #22再デプロイ検証では、完成画面が遅延chunkだったため、開始済みtabが削除済みの旧chunkを取得して完成へ遷移できないことを確認した。製品routeの静的importと回帰testを追加して再検証する。
 
 ## Open Questions
 
