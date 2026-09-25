@@ -72,11 +72,9 @@ describe('templates service', () => {
       tags: ['bird'],
       masks: [{ id: 'background', initialColor: '#F3E8DC' }],
     })
-    expect(result.publicationCounts).toEqual({
-      published: 1,
-      unpublished: 1,
-      scheduled: 0,
-      expired: 0,
-    })
+    expect(result.templates[0]?.thumbnail).not.toHaveProperty('path')
+    expect(result.templates[0]?.lineArt).not.toHaveProperty('path')
+    expect(result.templates[0]?.masks[0]).not.toHaveProperty('path')
+    expect(result).not.toHaveProperty('publicationCounts')
   })
 })

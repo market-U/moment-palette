@@ -57,6 +57,8 @@ APIが画像bytesをproxyする案は、帯域とFunction負荷を増やし、F/
 
 `beginCreation`はrelease情報とcatalog responseを並列取得し、frontend、release、APIのapp version・build IDが一致した場合だけsnapshotを生成する。template選択後はそのsnapshotのSAS URLからline artと全maskをdecodeし、sessionへ所有権を渡す。Start後はAPI、release、Blob、JavaScript、CSSを再取得せず、同じtabでの配信更新とSAS期限経過後も取得済みresourceで作品を完成できる。
 
+製品のtemplate選択、制作、完成画面はrouterから静的にimportし、Start後に遷移する画面が配信更新で削除された旧buildの遅延chunkを取得しないようにする。F/S専用routeは制作sessionの継続に関与しないため遅延読込を維持できる。
+
 ローカルで静的fixtureを常用する案は、実際のAPI契約・設定不備・assetのCORS/SASを検出できないため、製品composition rootでは採用しない。必要なunit test fixtureは各テストの入力として残す。
 
 ### releaseだけをProductionへ配信する
@@ -114,6 +116,17 @@ Productionのリリースは`main`から`release`へのPRとして確認し、me
 7. すべての検証証跡がそろってからF/S route、UI、diagnostic、obsolete catalog/fixtureを削除し、F/S結果と本番構成を文書化する。
 
 ロールバックは、配信コードなら`release`へのrevert PR、catalogなら直前revisionへのcatalog復元、assetならBlob versionまたはsoft deleteからの復元を使う。Azureリソース自体は削除しない。
+
+## 実環境検証記録
+
+- 2026-09-24に、`main`へPR #20をmergeしてもProductionのbuild IDが更新されないこと、PR #21の`main`から`release`へのmergeでProductionが`release`のmerge commitへ更新されることを確認した。
+- PR #22は、開始済み制作sessionを同じPR previewの再デプロイ後も継続できることをiPhone Safari・Chromeで確認するための検証用PRである。
+- 2026-09-24のPR #22再デプロイ検証では、完成画面が遅延chunkだったため、開始済みtabが削除済みの旧chunkを取得して完成へ遷移できないことを確認した。製品routeの静的importと回帰testを追加して再検証する。
+- 修正済みPR #22のpreviewで新しい制作sessionを開始し、同じpreviewへの再デプロイ後にiPhoneの各ブラウザおよびPCで完成・保存・共有まで成功した。さらにSASの60分期限を経過したsessionでも同じ操作を完了できた。
+- 製品経路のunit testと全自動品質検査、ProductionおよびPR previewの実機確認がそろったため、F/S専用route、page、UI、diagnostic、port、adapterと関連testを削除した。製品で共有するasset decoderは`src/infrastructure/template-selection/`へ移設した。
+- 文鳥01のrevision付きassetとcatalog例は、catalog更新・復旧手順を示す運用fixtureとして保持する。参照を外したassetを削除する場合は、すべてのcatalogを確認してから24時間の削除猶予と14日の復旧可能性を満たす。
+- `infra/environments/production.bicepparam`によるBicep validateは成功した。what-ifでは既存SWAの変更・再作成はなく、Storage Blob serviceのstatic websiteを`false`へ収束させる差分だけを確認した。
+- Node.js 22.22.0のFunctions hostとSWA CLI 2.0.10で、`GET /api/templates`、`/create`・`/complete`のSPA直接アクセス、Startからtemplate選択、制作、完成、保存案内、共有文コピーまでを確認した。API responseは内部asset pathとF/S用`publicationCounts`を返さない。
 
 ## Open Questions
 

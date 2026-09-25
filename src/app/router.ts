@@ -1,6 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 import { creationSessionAppService } from '@/app/creationSessionAppService'
+import CompletedArtworkPage from '@/pages/CompletedArtworkPage.vue'
+import CreationPage from '@/pages/CreationPage.vue'
+import TemplateSelectionPage from '@/pages/TemplateSelectionPage.vue'
 import TitlePage from '@/pages/TitlePage.vue'
 
 /** 製品画面と残存する技術F/S画面のroute、および制作状態に基づく遷移境界を提供する。 */
@@ -15,25 +18,20 @@ export const router = createRouter({
     {
       path: '/templates',
       name: 'template-selection',
-      component: () => import('@/pages/TemplateSelectionPage.vue'),
+      component: TemplateSelectionPage,
       meta: { requiresCatalog: true },
     },
     {
       path: '/create',
       name: 'creation',
-      component: () => import('@/pages/CreationPage.vue'),
+      component: CreationPage,
       meta: { requiresSession: true },
     },
     {
       path: '/complete',
       name: 'completed-artwork',
-      component: () => import('@/pages/CompletedArtworkPage.vue'),
+      component: CompletedArtworkPage,
       meta: { requiresSession: true, requiresCompletedArtwork: true },
-    },
-    {
-      path: '/spikes/azure-template-delivery',
-      name: 'azure-template-delivery-spike',
-      component: () => import('./spikes/AzureTemplateDeliverySpikeRoute.vue'),
     },
     {
       path: '/:pathMatch(.*)*',
