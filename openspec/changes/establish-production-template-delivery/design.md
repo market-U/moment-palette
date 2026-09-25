@@ -126,6 +126,7 @@ Productionのリリースは`main`から`release`へのPRとして確認し、me
 - 製品経路のunit testと全自動品質検査、ProductionおよびPR previewの実機確認がそろったため、F/S専用route、page、UI、diagnostic、port、adapterと関連testを削除した。製品で共有するasset decoderは`src/infrastructure/template-selection/`へ移設した。
 - 文鳥01のrevision付きassetとcatalog例は、catalog更新・復旧手順を示す運用fixtureとして保持する。参照を外したassetを削除する場合は、すべてのcatalogを確認してから24時間の削除猶予と14日の復旧可能性を満たす。
 - `infra/environments/production.bicepparam`によるBicep validateは成功した。what-ifでは既存SWAの変更・再作成はなく、Storage Blob serviceのstatic websiteを`false`へ収束させる差分だけを確認した。
+- Node.js 22.22.0のFunctions hostとSWA CLI 2.0.10で、`GET /api/templates`、`/create`・`/complete`のSPA直接アクセス、Startからtemplate選択、制作、完成、保存案内、共有文コピーまでを確認した。API responseは内部asset pathとF/S用`publicationCounts`を返さない。
 
 ## Open Questions
 

@@ -40,10 +40,13 @@ export type PublicationCounts = {
   expired: number
 }
 
-export type SignedAsset = CatalogAsset & {
+/** APIがbrowserへ公開する、内部Blob pathを含まないasset参照を表す。 */
+export type SignedAsset = {
+  mimeType: string
   url: string
 }
 
+/** APIがbrowserへ公開するmask参照と制作に必要な表示情報を表す。 */
 export type SignedMask = SignedAsset & {
   id: string
   label: LocalizedText
@@ -67,7 +70,6 @@ export type TemplatesResponse = {
   serverTime: string
   catalogRevision: string
   sasExpiresAt: string
-  publicationCounts: PublicationCounts
   templates: PublishedTemplate[]
 }
 

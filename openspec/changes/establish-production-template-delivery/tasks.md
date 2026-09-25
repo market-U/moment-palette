@@ -20,7 +20,7 @@
 - [x] 3.1 F/S browser catalog adapterを製品`TemplateCatalogPort`とcatalog validatorを使う`src/infrastructure/template-selection/`へ移設し、network・HTTP・invalid responseのunit testを移行する。
 - [x] 3.2 `creationSessionAppService`を開発用catalog adapterではなくsame-originの製品`GET /api/templates` adapterへ結線し、明示的なfixtureを使うunit test以外で静的catalogへfallbackしないようにする。
 - [x] 3.3 release情報・frontend・APIの三者identity照合、assetの全件decode、失敗時のresource解放、Start後のsession継続に関する既存testを製品経路で維持・追加する。配信更新後に完成画面への遷移で旧buildの遅延chunkを取得しないことを回帰testで保証する。
-- [ ] 3.4 production buildとSWA CLIで、`/api/templates`、SPA直接アクセス、template選択から完成・保存・共有までの製品経路を確認する。
+- [x] 3.4 production buildとSWA CLIで、`/api/templates`、SPA直接アクセス、template選択から完成・保存・共有までの製品経路を確認する。
 
 ## 4. release起点のデプロイを実装する
 
@@ -35,4 +35,4 @@
 - [x] 5.1 製品経路のunit test、全自動品質検査、ProductionとPR previewの実機確認証跡がそろったことを確認してから、F/S専用route、page、UI、diagnostic、port、adapterと関連testを削除する。
 - [x] 5.2 製品実装が利用しないF/S catalog/fixtureとApplication Settingsを削除するか、運用fixtureとして残すかを判定し、削除する場合は24時間のasset削除猶予と復旧可能性を確認する。
 - [x] 5.3 `docs/architecture/`のMermaid図、template API契約、`infra/README.md`、ルートREADME、F/S結果記録を、既存リソースを昇格したProduction構成、catalog切替、release配信、secret、asset更新、ロールバックへ更新する。
-- [ ] 5.4 `docs/development-roadmap.md`のフェーズ6状態と次の作業を更新し、全品質検査、Bicep検査、OpenSpec validation、実環境・実機確認の結果を記録する。
+- [x] 5.4 `docs/development-roadmap.md`のフェーズ6状態と次の作業を更新し、全品質検査、Bicep検査、OpenSpec validation、実環境・実機確認の結果を記録する。

@@ -21,13 +21,22 @@ const signAsset = (
   asset: CatalogAsset,
   expiresOn: Date,
   signer: ServiceSasSigner,
-): SignedAsset => ({ ...asset, url: signer.signReadUrl(asset.path, expiresOn) })
+): SignedAsset => ({
+  mimeType: asset.mimeType,
+  url: signer.signReadUrl(asset.path, expiresOn),
+})
 
 const signMask = (
   mask: CatalogMask,
   expiresOn: Date,
   signer: ServiceSasSigner,
-): SignedMask => ({ ...mask, url: signer.signReadUrl(mask.path, expiresOn) })
+): SignedMask => ({
+  id: mask.id,
+  label: mask.label,
+  initialColor: mask.initialColor,
+  mimeType: mask.mimeType,
+  url: signer.signReadUrl(mask.path, expiresOn),
+})
 
 /** 検証済みcatalogから公開中templateのAPI responseを組み立てるサービスを生成する。 */
 export const createTemplatesService = (
@@ -36,7 +45,7 @@ export const createTemplatesService = (
   async execute(): Promise<TemplatesResponse> {
     const now = dependencies.now()
     const catalog = await dependencies.catalogReader.read()
-    const { templates, counts } = selectPublishedTemplates(catalog, now)
+    const { templates } = selectPublishedTemplates(catalog, now)
     const expiresOn = new Date(now.getTime() + 60 * 60 * 1000)
 
     return {
@@ -46,7 +55,6 @@ export const createTemplatesService = (
       serverTime: now.toISOString(),
       catalogRevision: catalog.catalogRevision,
       sasExpiresAt: expiresOn.toISOString(),
-      publicationCounts: counts,
       // 非公開templateの表示情報や内部pathはresponseへ写さない。
       templates: templates.map((template) => ({
         id: template.id,
