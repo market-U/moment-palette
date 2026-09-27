@@ -7,8 +7,8 @@ export const en = {
     startFailed: 'We could not get ready. Check your connection and try again.',
     language: {
       label: 'Language',
-      ja: '日本語',
-      en: 'English',
+      ja: 'JA',
+      en: 'EN',
     },
   },
   actions: {

@@ -69,14 +69,18 @@ const completeArtwork = async () => {
   <template v-if="creation">
     <ScreenShell class="creation-page">
       <template #header-left>
-        <BackButton :label="t('actions.templates')" @click="backToTemplates" />
+        <BackButton
+          :label="t('actions.templates')"
+          :hideLabel="true"
+          @click="backToTemplates"
+        />
       </template>
 
       <section
         class="creation-page__content"
         aria-labelledby="creation-heading"
       >
-        <div class="creation-page__copy">
+        <div v-show="false" class="creation-page__copy">
           <p class="eyebrow">{{ t('creation.eyebrow') }}</p>
           <h1 id="creation-heading">{{ localized(creation.templateName) }}</h1>
         </div>

@@ -9,8 +9,8 @@ export const ja = {
       '開始に必要な情報を取得できませんでした。通信環境を確認して、もう一度お試しください。',
     language: {
       label: '表示言語',
-      ja: '日本語',
-      en: 'English',
+      ja: 'JA',
+      en: 'EN',
     },
   },
   actions: {
