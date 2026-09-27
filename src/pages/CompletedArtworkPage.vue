@@ -74,6 +74,7 @@ const copyMessage = computed(() => {
     <template #header-left>
       <BackButton
         :label="t('completed.backToCreation')"
+        :hideLabel="true"
         @click="returnToCreation"
       />
     </template>
@@ -104,7 +105,7 @@ const copyMessage = computed(() => {
         {{ shareMessage }}
       </p>
 
-      <section class="share-copy" :aria-label="t('completed.shareText')">
+      <section v-show="false" class="share-copy" :aria-label="t('completed.shareText')">
         <div class="share-copy__heading">
           <h2>{{ t('completed.shareText') }}</h2>
           <button type="button" @click="copyShareText">
