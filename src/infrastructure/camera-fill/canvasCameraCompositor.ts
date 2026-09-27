@@ -382,6 +382,17 @@ export const createCanvasCameraCompositor = (
         context.restore()
       }
     },
+    renderLineArtOverlay(canvas, state) {
+      const context = requireContext(canvas)
+      context.save()
+      try {
+        context.clearRect(0, 0, canvas.width, canvas.height)
+        context.scale(canvas.width / artworkSize, canvas.height / artworkSize)
+        drawLineArt(context, state)
+      } finally {
+        context.restore()
+      }
+    },
     renderAreaThumbnail(canvas, state, areaId) {
       const { definition, mask } = requireAreaMask(state, areaId)
       const context = requireContext(canvas)
@@ -564,7 +575,6 @@ export const createCanvasCameraCompositor = (
       try {
         const context = requireContext(canvas)
         drawArtwork(context, artworkContext)
-        drawLineArt(context, artworkContext)
         const url = dependencies.createObjectUrl(await canvasToBlob(canvas))
         let released = false
         return Object.freeze({

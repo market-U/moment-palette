@@ -6,6 +6,7 @@
 
 - 制作画面から作品を破棄する遷移に、破棄確認とキャンセル操作を追加する。
 - 制作画面の静的作品preview上に、選択中Areaのmaskで切り抜いた斜線patternを重ね、CSS animationで点滅表示する。
+- 制作画面では線画を斜線patternより前面の独立した静的Canvasへ描き、選択maskが線画を覆わないようにする。
 - 横スクロールArea selectorから名前・初期色・fill状態の補助テキストを取り除き、mask形状のサムネイルを表示する。
 
 ## Capabilities
@@ -21,6 +22,6 @@
 
 ## Impact
 
-- `src/app/assets/selected-area.png`、`src/pages/CreationPage.vue`、Area selector、制作session facadeとCanvas compositor
+- `src/app/assets/selected-area.png`、`src/pages/CreationPage.vue`、Artwork preview、Area selector、制作session facadeとCanvas compositor
 - 制作画面の日本語・英語翻訳resourceと単体テスト
 - 外部API、template形式、保存済みArtworkには変更なし

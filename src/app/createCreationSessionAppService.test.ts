@@ -87,6 +87,7 @@ const dependencies = () => {
     renderPreview: vi.fn(),
     renderArtworkPreview: vi.fn(),
     renderAreaHighlight: vi.fn(),
+    renderLineArtOverlay: vi.fn(),
     renderAreaThumbnail: vi.fn(),
     getPhotoAreaBounds: vi.fn().mockReturnValue({
       x: 0,
@@ -218,6 +219,7 @@ describe('creation session app service', () => {
 
     service.resizeAreaFeedback(canvas, 320, 2)
     service.renderAreaHighlight(canvas, 'body')
+    service.renderLineArtOverlay(canvas)
     service.renderAreaThumbnail(canvas, 'body')
 
     expect(deps.cameraCompositor.resizePreview).toHaveBeenCalledWith(
@@ -231,6 +233,12 @@ describe('creation session app service', () => {
         assets: expect.objectContaining({ masks: expect.any(Array) }),
       }),
       'body',
+    )
+    expect(deps.cameraCompositor.renderLineArtOverlay).toHaveBeenCalledWith(
+      canvas,
+      expect.objectContaining({
+        assets: expect.objectContaining({ lineArt: expect.anything() }),
+      }),
     )
     expect(deps.cameraCompositor.renderAreaThumbnail).toHaveBeenCalledWith(
       canvas,

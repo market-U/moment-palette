@@ -59,6 +59,10 @@ export interface CameraCompositorPort {
     context: CameraArtworkContext,
     areaId: string,
   ): void
+  renderLineArtOverlay(
+    canvas: HTMLCanvasElement,
+    context: CameraArtworkContext,
+  ): void
   renderAreaThumbnail(
     canvas: HTMLCanvasElement,
     context: CameraArtworkContext,

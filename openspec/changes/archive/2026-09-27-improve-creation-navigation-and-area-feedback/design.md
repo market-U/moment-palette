@@ -9,7 +9,7 @@
 **Goals:**
 
 - 破棄される遷移をキャンセル可能な確認dialogで保護する。
-- 静的previewを保存可能な`img`のまま維持し、選択中maskを重ねて表示する。
+- 静的previewを保存可能な`img`のまま維持し、選択中maskと線画を重ねて表示する。
 - Area selectorの視覚表現をmaskサムネイルへ置き換え、文字列の補助情報へ依存しない。
 - maskを追加取得せず、sessionが所有するdecode済みassetだけを使う。
 
@@ -18,14 +18,17 @@
 - 完成画像、template catalog、Artworkデータ形式、mask asset形式の変更。
 - 個別Areaの輪郭asset生成やnetworkからの追加読み込み。
 - tabを閉じる・再読み込みする際のbrowser標準確認の置換。
+- OSの「動きを減らす」設定に応じた強調表示animationの切り替え。
 
 ## Decisions
 
-### Canvasを静的なmask済みoverlayとthumbnail専用に再利用する
+### Canvasを静的なmask済みoverlay、前面線画、thumbnail専用に再利用する
 
-Canvas compositorは`src/app/assets/selected-area.png`の斜線patternと選択中Areaのdecode済みmaskを合成し、透明Canvasへ一度だけ描く。制作pageは既存`img`の上にpointer eventsを受けないCanvasを置き、そのCanvasの`opacity`だけをCSS animationで点滅させる。選択Areaまたは作品previewの表示サイズが変わったときだけCanvasを描き直す。
+Canvas compositorは`src/app/assets/selected-area.png`の斜線patternと選択中Areaのdecode済みmaskを合成し、透明Canvasへ一度だけ描く。制作pageは静的`img`、斜線Canvas、線画Canvasをこの順で重ねる。静的`img`にはAreaの塗りだけを含め、decode済みline artは斜線より前面の独立した透明Canvasへ一度だけ描く。線画CanvasはCSS animationを適用しない。
 
-patternのblend modeとasset自体は視認性を見ながら調整可能な表示パラメータとして扱い、Artworkや完成PNGへ反映しない。blinkはJavaScript timerや`requestAnimationFrame`を使わないため、画面離脱後の描画loopを持たない。`prefers-reduced-motion`ではCSS animationを止め、静的なopacityで表示する。
+斜線Canvas要素のCSS `filter` animationで`hue-rotate()`と`brightness()`を時間変化させる。これによりCanvasの画素を再描画せず、下地の色を問わず斜線を見つけやすくする。選択Area、作品previewの表示サイズ、またはpreview画像が変わったときだけ必要なCanvasを描き直す。
+
+patternのblend modeとasset自体は視認性を見ながら調整可能な表示パラメータとして扱い、現行のblend modeは`normal`とする。Artworkや完成PNGへは反映しない。色相・明度の変化はJavaScript timerや`requestAnimationFrame`を使わないCSS animationのため、画面離脱後の描画loopを持たない。
 
 CSS `mask-image`へasset URLを渡す方式は、decode済みImageBitmapを再利用できず、制作開始後のasset再取得禁止にも反するため採用しない。
 
@@ -40,7 +43,8 @@ CreationPageのcomponent-level route leave guardが、制作または完成確�
 ## Risks / Trade-offs
 
 - [Canvas表示と`img`の表示位置がずれる] → 両方を同じaspect ratioの親要素にabsolute配置し、CanvasはResizeObserverで画像表示サイズへ追従する。
-- [下地によって斜線patternの色が見えにくい] → assetまたはblend modeを表示パラメータとして調整し、実機で写真・カメラ・単色の各fillを確認する。
-- [motionが不快または読みにくい] → 点滅はCSSだけで実装し、`prefers-reduced-motion`では静的表示へ切り替える。
+- [線画が斜線の色相・明度変化を受ける] → 線画を斜線Canvasと分離し、最前面の静的Canvasへ描く。
+- [下地によって斜線patternの色が見えにくい] → 色相・明度のCSS animationを表示パラメータとして調整し、実機で写真・カメラ・単色の各fillを確認する。
+- [motionが不快または読みにくい] → 色相・明度の変化はCSSだけで実装し、周期や各keyframe値を表示パラメータとして調整する。OS設定に応じた停止はこのchangeの対象外とする。
 - [確認後の再遷移が再びdialogを開く] → 一度だけ通過する承認フラグと保留先routeをpage内に保持する。
 - [mask描画の失敗で制作が操作不能になる] → overlay・thumbnailの描画は表示補助に限定し、失敗してもArtwork本体とArea選択は維持する。

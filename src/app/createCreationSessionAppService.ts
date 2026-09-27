@@ -429,6 +429,16 @@ export const createCreationSessionAppService = (
         areaId,
       )
     },
+    renderLineArtOverlay: (canvas) => {
+      const session = activeSession.value
+      if (!session) return
+      dependencies.cameraCompositor.renderLineArtOverlay(canvas, {
+        template: session.template,
+        artwork: session.artwork,
+        assets: session.assets,
+        areaResources: session.areaResources,
+      })
+    },
     renderAreaThumbnail: (canvas, areaId) => {
       const session = activeSession.value
       if (!session || !areaId) return

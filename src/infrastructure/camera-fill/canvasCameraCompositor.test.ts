@@ -109,7 +109,7 @@ describe('drawCameraSource', () => {
 })
 
 describe('createCanvasCameraCompositor', () => {
-  it('Area順に初期色と撮影frameへmaskを適用し、line artを最後に描く', async () => {
+  it('Area順に初期色と撮影frameへmaskを適用し、塗りだけのpreviewを生成する', async () => {
     const calls: string[] = []
     const contexts = [
       context(),
@@ -152,7 +152,6 @@ describe('createCanvasCameraCompositor', () => {
       'draw:body-mask',
       'restore',
       'draw:canvas-2',
-      'draw:line',
     ])
     expect(preview).toMatchObject({
       url: 'blob:preview',
@@ -224,6 +223,30 @@ describe('createCanvasCameraCompositor', () => {
 
     expect(highlightCalls).toContain('draw:body-mask')
     expect(thumbnailCalls).toContain('draw:body-mask')
+  })
+
+  it('線画を選択overlayとは別の透明Canvasへ描画する', () => {
+    const internalCanvases = Array.from({ length: 5 }, (_, index) =>
+      canvas(context(), `internal-${String(index)}`),
+    )
+    const compositor = createCanvasCameraCompositor({
+      createCanvas: () => internalCanvases.shift()!,
+      createObjectUrl: vi.fn(),
+      revokeObjectUrl: vi.fn(),
+    })
+    const calls: string[] = []
+    const lineArt = canvas(context(calls), 'line-art')
+    lineArt.width = 540
+    lineArt.height = 540
+
+    compositor.renderLineArtOverlay(lineArt, {
+      template,
+      artwork: createInitialArtwork(template),
+      assets,
+      areaResources: new Map(),
+    })
+
+    expect(calls).toContain('draw:line')
   })
 
   it('表示比率の中間値でsourceを不透明、artworkを比率alphaで重ねる', () => {

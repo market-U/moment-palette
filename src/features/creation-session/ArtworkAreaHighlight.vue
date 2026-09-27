@@ -11,10 +11,12 @@ const props = defineProps<{
     pixelRatio: number,
   ) => void
   render: (canvas: HTMLCanvasElement, areaId: string) => void
+  renderLineArt: (canvas: HTMLCanvasElement) => void
 }>()
 
 const container = ref<HTMLElement>()
 const canvas = ref<HTMLCanvasElement>()
+const lineArtCanvas = ref<HTMLCanvasElement>()
 let resizeObserver: ResizeObserver | undefined
 
 const renderHighlight = () => {
@@ -29,8 +31,33 @@ const renderHighlight = () => {
   }
 }
 
+const renderLineArt = () => {
+  const target = container.value
+  const overlay = lineArtCanvas.value
+  if (!target || !overlay) return
+  try {
+    props.resize(overlay, target.clientWidth, window.devicePixelRatio || 1)
+    props.renderLineArt(overlay)
+  } catch {
+    // 表示補助の失敗は作品previewやArea選択を妨げない。
+  }
+}
+
+const renderOverlays = () => {
+  renderHighlight()
+  renderLineArt()
+}
+
 watch(
-  () => [props.src, props.selectedAreaId],
+  () => props.src,
+  async () => {
+    await nextTick()
+    renderOverlays()
+  },
+)
+
+watch(
+  () => props.selectedAreaId,
   async () => {
     await nextTick()
     renderHighlight()
@@ -38,9 +65,9 @@ watch(
 )
 
 onMounted(() => {
-  renderHighlight()
+  renderOverlays()
   if (!container.value) return
-  resizeObserver = new ResizeObserver(renderHighlight)
+  resizeObserver = new ResizeObserver(renderOverlays)
   resizeObserver.observe(container.value)
 })
 
@@ -53,6 +80,11 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
     <canvas
       ref="canvas"
       class="artwork-area-highlight__overlay"
+      aria-hidden="true"
+    />
+    <canvas
+      ref="lineArtCanvas"
+      class="artwork-area-highlight__line-art"
       aria-hidden="true"
     />
   </div>
@@ -70,7 +102,8 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 }
 
 .artwork-area-highlight__image,
-.artwork-area-highlight__overlay {
+.artwork-area-highlight__overlay,
+.artwork-area-highlight__line-art {
   display: block;
   width: 100%;
   height: 100%;
@@ -83,9 +116,17 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 .artwork-area-highlight__overlay {
   position: absolute;
   inset: 0;
+  z-index: 1;
   pointer-events: none;
   mix-blend-mode: normal;
-  animation: selected-area-blink 12s linear infinite;
+  animation: selected-area-blink 3s linear infinite;
+}
+
+.artwork-area-highlight__line-art {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
 }
 
 @keyframes selected-area-blink {

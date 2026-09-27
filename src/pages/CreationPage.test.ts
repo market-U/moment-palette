@@ -27,6 +27,7 @@ describe('CreationPage', () => {
     expect(source).toContain('<SolidColorFillPanel')
     expect(source).toContain(':state="session.solidColorState.value"')
     expect(source).toContain('<ArtworkAreaHighlight')
+    expect(source).toContain(':render-line-art="session.renderLineArtOverlay"')
     expect(source).toContain(':render-thumbnail="session.renderAreaThumbnail"')
   })
 })

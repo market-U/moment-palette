@@ -7,7 +7,7 @@ import type {
 
 const artworkSize = 1080
 
-/** Artworkの領域順にmaskと初期色を合成し、最後に線画を前面へ描画する。 */
+/** Artworkの領域順にmaskと初期色だけを合成して、制作画面用のpreviewを生成する。 */
 export const drawInitialArtwork = (
   context: CanvasRenderingContext2D,
   layerContext: CanvasRenderingContext2D,
@@ -42,7 +42,6 @@ export const drawInitialArtwork = (
     layerContext.fillRect(0, 0, artworkSize, artworkSize)
     context.drawImage(layerContext.canvas, 0, 0, artworkSize, artworkSize)
   }
-  context.drawImage(assets.lineArt.source, 0, 0, artworkSize, artworkSize)
 }
 
 const canvasToBlob = (canvas: HTMLCanvasElement): Promise<Blob> =>
