@@ -47,6 +47,10 @@ export const ja = {
     completing: '完成画像を生成しています…',
     completeFailed:
       '完成画像を生成できませんでした。もう一度試すか、制作を続けてください。',
+    discardHeading: '制作をやめますか？',
+    discardDescription: 'ここまでの作品は保存されません。',
+    discardCancel: '制作を続ける',
+    discardConfirm: '破棄して戻る',
   },
   solidColor: {
     eyebrow: '気持ちからつくる',

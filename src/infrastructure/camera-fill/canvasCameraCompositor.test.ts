@@ -16,6 +16,9 @@ const context = (calls: string[] = []) =>
   ({
     canvas: { name: 'layer' },
     clearRect: vi.fn(() => calls.push('clear')),
+    createPattern: vi.fn(
+      () => ({ name: 'selection-pattern' }) as unknown as CanvasPattern,
+    ),
     fillRect: vi.fn(() => calls.push('fill')),
     drawImage: vi.fn((source: { name?: string }) =>
       calls.push(`draw:${source.name ?? 'canvas'}`),
@@ -189,6 +192,38 @@ describe('createCanvasCameraCompositor', () => {
 
     expect(calls).toContain('draw:body-mask')
     expect(calls).toContain('draw:line')
+  })
+
+  it('選択Areaのmaskを透明overlayとサムネイルへ描画する', () => {
+    const internalCanvases = Array.from({ length: 5 }, (_, index) =>
+      canvas(context(), `internal-${String(index)}`),
+    )
+    const compositor = createCanvasCameraCompositor({
+      createCanvas: () => internalCanvases.shift()!,
+      createObjectUrl: vi.fn(),
+      revokeObjectUrl: vi.fn(),
+      selectedAreaPattern: { name: 'selection-pattern' } as never,
+    })
+    const highlightCalls: string[] = []
+    const thumbnailCalls: string[] = []
+    const highlight = canvas(context(highlightCalls), 'highlight')
+    const thumbnail = canvas(context(thumbnailCalls), 'thumbnail')
+    highlight.width = 540
+    highlight.height = 540
+    thumbnail.width = 128
+    thumbnail.height = 112
+    const state = {
+      template,
+      artwork: createInitialArtwork(template),
+      assets,
+      areaResources: new Map(),
+    }
+
+    compositor.renderAreaHighlight(highlight, state, 'body')
+    compositor.renderAreaThumbnail(thumbnail, state, 'body')
+
+    expect(highlightCalls).toContain('draw:body-mask')
+    expect(thumbnailCalls).toContain('draw:body-mask')
   })
 
   it('表示比率の中間値でsourceを不透明、artworkを比率alphaで重ねる', () => {

@@ -125,6 +125,13 @@ export type CreationSessionFacade = {
     pixelRatio: number,
   ) => Size
   renderCameraPreview: (canvas: HTMLCanvasElement) => void
+  resizeAreaFeedback: (
+    canvas: HTMLCanvasElement,
+    cssPixels: number,
+    pixelRatio: number,
+  ) => Size
+  renderAreaHighlight: (canvas: HTMLCanvasElement, areaId: string) => void
+  renderAreaThumbnail: (canvas: HTMLCanvasElement, areaId: string) => void
   captureCamera: () => Promise<boolean>
   cancelCamera: () => void
   handleCameraVisibilityChange: () => void

@@ -86,6 +86,8 @@ const dependencies = () => {
     resizePreview: vi.fn().mockReturnValue({ width: 540, height: 540 }),
     renderPreview: vi.fn(),
     renderArtworkPreview: vi.fn(),
+    renderAreaHighlight: vi.fn(),
+    renderAreaThumbnail: vi.fn(),
     getPhotoAreaBounds: vi.fn().mockReturnValue({
       x: 0,
       y: 0,
@@ -205,6 +207,38 @@ describe('creation session app service', () => {
     expect(deps.loadCurrent).toHaveBeenCalledOnce()
     expect(deps.loadAvailable).toHaveBeenCalledOnce()
     expect(deps.loadAssets).toHaveBeenCalledOnce()
+  })
+
+  it('保持中sessionのdecode済みassetだけでArea表示補助を描画する', async () => {
+    const deps = dependencies()
+    const service = createCreationSessionAppService(deps.values)
+    await service.start()
+    await service.selectTemplate('buncho-01')
+    const canvas = {} as HTMLCanvasElement
+
+    service.resizeAreaFeedback(canvas, 320, 2)
+    service.renderAreaHighlight(canvas, 'body')
+    service.renderAreaThumbnail(canvas, 'body')
+
+    expect(deps.cameraCompositor.resizePreview).toHaveBeenCalledWith(
+      canvas,
+      320,
+      2,
+    )
+    expect(deps.cameraCompositor.renderAreaHighlight).toHaveBeenCalledWith(
+      canvas,
+      expect.objectContaining({
+        assets: expect.objectContaining({ masks: expect.any(Array) }),
+      }),
+      'body',
+    )
+    expect(deps.cameraCompositor.renderAreaThumbnail).toHaveBeenCalledWith(
+      canvas,
+      expect.objectContaining({
+        assets: expect.objectContaining({ masks: expect.any(Array) }),
+      }),
+      'body',
+    )
   })
 
   it('resetとdisposeを重ねてもactive resourceを一度だけ解放する', async () => {
