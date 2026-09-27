@@ -9,6 +9,7 @@ import type {
   TemplateAssetLoaderPort,
 } from './assetLoaderPort'
 import type { ArtworkPreview, ArtworkPreviewPort } from './artworkPreviewPort'
+import type { AreaHitTester, AreaHitTesterPort } from './areaHitTesterPort'
 import type { CatalogSnapshot } from './catalog'
 
 const artworkSize = 1080
@@ -33,6 +34,7 @@ export type ActiveCreationSession = Readonly<{
   assets: LoadedTemplateAssets
   readonly preview: ArtworkPreview
   readonly areaResources: ReadonlyMap<string, ArtworkAreaResource>
+  areaHitTester: AreaHitTester
   startedAt: string
   replaceAreaResource: (
     areaId: string,
@@ -51,6 +53,7 @@ export type ActiveCreationSession = Readonly<{
 type PrepareTemplateDependencies = {
   assetLoader: TemplateAssetLoaderPort
   previewPort: ArtworkPreviewPort
+  areaHitTesterPort?: AreaHitTesterPort
   now: () => Date
 }
 
@@ -87,9 +90,14 @@ export const prepareTemplate = async (
   if (!entry) throw new Error('選択したtemplateがcatalogにありません。')
 
   const assets = await dependencies.assetLoader.load(entry)
+  let areaHitTester: AreaHitTester | undefined
   try {
     assertAssets(entry.template, assets)
     const artwork = createInitialArtwork(entry.template)
+    areaHitTester = dependencies.areaHitTesterPort?.create(
+      entry.template,
+      assets,
+    ) ?? { findAreaAt: () => undefined, release: () => undefined }
     const preview = await dependencies.previewPort.generate(
       entry.template,
       artwork,
@@ -112,6 +120,7 @@ export const prepareTemplate = async (
       get areaResources() {
         return areaResources as ReadonlyMap<string, ArtworkAreaResource>
       },
+      areaHitTester,
       startedAt: dependencies.now().toISOString(),
       async replaceAreaResource(
         areaId,
@@ -172,11 +181,13 @@ export const prepareTemplate = async (
         currentPreview.release()
         areaResources.forEach((resource) => resource.release())
         areaResources.clear()
+        areaHitTester?.release()
         assets.release()
       },
     })
   } catch (error) {
     // session成立前の失敗では、呼び出し側へ所有権を渡せないためここでassetを解放する。
+    areaHitTester?.release()
     assets.release()
     throw error
   }

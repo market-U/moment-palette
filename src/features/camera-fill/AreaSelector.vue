@@ -91,6 +91,14 @@ watch(
   },
 )
 
+watch(
+  () => props.selectedAreaId,
+  async (areaId) => {
+    await nextTick()
+    centerArea(areaId)
+  },
+)
+
 onMounted(async () => {
   await nextTick()
   updateEdgePadding()

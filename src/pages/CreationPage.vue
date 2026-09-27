@@ -125,6 +125,8 @@ const completeArtwork = async () => {
           :resize="session.resizeAreaFeedback"
           :render="session.renderAreaHighlight"
           :render-line-art="session.renderLineArtOverlay"
+          :find-area-at="session.findAreaAt"
+          @select="selectedAreaId = $event"
         />
 
         <section class="area-panel" :aria-label="t('creation.areas')">

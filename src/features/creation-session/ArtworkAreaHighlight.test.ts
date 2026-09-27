@@ -22,4 +22,12 @@ describe('ArtworkAreaHighlight', () => {
     )
     expect(source).toContain('props.renderLineArt(overlay)')
   })
+
+  it('pointer操作でhit testしたAreaを選択イベントとして通知する', () => {
+    expect(source).toContain('@pointerdown="beginPointer"')
+    expect(source).toContain('@pointerup="completePointer"')
+    expect(source).toContain('@pointercancel="pointerStart = undefined"')
+    expect(source).toContain('props.findAreaAt(point.x, point.y)')
+    expect(source).toContain("emit('select', areaId)")
+  })
 })

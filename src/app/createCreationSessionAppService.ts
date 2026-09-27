@@ -25,6 +25,7 @@ import type {
   TemplateSelectionViewState,
 } from '@/features/creation-session/sessionFacade'
 import type { ArtworkPreviewPort } from '@/features/template-selection/artworkPreviewPort'
+import type { AreaHitTesterPort } from '@/features/template-selection/areaHitTesterPort'
 import type { TemplateAssetLoaderPort } from '@/features/template-selection/assetLoaderPort'
 import type { CatalogSnapshot } from '@/features/template-selection/catalog'
 import {
@@ -63,6 +64,7 @@ type Dependencies = {
   catalogPort: TemplateCatalogPort
   assetLoader: TemplateAssetLoaderPort
   previewPort: ArtworkPreviewPort
+  areaHitTesterPort?: AreaHitTesterPort
   cameraPort: CameraStreamPort
   cameraPermission: CameraPermissionPort
   cameraCompositor: CameraCompositorPort
@@ -217,6 +219,7 @@ export const createCreationSessionAppService = (
       const session = await prepareTemplate(currentSnapshot, templateId, {
         assetLoader: dependencies.assetLoader,
         previewPort: dependencies.previewPort,
+        areaHitTesterPort: dependencies.areaHitTesterPort,
         now: dependencies.now,
       })
       owner.replace(session)
@@ -429,6 +432,7 @@ export const createCreationSessionAppService = (
         areaId,
       )
     },
+    findAreaAt: (x, y) => activeSession.value?.areaHitTester.findAreaAt(x, y),
     renderLineArtOverlay: (canvas) => {
       const session = activeSession.value
       if (!session) return
