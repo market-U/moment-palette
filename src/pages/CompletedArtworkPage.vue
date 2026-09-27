@@ -20,6 +20,7 @@ const shareCopy = computed(() => ({
       : 'I made this with Moment Palette.',
   hashtag: '#MomentPalette',
   url: new URL(import.meta.env.BASE_URL, window.location.origin).toString(),
+  version: `v${session.appVersion}`,
 }))
 const shareText = computed(() =>
   createCompletedArtworkShareText(shareCopy.value),
