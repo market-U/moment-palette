@@ -10,7 +10,11 @@ const source = readFileSync(
 describe('TemplateSelectionPage', () => {
   it('pageが開始状態をリセットしてから戻り、言語切替を置かない', () => {
     expect(source).toContain(
-      '<BackButton :label="t(\'actions.back\')" @click="restart" />',
+      `<BackButton
+        :label="t('actions.back')"
+        :hideLabel="true"
+        @click="restart"
+      />`,
     )
     expect(source).toContain('session.resetToStart()\n  await router.push')
     expect(source).not.toContain('LanguageSwitcher')
