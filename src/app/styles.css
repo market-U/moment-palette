@@ -42,7 +42,11 @@ html {
 
 body {
   min-width: 20rem;
-  background: var(--surface-gradient);
+  /* background: var(--surface-gradient); */
+  background-image: url('@/app/assets/bg.png');
+  background-repeat: repeat;
+  background-size: 60px auto;
+  background-blend-mode: multiply;
 }
 
 button {
@@ -58,3 +62,7 @@ button {
 /* .shadow-lg {
     box-shadow: 0 1rem 3rem rgb(65 54 76 / 14%);
 } */
+
+.shadow-md {
+  box-shadow: 0.2rem 0.2rem 0.3rem #00000028;
+}

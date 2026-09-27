@@ -64,13 +64,9 @@ const handleStart = async () => {
 <style scoped>
 .title-page {
   position: relative;
-  background:
-    radial-gradient(circle at 10% 12%, rgb(250 191 104 / 38%), transparent 30%),
-    radial-gradient(circle at 90% 78%, rgb(117 198 188 / 32%), transparent 34%),
-    linear-gradient(155deg, #fffaf0 0%, #f8eef2 50%, #f1effa 100%);
 }
 
-.title-page::before,
+/* .title-page::before,
 .title-page::after {
   position: absolute;
   z-index: 0;
@@ -89,7 +85,7 @@ const handleStart = async () => {
 .title-page::after {
   right: -20vw;
   bottom: 8%;
-}
+} */
 
 .title-page :deep(.screen-shell__header),
 .title-page :deep(.screen-shell__body) {

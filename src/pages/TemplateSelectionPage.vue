@@ -34,13 +34,19 @@ const restart = async () => {
 <template>
   <ScreenShell class="selection-page">
     <template #header-left>
-      <BackButton :label="t('actions.back')" @click="restart" />
+      <BackButton
+        :label="t('actions.back')"
+        :hideLabel="true"
+        @click="restart"
+      />
     </template>
 
     <section class="selection-page__content" aria-labelledby="template-heading">
-      <p class="eyebrow">Moment Palette</p>
-      <h1 id="template-heading">{{ t('templates.heading') }}</h1>
-      <p class="selection-page__lead">{{ t('templates.lead') }}</p>
+      <p v-show="true" class="eyebrow">Moment Palette</p>
+      <h1 v-show="false" id="template-heading">{{ t('templates.heading') }}</h1>
+      <p v-show="true" class="selection-page__lead">
+        {{ t('templates.lead') }}
+      </p>
 
       <div v-if="state.phase === 'empty'" class="state-card" role="status">
         <p>{{ t('templates.empty') }}</p>
@@ -83,9 +89,14 @@ const restart = async () => {
             "
             @click="select(template.id)"
           >
-            <img :src="template.thumbnailUrl" :alt="localized(template.name)" />
-            <span>{{ localized(template.name) }}</span>
+            <img
+              class="shadow-md"
+              :src="template.thumbnailUrl"
+              :alt="localized(template.name)"
+            />
+            <span v-show="false">{{ localized(template.name) }}</span>
             <small
+              v-show="false"
               v-if="
                 state.phase === 'preparing' && state.templateId === template.id
               "
@@ -105,7 +116,8 @@ const restart = async () => {
 }
 
 .selection-page__content {
-  margin: clamp(2rem, 7vh, 4.5rem) auto 0;
+  /* margin: clamp(2rem, 7vh, 4.5rem) auto 0; */
+  margin: 1.5rem auto 0;
 }
 
 .eyebrow {
@@ -128,7 +140,7 @@ h1 {
 
 .template-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
   gap: 1rem;
   padding: 0;
   list-style: none;
@@ -136,22 +148,23 @@ h1 {
 
 .template-card {
   display: grid;
+  padding: 0;
   width: 100%;
-  padding: 0.75rem;
+  /* padding: 0.75rem; */
   color: var(--color-ink);
   font-weight: 700;
   text-align: left;
   cursor: pointer;
-  background: rgb(255 255 255 / 82%);
+  background: rgba(202, 202, 202, 0.82);
   /* border: 1px solid rgb(65 54 76 / 12%); */
   border: none;
-  border-radius: 1.5rem;
+  border-radius: 1rem;
 }
 
 .template-card img {
   width: 100%;
   aspect-ratio: 1;
-  margin-bottom: 0.75rem;
+  /* margin-bottom: 0.75rem; */
   object-fit: contain;
   background: #fff;
   border-radius: 1rem;

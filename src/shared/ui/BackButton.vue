@@ -1,6 +1,7 @@
 <script setup lang="ts">
 defineProps<{
   label: string
+  hideLabel?: boolean
   disabled?: boolean
 }>()
 
@@ -24,7 +25,7 @@ const emit = defineEmits<{
     >
       <path d="m14.5 5-7 7 7 7" />
     </svg>
-    <span>{{ label }}</span>
+    <span v-show="!hideLabel">{{ label }}</span>
   </button>
 </template>
 
