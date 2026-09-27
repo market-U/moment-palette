@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import { computed, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import {
+  onBeforeRouteLeave,
+  useRouter,
+  type RouteLocationRaw,
+} from 'vue-router'
 
 import AreaSelector from '@/features/camera-fill/AreaSelector.vue'
 import CameraFillPanel from '@/features/camera-fill/CameraFillPanel.vue'
+import ArtworkAreaHighlight from '@/features/creation-session/ArtworkAreaHighlight.vue'
 import PhotoFillPanel from '@/features/photo-fill/PhotoFillPanel.vue'
 import SolidColorFillPanel from '@/features/solid-color-fill/SolidColorFillPanel.vue'
 import { useCreationSession } from '@/features/creation-session/sessionFacade'
@@ -16,6 +21,9 @@ const router = useRouter()
 const session = useCreationSession()
 const creation = computed(() => session.activeCreation.value)
 const selectedAreaId = ref('')
+const showDiscardConfirmation = ref(false)
+const pendingDestination = ref<RouteLocationRaw>()
+let discardConfirmed = false
 
 // Sessionが切り替わった場合も、存在しない領域を選択状態に残さない。
 watchEffect(() => {
@@ -36,14 +44,37 @@ const localizedAreas = computed(
     })) ?? [],
 )
 
-const backToTemplates = async () => {
-  session.returnToTemplates()
-  await router.push({ name: 'template-selection' })
+const requestTemplateBack = async () =>
+  router.push({ name: 'template-selection' })
+
+const startOver = async () => router.push({ name: 'title' })
+
+onBeforeRouteLeave((to) => {
+  if (
+    discardConfirmed ||
+    to.name === 'creation' ||
+    to.name === 'completed-artwork'
+  ) {
+    discardConfirmed = false
+    return true
+  }
+  pendingDestination.value = to.fullPath
+  showDiscardConfirmation.value = true
+  return false
+})
+
+const cancelDiscard = () => {
+  pendingDestination.value = undefined
+  showDiscardConfirmation.value = false
 }
 
-const startOver = async () => {
-  session.resetToStart()
-  await router.push({ name: 'title' })
+const confirmDiscard = async () => {
+  const destination = pendingDestination.value
+  if (!destination) return
+  discardConfirmed = true
+  showDiscardConfirmation.value = false
+  pendingDestination.value = undefined
+  await router.push(destination)
 }
 
 const openCamera = async () => {
@@ -72,7 +103,7 @@ const completeArtwork = async () => {
         <BackButton
           :label="t('actions.templates')"
           :hideLabel="true"
-          @click="backToTemplates"
+          @click="requestTemplateBack"
         />
       </template>
 
@@ -85,12 +116,17 @@ const completeArtwork = async () => {
           <h1 id="creation-heading">{{ localized(creation.templateName) }}</h1>
         </div>
 
-        <img
-          class="artwork-preview"
+        <ArtworkAreaHighlight
           :src="creation.previewUrl"
           :alt="
             t('creation.previewAlt', { name: localized(creation.templateName) })
           "
+          :selected-area-id="selectedAreaId"
+          :resize="session.resizeAreaFeedback"
+          :render="session.renderAreaHighlight"
+          :render-line-art="session.renderLineArtOverlay"
+          :find-area-at="session.findAreaAt"
+          @select="selectedAreaId = $event"
         />
 
         <section class="area-panel" :aria-label="t('creation.areas')">
@@ -99,7 +135,7 @@ const completeArtwork = async () => {
             :areas="localizedAreas"
             :selected-area-id="selectedAreaId"
             :label="t('creation.areas')"
-            :captured-label="t('creation.cameraFilled')"
+            :render-thumbnail="session.renderAreaThumbnail"
             @select="selectedAreaId = $event"
           />
         </section>
@@ -155,6 +191,26 @@ const completeArtwork = async () => {
         </button>
       </section>
     </ScreenShell>
+    <section
+      v-if="showDiscardConfirmation"
+      class="discard-confirmation"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="discard-heading"
+    >
+      <div class="discard-confirmation__panel">
+        <h2 id="discard-heading">{{ t('creation.discardHeading') }}</h2>
+        <p>{{ t('creation.discardDescription') }}</p>
+        <div class="discard-confirmation__actions">
+          <button type="button" @click="cancelDiscard">
+            {{ t('creation.discardCancel') }}
+          </button>
+          <button type="button" @click="confirmDiscard">
+            {{ t('creation.discardConfirm') }}
+          </button>
+        </div>
+      </div>
+    </section>
     <CameraFillPanel
       :state="session.cameraState.value"
       :attach-target="session.attachCameraTarget"
@@ -215,15 +271,6 @@ const completeArtwork = async () => {
 h1 {
   margin: 0.25rem 0 1rem;
   font-size: clamp(1.75rem, 8vw, 2.75rem);
-}
-
-.artwork-preview {
-  width: min(100%, 30rem);
-  aspect-ratio: 1;
-  margin: 0 auto;
-  object-fit: contain;
-  background: #fff;
-  border-radius: 1.5rem;
 }
 
 .area-panel {
@@ -311,5 +358,50 @@ h1 {
 .start-over {
   justify-self: center;
   margin-top: 0.5rem;
+}
+
+.discard-confirmation {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgb(35 25 42 / 48%);
+}
+
+.discard-confirmation__panel {
+  width: min(100%, 25rem);
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 1.25rem;
+  box-shadow: 0 1rem 3rem rgb(35 25 42 / 28%);
+}
+
+.discard-confirmation__panel h2,
+.discard-confirmation__panel p {
+  margin-top: 0;
+}
+
+.discard-confirmation__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.discard-confirmation__actions button {
+  min-height: 2.75rem;
+  padding: 0.55rem 1rem;
+  font: inherit;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid rgb(54 45 59 / 18%);
+  border-radius: 999px;
+}
+
+.discard-confirmation__actions button:last-child {
+  color: #fff;
+  background: #a13d5b;
+  border-color: #a13d5b;
 }
 </style>

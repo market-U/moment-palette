@@ -25,6 +25,7 @@ import type {
   TemplateSelectionViewState,
 } from '@/features/creation-session/sessionFacade'
 import type { ArtworkPreviewPort } from '@/features/template-selection/artworkPreviewPort'
+import type { AreaHitTesterPort } from '@/features/template-selection/areaHitTesterPort'
 import type { TemplateAssetLoaderPort } from '@/features/template-selection/assetLoaderPort'
 import type { CatalogSnapshot } from '@/features/template-selection/catalog'
 import {
@@ -63,6 +64,7 @@ type Dependencies = {
   catalogPort: TemplateCatalogPort
   assetLoader: TemplateAssetLoaderPort
   previewPort: ArtworkPreviewPort
+  areaHitTesterPort?: AreaHitTesterPort
   cameraPort: CameraStreamPort
   cameraPermission: CameraPermissionPort
   cameraCompositor: CameraCompositorPort
@@ -217,6 +219,7 @@ export const createCreationSessionAppService = (
       const session = await prepareTemplate(currentSnapshot, templateId, {
         assetLoader: dependencies.assetLoader,
         previewPort: dependencies.previewPort,
+        areaHitTesterPort: dependencies.areaHitTesterPort,
         now: dependencies.now,
       })
       owner.replace(session)
@@ -408,6 +411,51 @@ export const createCreationSessionAppService = (
         transform: state.transform,
         mirrorSource: state.facing === 'user',
       })
+    },
+    resizeAreaFeedback: (canvas, cssPixels, pixelRatio) =>
+      dependencies.cameraCompositor.resizePreview(
+        canvas,
+        cssPixels,
+        pixelRatio,
+      ),
+    renderAreaHighlight: (canvas, areaId) => {
+      const session = activeSession.value
+      if (!session || !areaId) return
+      dependencies.cameraCompositor.renderAreaHighlight(
+        canvas,
+        {
+          template: session.template,
+          artwork: session.artwork,
+          assets: session.assets,
+          areaResources: session.areaResources,
+        },
+        areaId,
+      )
+    },
+    findAreaAt: (x, y) => activeSession.value?.areaHitTester.findAreaAt(x, y),
+    renderLineArtOverlay: (canvas) => {
+      const session = activeSession.value
+      if (!session) return
+      dependencies.cameraCompositor.renderLineArtOverlay(canvas, {
+        template: session.template,
+        artwork: session.artwork,
+        assets: session.assets,
+        areaResources: session.areaResources,
+      })
+    },
+    renderAreaThumbnail: (canvas, areaId) => {
+      const session = activeSession.value
+      if (!session || !areaId) return
+      dependencies.cameraCompositor.renderAreaThumbnail(
+        canvas,
+        {
+          template: session.template,
+          artwork: session.artwork,
+          assets: session.assets,
+          areaResources: session.areaResources,
+        },
+        areaId,
+      )
     },
     captureCamera: async () => {
       const session = activeSession.value

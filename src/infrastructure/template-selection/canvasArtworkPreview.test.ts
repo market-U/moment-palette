@@ -28,7 +28,7 @@ const assets = {
 }
 
 describe('canvas artwork preview', () => {
-  it('初期色のmaskを描画してから線画を前面へ重ねる', () => {
+  it('初期色のmaskだけを描画する', () => {
     const calls: string[] = []
     const context = {
       clearRect: vi.fn(() => calls.push('clear-main')),
@@ -64,7 +64,6 @@ describe('canvas artwork preview', () => {
       'draw-layer:mask',
       'fill-layer',
       'draw-main:layer',
-      'draw-main:line',
     ])
     expect(layerContext.fillStyle).toBe('#E8DED2')
   })

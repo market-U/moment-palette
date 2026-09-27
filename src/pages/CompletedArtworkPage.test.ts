@@ -13,6 +13,7 @@ describe('CompletedArtworkPage', () => {
     expect(source).toContain('<textarea')
     expect(source).toContain('readonly')
     expect(source).toContain("router.push({ name: 'creation' })")
+    expect(source).toContain('version: `v${session.appVersion}`')
     expect(source).toContain('session.shareCompletedArtwork(shareCopy.value)')
   })
 })

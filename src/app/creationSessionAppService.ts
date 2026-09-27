@@ -1,4 +1,5 @@
 import { APP_VERSION, BUILD_ID } from '@/app/config/generatedBuildMetadata'
+import selectedAreaPatternUrl from '@/app/assets/selected-area.png'
 import { createCanvasCameraCompositor } from '@/infrastructure/camera-fill/canvasCameraCompositor'
 import { createBrowserCameraPermission } from '@/infrastructure/camera/browserCameraPermission'
 import {
@@ -13,10 +14,13 @@ import { createBrowserProductPhotoDecoder } from '@/infrastructure/photo-import/
 import { createBrowserTemplateAssetLoader } from '@/infrastructure/template-selection/browserTemplateAssetLoader'
 import { createBrowserTemplateCatalogAdapter } from '@/infrastructure/template-selection/browserTemplateCatalogAdapter'
 import { createCanvasArtworkPreview } from '@/infrastructure/template-selection/canvasArtworkPreview'
+import { createCanvasAreaHitTester } from '@/infrastructure/template-selection/canvasAreaHitTester'
 
 import { createCreationSessionAppService } from './createCreationSessionAppService'
 
 const frontend = { appVersion: APP_VERSION, buildId: BUILD_ID }
+const selectedAreaPattern = document.createElement('img')
+selectedAreaPattern.src = selectedAreaPatternUrl
 
 /** Browser用adapterを結線し、tab内で共有する単一の制作sessionサービスを提供する。 */
 export const creationSessionAppService = createCreationSessionAppService({
@@ -25,9 +29,15 @@ export const creationSessionAppService = createCreationSessionAppService({
   catalogPort: createBrowserTemplateCatalogAdapter(),
   assetLoader: createBrowserTemplateAssetLoader(),
   previewPort: createCanvasArtworkPreview(),
+  areaHitTesterPort: createCanvasAreaHitTester(),
   cameraPort: createBrowserCameraStream(),
   cameraPermission: createBrowserCameraPermission(),
-  cameraCompositor: createCanvasCameraCompositor(),
+  cameraCompositor: createCanvasCameraCompositor({
+    createCanvas: () => document.createElement('canvas'),
+    createObjectUrl: (blob) => URL.createObjectURL(blob),
+    revokeObjectUrl: (url) => URL.revokeObjectURL(url),
+    selectedAreaPattern,
+  }),
   completedArtworkGenerator: createCanvasCompletedArtworkGenerator(),
   completedArtworkShare: createBrowserCompletedArtworkShare(),
   clipboard: createBrowserClipboard(),

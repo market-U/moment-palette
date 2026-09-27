@@ -45,6 +45,10 @@ export const en = {
     completing: 'Creating your finished image…',
     completeFailed:
       'We could not create the finished image. Try again or keep creating.',
+    discardHeading: 'Leave your artwork?',
+    discardDescription: 'Your work so far will not be saved.',
+    discardCancel: 'Keep creating',
+    discardConfirm: 'Discard and leave',
   },
   solidColor: {
     eyebrow: 'Create from a feeling',

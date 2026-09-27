@@ -7,15 +7,13 @@ import { findNearestAreaId, getAreaEdgePadding } from './areaSelector'
 type AreaItem = Readonly<{
   id: string
   label: string
-  initialColor: string
-  fillKind: 'initial' | 'camera' | 'photo' | 'solid'
 }>
 
 const props = defineProps<{
   areas: readonly AreaItem[]
   selectedAreaId: string
   label: string
-  capturedLabel: string
+  renderThumbnail: (canvas: HTMLCanvasElement, areaId: string) => void
 }>()
 
 const emit = defineEmits<{
@@ -93,6 +91,14 @@ watch(
   },
 )
 
+watch(
+  () => props.selectedAreaId,
+  async (areaId) => {
+    await nextTick()
+    centerArea(areaId)
+  },
+)
+
 onMounted(async () => {
   await nextTick()
   updateEdgePadding()
@@ -126,7 +132,7 @@ onBeforeUnmount(() => {
         :key="area.id"
         :area="area"
         :selected="selectedAreaId === area.id"
-        :captured-label="capturedLabel"
+        :render-thumbnail="renderThumbnail"
         @select="handleItemClick"
       />
     </div>
