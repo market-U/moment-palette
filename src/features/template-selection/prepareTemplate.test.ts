@@ -53,6 +53,7 @@ describe('prepare template', () => {
   it('全assetとpreview成功後だけsessionを返して一度だけ解放する', async () => {
     const releaseAssets = vi.fn()
     const releasePreview = vi.fn()
+    const releaseHitTester = vi.fn()
     const load = vi.fn().mockResolvedValue(assets(releaseAssets))
     const generate = vi.fn().mockResolvedValue({
       url: 'blob:preview',
@@ -63,6 +64,12 @@ describe('prepare template', () => {
     const session = await prepareTemplate(snapshot, 'buncho-01', {
       assetLoader: { load },
       previewPort: { generate },
+      areaHitTesterPort: {
+        create: vi.fn().mockReturnValue({
+          findAreaAt: () => 'body',
+          release: releaseHitTester,
+        }),
+      },
       now: () => new Date('2026-09-21T00:10:00.000Z'),
     })
 
@@ -73,6 +80,7 @@ describe('prepare template', () => {
     session.release()
     session.release()
     expect(releasePreview).toHaveBeenCalledOnce()
+    expect(releaseHitTester).toHaveBeenCalledOnce()
     expect(releaseAssets).toHaveBeenCalledOnce()
   })
 

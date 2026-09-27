@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { isPreviewTap, toArtworkPoint } from './previewAreaTap'
 
 const props = defineProps<{
   src: string
@@ -12,12 +13,34 @@ const props = defineProps<{
   ) => void
   render: (canvas: HTMLCanvasElement, areaId: string) => void
   renderLineArt: (canvas: HTMLCanvasElement) => void
+  findAreaAt: (x: number, y: number) => string | undefined
 }>()
+const emit = defineEmits<{ select: [areaId: string] }>()
 
 const container = ref<HTMLElement>()
 const canvas = ref<HTMLCanvasElement>()
 const lineArtCanvas = ref<HTMLCanvasElement>()
 let resizeObserver: ResizeObserver | undefined
+let pointerStart: { id: number; x: number; y: number } | undefined
+
+const beginPointer = (event: PointerEvent) => {
+  pointerStart = { id: event.pointerId, x: event.clientX, y: event.clientY }
+}
+const completePointer = (event: PointerEvent) => {
+  const start = pointerStart
+  pointerStart = undefined
+  if (!start || start.id !== event.pointerId || !isPreviewTap(start, event))
+    return
+  const target = container.value
+  if (!target) return
+  const point = toArtworkPoint(
+    event.clientX,
+    event.clientY,
+    target.getBoundingClientRect(),
+  )
+  const areaId = props.findAreaAt(point.x, point.y)
+  if (areaId) emit('select', areaId)
+}
 
 const renderHighlight = () => {
   const target = container.value
@@ -75,7 +98,13 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 </script>
 
 <template>
-  <div ref="container" class="artwork-area-highlight">
+  <div
+    ref="container"
+    class="artwork-area-highlight"
+    @pointerdown="beginPointer"
+    @pointerup="completePointer"
+    @pointercancel="pointerStart = undefined"
+  >
     <img class="artwork-area-highlight__image" :src="src" :alt="alt" />
     <canvas
       ref="canvas"

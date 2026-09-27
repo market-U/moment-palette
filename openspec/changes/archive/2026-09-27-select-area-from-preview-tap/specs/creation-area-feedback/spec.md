@@ -1,9 +1,5 @@
-# creation-area-feedback Specification
+## MODIFIED Requirements
 
-## Purpose
-
-制作画面で現在選択中のAreaを、作品preview上の強調表示とArea selectorの表示で分かりやすく示す。
-## Requirements
 ### Requirement: 選択中Areaの作品preview上での強調表示
 
 アプリケーションは、制作画面の現在のArtwork preview上に、`selected-area.png`の斜線patternを選択中Areaのdecode済みmaskで切り抜いた透明Canvasを重ねなければならない（SHALL）。さらに、アプリケーションは斜線Canvasより前面に、decode済みline artだけを描いた独立した透明Canvasを重ねなければならない（SHALL）。静的Artwork previewはAreaの塗りだけを含め、前面の線画CanvasへCSS animationを適用してはならない（MUST NOT）。

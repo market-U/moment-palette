@@ -27,6 +27,8 @@ describe('CreationPage', () => {
     expect(source).toContain('<SolidColorFillPanel')
     expect(source).toContain(':state="session.solidColorState.value"')
     expect(source).toContain('<ArtworkAreaHighlight')
+    expect(source).toContain(':find-area-at="session.findAreaAt"')
+    expect(source).toContain('@select="selectedAreaId = $event"')
     expect(source).toContain(':render-line-art="session.renderLineArtOverlay"')
     expect(source).toContain(':render-thumbnail="session.renderAreaThumbnail"')
   })

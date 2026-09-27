@@ -131,6 +131,7 @@ export type CreationSessionFacade = {
     pixelRatio: number,
   ) => Size
   renderAreaHighlight: (canvas: HTMLCanvasElement, areaId: string) => void
+  findAreaAt: (x: number, y: number) => string | undefined
   renderLineArtOverlay: (canvas: HTMLCanvasElement) => void
   renderAreaThumbnail: (canvas: HTMLCanvasElement, areaId: string) => void
   captureCamera: () => Promise<boolean>
