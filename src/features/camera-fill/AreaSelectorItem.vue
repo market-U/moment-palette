@@ -1,15 +1,15 @@
 <script setup lang="ts">
+import AreaMaskThumbnail from './AreaMaskThumbnail.vue'
+
 type AreaItem = Readonly<{
   id: string
   label: string
-  initialColor: string
-  fillKind: 'initial' | 'camera' | 'photo' | 'solid'
 }>
 
 defineProps<{
   area: AreaItem
   selected: boolean
-  capturedLabel: string
+  renderThumbnail: (canvas: HTMLCanvasElement, areaId: string) => void
 }>()
 
 const emit = defineEmits<{
@@ -23,15 +23,11 @@ const emit = defineEmits<{
     :class="{ 'is-selected': selected }"
     type="button"
     :data-area-id="area.id"
+    :aria-label="area.label"
     :aria-pressed="selected"
     @click="emit('select', area.id)"
   >
-    <span
-      class="area-selector-item__swatch"
-      :style="{ backgroundColor: area.initialColor }"
-    />
-    <span>{{ area.label }}</span>
-    <small v-if="area.fillKind !== 'initial'">{{ capturedLabel }}</small>
+    <AreaMaskThumbnail :area-id="area.id" :render="renderThumbnail" />
   </button>
 </template>
 
@@ -39,11 +35,9 @@ const emit = defineEmits<{
 .area-selector-item {
   display: grid;
   flex: 0 0 7.5rem;
-  grid-template-columns: auto 1fr;
-  gap: 0.15rem 0.45rem;
-  align-items: center;
-  min-height: 4rem;
-  padding: 0.55rem 0.7rem;
+  place-items: center;
+  min-height: 5.25rem;
+  padding: 0.35rem;
   color: var(--color-ink);
   text-align: left;
   cursor: pointer;
@@ -57,19 +51,5 @@ const emit = defineEmits<{
 
 .area-selector-item.is-selected {
   opacity: 1;
-}
-
-.area-selector-item small {
-  grid-column: 2;
-  color: var(--color-accent);
-  font-size: 0.68rem;
-}
-
-.area-selector-item__swatch {
-  grid-row: 1 / span 2;
-  width: 1.35rem;
-  aspect-ratio: 1;
-  border: 1px solid rgb(65 54 76 / 16%);
-  border-radius: 50%;
 }
 </style>

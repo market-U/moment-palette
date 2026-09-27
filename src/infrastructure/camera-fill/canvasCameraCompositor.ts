@@ -16,6 +16,7 @@ type CanvasCameraCompositorDependencies = Readonly<{
   createCanvas: () => HTMLCanvasElement
   createObjectUrl: (blob: Blob) => string
   revokeObjectUrl: (url: string) => void
+  selectedAreaPattern?: CanvasImageSource
 }>
 
 const browserDependencies = (): CanvasCameraCompositorDependencies => ({
@@ -274,6 +275,16 @@ export const createCanvasCameraCompositor = (
     )
   }
 
+  const requireAreaMask = (state: CameraArtworkContext, areaId: string) => {
+    const index = state.template.areas.findIndex((area) => area.id === areaId)
+    const definition = state.template.areas[index]
+    const mask = state.assets.masks[index]
+    if (!definition || !mask || definition.id !== mask.id) {
+      throw new Error('選択中のAreaのmaskがありません。')
+    }
+    return { definition, mask }
+  }
+
   return {
     resizePreview(canvas, cssPixels, pixelRatio) {
       const resolution = Math.max(
@@ -349,6 +360,55 @@ export const createCanvasCameraCompositor = (
       context.drawImage(artworkPlane, 0, 0)
       drawLineArt(context, state)
       context.restore()
+    },
+    renderAreaHighlight(canvas, state, areaId) {
+      const { mask } = requireAreaMask(state, areaId)
+      const selectedAreaPattern = dependencies.selectedAreaPattern
+      if (!selectedAreaPattern) {
+        throw new Error('選択Areaの斜線patternがありません。')
+      }
+      const context = requireContext(canvas)
+      context.save()
+      try {
+        context.clearRect(0, 0, canvas.width, canvas.height)
+        context.scale(canvas.width / artworkSize, canvas.height / artworkSize)
+        const pattern = context.createPattern(selectedAreaPattern, 'repeat')
+        if (!pattern) throw new Error('選択Areaの斜線patternを作成できません。')
+        context.fillStyle = pattern
+        context.fillRect(0, 0, artworkSize, artworkSize)
+        context.globalCompositeOperation = 'destination-in'
+        context.drawImage(mask.source, 0, 0, artworkSize, artworkSize)
+      } finally {
+        context.restore()
+      }
+    },
+    renderLineArtOverlay(canvas, state) {
+      const context = requireContext(canvas)
+      context.save()
+      try {
+        context.clearRect(0, 0, canvas.width, canvas.height)
+        context.scale(canvas.width / artworkSize, canvas.height / artworkSize)
+        drawLineArt(context, state)
+      } finally {
+        context.restore()
+      }
+    },
+    renderAreaThumbnail(canvas, state, areaId) {
+      const { definition, mask } = requireAreaMask(state, areaId)
+      const context = requireContext(canvas)
+      const size = Math.min(canvas.width, canvas.height) * 0.84
+      context.save()
+      try {
+        context.clearRect(0, 0, canvas.width, canvas.height)
+        context.translate((canvas.width - size) / 2, (canvas.height - size) / 2)
+        context.scale(size / artworkSize, size / artworkSize)
+        context.drawImage(mask.source, 0, 0, artworkSize, artworkSize)
+        context.globalCompositeOperation = 'source-in'
+        context.fillStyle = definition.initialColor
+        context.fillRect(0, 0, artworkSize, artworkSize)
+      } finally {
+        context.restore()
+      }
     },
     renderPhotoPreview(canvas, source, sourceSize, state) {
       if (requiresPhotoPreparation(state)) preparePhotoArtwork(state)
@@ -515,7 +575,6 @@ export const createCanvasCameraCompositor = (
       try {
         const context = requireContext(canvas)
         drawArtwork(context, artworkContext)
-        drawLineArt(context, artworkContext)
         const url = dependencies.createObjectUrl(await canvasToBlob(canvas))
         let released = false
         return Object.freeze({

@@ -409,6 +409,50 @@ export const createCreationSessionAppService = (
         mirrorSource: state.facing === 'user',
       })
     },
+    resizeAreaFeedback: (canvas, cssPixels, pixelRatio) =>
+      dependencies.cameraCompositor.resizePreview(
+        canvas,
+        cssPixels,
+        pixelRatio,
+      ),
+    renderAreaHighlight: (canvas, areaId) => {
+      const session = activeSession.value
+      if (!session || !areaId) return
+      dependencies.cameraCompositor.renderAreaHighlight(
+        canvas,
+        {
+          template: session.template,
+          artwork: session.artwork,
+          assets: session.assets,
+          areaResources: session.areaResources,
+        },
+        areaId,
+      )
+    },
+    renderLineArtOverlay: (canvas) => {
+      const session = activeSession.value
+      if (!session) return
+      dependencies.cameraCompositor.renderLineArtOverlay(canvas, {
+        template: session.template,
+        artwork: session.artwork,
+        assets: session.assets,
+        areaResources: session.areaResources,
+      })
+    },
+    renderAreaThumbnail: (canvas, areaId) => {
+      const session = activeSession.value
+      if (!session || !areaId) return
+      dependencies.cameraCompositor.renderAreaThumbnail(
+        canvas,
+        {
+          template: session.template,
+          artwork: session.artwork,
+          assets: session.assets,
+          areaResources: session.areaResources,
+        },
+        areaId,
+      )
+    },
     captureCamera: async () => {
       const session = activeSession.value
       const target = cameraTarget

@@ -16,6 +16,9 @@ const context = (calls: string[] = []) =>
   ({
     canvas: { name: 'layer' },
     clearRect: vi.fn(() => calls.push('clear')),
+    createPattern: vi.fn(
+      () => ({ name: 'selection-pattern' }) as unknown as CanvasPattern,
+    ),
     fillRect: vi.fn(() => calls.push('fill')),
     drawImage: vi.fn((source: { name?: string }) =>
       calls.push(`draw:${source.name ?? 'canvas'}`),
@@ -106,7 +109,7 @@ describe('drawCameraSource', () => {
 })
 
 describe('createCanvasCameraCompositor', () => {
-  it('Area順に初期色と撮影frameへmaskを適用し、line artを最後に描く', async () => {
+  it('Area順に初期色と撮影frameへmaskを適用し、塗りだけのpreviewを生成する', async () => {
     const calls: string[] = []
     const contexts = [
       context(),
@@ -149,7 +152,6 @@ describe('createCanvasCameraCompositor', () => {
       'draw:body-mask',
       'restore',
       'draw:canvas-2',
-      'draw:line',
     ])
     expect(preview).toMatchObject({
       url: 'blob:preview',
@@ -188,6 +190,62 @@ describe('createCanvasCameraCompositor', () => {
     })
 
     expect(calls).toContain('draw:body-mask')
+    expect(calls).toContain('draw:line')
+  })
+
+  it('選択Areaのmaskを透明overlayとサムネイルへ描画する', () => {
+    const internalCanvases = Array.from({ length: 5 }, (_, index) =>
+      canvas(context(), `internal-${String(index)}`),
+    )
+    const compositor = createCanvasCameraCompositor({
+      createCanvas: () => internalCanvases.shift()!,
+      createObjectUrl: vi.fn(),
+      revokeObjectUrl: vi.fn(),
+      selectedAreaPattern: { name: 'selection-pattern' } as never,
+    })
+    const highlightCalls: string[] = []
+    const thumbnailCalls: string[] = []
+    const highlight = canvas(context(highlightCalls), 'highlight')
+    const thumbnail = canvas(context(thumbnailCalls), 'thumbnail')
+    highlight.width = 540
+    highlight.height = 540
+    thumbnail.width = 128
+    thumbnail.height = 112
+    const state = {
+      template,
+      artwork: createInitialArtwork(template),
+      assets,
+      areaResources: new Map(),
+    }
+
+    compositor.renderAreaHighlight(highlight, state, 'body')
+    compositor.renderAreaThumbnail(thumbnail, state, 'body')
+
+    expect(highlightCalls).toContain('draw:body-mask')
+    expect(thumbnailCalls).toContain('draw:body-mask')
+  })
+
+  it('線画を選択overlayとは別の透明Canvasへ描画する', () => {
+    const internalCanvases = Array.from({ length: 5 }, (_, index) =>
+      canvas(context(), `internal-${String(index)}`),
+    )
+    const compositor = createCanvasCameraCompositor({
+      createCanvas: () => internalCanvases.shift()!,
+      createObjectUrl: vi.fn(),
+      revokeObjectUrl: vi.fn(),
+    })
+    const calls: string[] = []
+    const lineArt = canvas(context(calls), 'line-art')
+    lineArt.width = 540
+    lineArt.height = 540
+
+    compositor.renderLineArtOverlay(lineArt, {
+      template,
+      artwork: createInitialArtwork(template),
+      assets,
+      areaResources: new Map(),
+    })
+
     expect(calls).toContain('draw:line')
   })
 

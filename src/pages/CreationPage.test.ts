@@ -8,20 +8,26 @@ const source = readFileSync(
 )
 
 describe('CreationPage', () => {
-  it('pageが制作sessionをテンプレート選択へ戻してから遷移し、言語切替を置かない', () => {
+  it('pageが破棄前の確認を通してから遷移し、言語切替を置かない', () => {
     expect(source).toContain(
       `<BackButton
           :label="t('actions.templates')"
           :hideLabel="true"
-          @click="backToTemplates"
+          @click="requestTemplateBack"
         />`,
     )
-    expect(source).toContain('session.returnToTemplates()\n  await router.push')
+    expect(source).toContain('onBeforeRouteLeave((to) =>')
+    expect(source).toContain('showDiscardConfirmation.value = true')
+    expect(source).toContain('await router.push(destination)')
+    expect(source).toContain('role="dialog"')
     expect(source).not.toContain('LanguageSwitcher')
     expect(source).toContain('session.completeArtwork()')
     expect(source).toContain("router.push({ name: 'completed-artwork' })")
     expect(source).toContain('session.openSolidColor(selectedAreaId.value)')
     expect(source).toContain('<SolidColorFillPanel')
     expect(source).toContain(':state="session.solidColorState.value"')
+    expect(source).toContain('<ArtworkAreaHighlight')
+    expect(source).toContain(':render-line-art="session.renderLineArtOverlay"')
+    expect(source).toContain(':render-thumbnail="session.renderAreaThumbnail"')
   })
 })
