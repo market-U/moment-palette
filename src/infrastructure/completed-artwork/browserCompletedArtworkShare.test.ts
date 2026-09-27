@@ -10,6 +10,7 @@ const prepared = prepareCompletedArtworkShare(
     message: 'Moment Palette',
     hashtag: '#MomentPalette',
     url: 'https://example.com/',
+    version: 'v1.2.3',
   },
 )
 

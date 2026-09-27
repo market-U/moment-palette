@@ -9,6 +9,7 @@ const copy = {
   message: 'Moment Paletteでつくった作品です。',
   hashtag: '#MomentPalette',
   url: 'https://example.com/',
+  version: 'v1.2.3',
 }
 
 describe('prepareCompletedArtworkShare', () => {
@@ -23,5 +24,8 @@ describe('prepareCompletedArtworkShare', () => {
       files: [prepared.file],
       text: createCompletedArtworkShareText(copy),
     })
+    expect(createCompletedArtworkShareText(copy)).toBe(
+      'Moment Paletteでつくった作品です。\n#MomentPalette\nhttps://example.com/\nv1.2.3',
+    )
   })
 })

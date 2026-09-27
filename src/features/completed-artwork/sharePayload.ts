@@ -3,6 +3,7 @@ export type CompletedArtworkShareCopy = Readonly<{
   message: string
   hashtag: string
   url: string
+  version: string
 }>
 
 /** Web Shareへ渡す、生成済みFileと同期的に組み立てたデータを表す。 */
@@ -11,10 +12,10 @@ export type PreparedCompletedArtworkShare = Readonly<{
   data: ShareData
 }>
 
-/** 固定文、ハッシュタグ、タイトルURLを共有先が扱える一つのtextへまとめる。 */
+/** 固定文、ハッシュタグ、タイトルURL、frontend版を共有先が扱える一つのtextへまとめる。 */
 export const createCompletedArtworkShareText = (
   copy: CompletedArtworkShareCopy,
-): string => `${copy.message}\n${copy.hashtag}\n${copy.url}`
+): string => `${copy.message}\n${copy.hashtag}\n${copy.url}\n${copy.version}`
 
 /** PNG bytesと拡張子を保った互換Fileを、共有クリック時に同期的に準備する。 */
 export const prepareCompletedArtworkShare = (
