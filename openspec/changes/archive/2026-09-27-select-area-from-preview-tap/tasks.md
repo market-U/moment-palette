@@ -12,4 +12,4 @@
 ## 3. 検証
 
 - [x] 3.1 関連する単体テスト、format、lint、型検査、production buildを実行する
-- [ ] 3.2 iPhone Safari・Chromeを含む実機またはPR previewで、preview tap、mask外、重なり、scrollの挙動を確認する
+- [x] 3.2 iPhone Safari・Chromeを含む実機またはPR previewで、preview tap、mask外、重なり、scrollの挙動を確認する
