@@ -279,7 +279,7 @@ const completeArtwork = async () => {
 
 .creation-page__content {
   display: grid;
-  margin: 1.5rem auto 0;
+  /* margin: 1.5rem auto 0; */
 }
 
 .creation-page__copy {
@@ -299,7 +299,7 @@ h1 {
 
 .area-panel {
   min-width: 0;
-  margin-top: 1.25rem;
+  /* margin-top: 1.25rem; */
 }
 
 .area-panel > p {

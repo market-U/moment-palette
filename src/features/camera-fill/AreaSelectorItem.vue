@@ -41,7 +41,7 @@ const emit = defineEmits<{
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-  min-height: 5.25rem;
+  /* min-height: 5.25rem; */
   padding: 0.35rem;
   color: var(--color-ink);
   text-align: left;

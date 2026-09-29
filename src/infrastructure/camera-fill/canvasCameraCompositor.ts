@@ -363,19 +363,25 @@ export const createCanvasCameraCompositor = (
     },
     renderAreaHighlight(canvas, state, areaId) {
       const { mask } = requireAreaMask(state, areaId)
-      const selectedAreaPattern = dependencies.selectedAreaPattern
-      if (!selectedAreaPattern) {
-        throw new Error('選択Areaの斜線patternがありません。')
-      }
+      // const selectedAreaPattern = dependencies.selectedAreaPattern
+      // if (!selectedAreaPattern) {
+      //   throw new Error('選択Areaの斜線patternがありません。')
+      // }
       const context = requireContext(canvas)
       context.save()
       try {
         context.clearRect(0, 0, canvas.width, canvas.height)
         context.scale(canvas.width / artworkSize, canvas.height / artworkSize)
-        const pattern = context.createPattern(selectedAreaPattern, 'repeat')
-        if (!pattern) throw new Error('選択Areaの斜線patternを作成できません。')
-        context.fillStyle = pattern
+        // const pattern = context.createPattern(selectedAreaPattern, 'repeat')
+        // if (!pattern) throw new Error('選択Areaの斜線patternを作成できません。')
+        // context.fillStyle = pattern
+        const index = state.template.areas.findIndex(
+          (area) => area.id === areaId,
+        )
+        const definition = state.template.areas[index]
+        context.fillStyle = definition?.initialColor ?? '#7d7d7d7f'
         context.fillRect(0, 0, artworkSize, artworkSize)
+        context.drawImage(artworkPlane, 0, 0, artworkSize, artworkSize)
         context.globalCompositeOperation = 'destination-in'
         context.drawImage(mask.source, 0, 0, artworkSize, artworkSize)
       } finally {
@@ -393,8 +399,9 @@ export const createCanvasCameraCompositor = (
         context.restore()
       }
     },
+    // AreaSelectorのサムネイル表示用に、maskと初期色だけで描画する。
     renderAreaThumbnail(canvas, state, areaId) {
-      const { definition, mask } = requireAreaMask(state, areaId)
+      const { mask } = requireAreaMask(state, areaId)
       const context = requireContext(canvas)
       const size = Math.min(canvas.width, canvas.height) * 1
       context.save()
@@ -404,7 +411,8 @@ export const createCanvasCameraCompositor = (
         context.scale(size / artworkSize, size / artworkSize)
         context.drawImage(mask.source, 0, 0, artworkSize, artworkSize)
         context.globalCompositeOperation = 'source-in'
-        context.fillStyle = definition.initialColor
+        // context.fillStyle = definition.initialColor
+        context.fillStyle = '#7d7d7d7f'
         context.fillRect(0, 0, artworkSize, artworkSize)
       } finally {
         context.restore()

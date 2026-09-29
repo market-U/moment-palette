@@ -147,7 +147,7 @@ onBeforeUnmount(() => {
   width: 100%;
   min-width: 0;
   overflow: hidden;
-  background: rgb(77 77 77 / 74%);
+  /* background: rgb(77 77 77 / 74%); */
 }
 
 .area-selector__frame {
@@ -155,12 +155,12 @@ onBeforeUnmount(() => {
   z-index: 1;
   top: 50%;
   left: 50%;
-  height: 85%;
+  height: 90%;
   aspect-ratio: 1;
   pointer-events: none;
   border: 3px solid var(--color-main-1);
   border-radius: 0.5rem;
-  box-shadow: 0 0 0 3px rgb(114 92 164 / 14%);
+  box-shadow: 0 0 3px rgb(114 92 164 / 14%);
   transform: translateX(-50%) translateY(-50%);
 }
 
@@ -169,7 +169,7 @@ onBeforeUnmount(() => {
   gap: 0.65rem;
   width: 100%;
   min-width: 0;
-  padding: 0.35rem var(--area-padding-end, 50%);
+  padding-right: var(--area-padding-end, 50%);
   padding-left: var(--area-padding-start, 50%);
   overflow-x: auto;
   overscroll-behavior-x: contain;

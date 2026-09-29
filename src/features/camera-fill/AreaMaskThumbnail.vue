@@ -28,7 +28,7 @@ onMounted(renderThumbnail)
   <section class="section-mask-thumbnail">
     <canvas
       ref="canvas"
-      class="area-mask-thumbnail"
+      class="area-mask-thumbnail area-mask-thumbnail--color"
       width="112"
       height="112"
       aria-hidden="true"
@@ -46,8 +46,8 @@ onMounted(renderThumbnail)
 <style scoped>
 .section-mask-thumbnail {
   position: relative;
-  width: 4.5rem;
-  height: 4.5rem;
+  width: 3.8rem;
+  height: 3.8rem;
 }
 .area-mask-thumbnail {
   position: absolute;
@@ -55,5 +55,31 @@ onMounted(renderThumbnail)
   left: 0;
   width: 100%;
   height: 100%;
+}
+/* .area-mask-thumbnail--color {
+  animation: selected-area-blink 3s linear infinite;
+} */
+@keyframes selected-area-blink {
+  0% {
+    filter: hue-rotate(0deg) brightness(1.6);
+  }
+  17% {
+    filter: hue-rotate(120deg) brightness(0.4);
+  }
+  34% {
+    filter: hue-rotate(240deg) brightness(1.6);
+  }
+  51% {
+    filter: hue-rotate(360deg) brightness(0.4);
+  }
+  68% {
+    filter: hue-rotate(480deg) brightness(1.6);
+  }
+  85% {
+    filter: hue-rotate(600deg) brightness(0.4);
+  }
+  100% {
+    filter: hue-rotate(720deg) brightness(1.6);
+  }
 }
 </style>
