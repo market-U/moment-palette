@@ -14,6 +14,7 @@ const props = defineProps<{
   selectedAreaId: string
   label: string
   renderThumbnail: (canvas: HTMLCanvasElement, areaId: string) => void
+  renderLineArt: (canvas: HTMLCanvasElement) => void
 }>()
 
 const emit = defineEmits<{
@@ -133,6 +134,7 @@ onBeforeUnmount(() => {
         :area="area"
         :selected="selectedAreaId === area.id"
         :render-thumbnail="renderThumbnail"
+        :render-line-art="renderLineArt"
         @select="handleItemClick"
       />
     </div>
@@ -145,20 +147,21 @@ onBeforeUnmount(() => {
   width: 100%;
   min-width: 0;
   overflow: hidden;
+  background: rgb(77 77 77 / 74%);
 }
 
 .area-selector__frame {
   position: absolute;
   z-index: 1;
-  top: 0;
+  top: 50%;
   left: 50%;
-  width: 7.5rem;
-  height: 100%;
+  height: 85%;
+  aspect-ratio: 1;
   pointer-events: none;
-  border: 2px solid var(--color-focus);
-  border-radius: 1rem;
+  border: 3px solid var(--color-main-1);
+  border-radius: 0.5rem;
   box-shadow: 0 0 0 3px rgb(114 92 164 / 14%);
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(-50%);
 }
 
 .area-selector__scroller {

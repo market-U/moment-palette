@@ -396,7 +396,7 @@ export const createCanvasCameraCompositor = (
     renderAreaThumbnail(canvas, state, areaId) {
       const { definition, mask } = requireAreaMask(state, areaId)
       const context = requireContext(canvas)
-      const size = Math.min(canvas.width, canvas.height) * 0.84
+      const size = Math.min(canvas.width, canvas.height) * 1
       context.save()
       try {
         context.clearRect(0, 0, canvas.width, canvas.height)

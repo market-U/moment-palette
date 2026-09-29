@@ -15,6 +15,7 @@ import SolidColorFillPanel from '@/features/solid-color-fill/SolidColorFillPanel
 import { useCreationSession } from '@/features/creation-session/sessionFacade'
 import BackButton from '@/shared/ui/BackButton.vue'
 import ScreenShell from '@/shared/ui/ScreenShell.vue'
+import ActionButton from '@/features/creation-session/ActionButton.vue'
 
 const { locale, t } = useI18n()
 const router = useRouter()
@@ -130,18 +131,41 @@ const completeArtwork = async () => {
         />
 
         <section class="area-panel" :aria-label="t('creation.areas')">
-          <p>{{ t('creation.chooseArea') }}</p>
+          <!-- <p>{{ t('creation.chooseArea') }}</p> -->
           <AreaSelector
             :areas="localizedAreas"
             :selected-area-id="selectedAreaId"
             :label="t('creation.areas')"
             :render-thumbnail="session.renderAreaThumbnail"
+            :render-line-art="session.renderLineArtOverlay"
             @select="selectedAreaId = $event"
           />
         </section>
+        <p>{{ t('creation.fillMethods') }}</p>
 
         <section class="fill-actions" :aria-label="t('creation.fillMethods')">
-          <button class="camera-action" type="button" @click="openCamera">
+          <ActionButton
+            class="left"
+            :label="t('creation.photoAction')"
+            type="photo"
+            :disabled="!selectedAreaId"
+            @click="openPhoto"
+          />
+          <ActionButton
+            class="center"
+            :label="t('creation.cameraAction')"
+            type="camera"
+            :disabled="!selectedAreaId"
+            @click="openCamera"
+          />
+          <ActionButton
+            class="right"
+            :label="t('creation.solidColorAction')"
+            type="palette"
+            :disabled="!selectedAreaId"
+            @click="openSolidColor"
+          />
+          <!-- <button class="camera-action" type="button" @click="openCamera">
             <span>{{ t('creation.cameraAction') }}</span>
             <small>{{ t('creation.cameraActionHint') }}</small>
           </button>
@@ -160,7 +184,7 @@ const completeArtwork = async () => {
           >
             <span>{{ t('creation.solidColorAction') }}</span>
             <small>{{ t('creation.solidColorActionHint') }}</small>
-          </button>
+          </button> -->
         </section>
 
         <p
@@ -285,8 +309,23 @@ h1 {
 }
 
 .fill-actions {
-  display: grid;
-  margin-top: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.fill-actions > .left {
+  margin-right: -0.5rem;
+  z-index: 1;
+}
+
+.fill-actions > .right {
+  margin-left: -0.5rem;
+  z-index: 1;
+}
+
+.fill-actions > .center {
+  z-index: 2;
 }
 
 .camera-action {
