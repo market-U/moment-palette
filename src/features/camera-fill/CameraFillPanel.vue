@@ -316,7 +316,6 @@ onBeforeUnmount(() => {
       <p class="eyebrow">{{ t('camera.eyebrow') }}</p>
       <h2>{{ t('camera.unavailableHeading') }}</h2>
       <p>{{ failureMessage }}</p>
-      <p>{{ t('camera.alternativesLater') }}</p>
       <div class="camera-panel__message-actions">
         <button class="primary-button" type="button" @click="retry">
           {{ t('actions.retry') }}

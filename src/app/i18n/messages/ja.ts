@@ -113,8 +113,6 @@ export const ja = {
     gestureHelp: '正方形の中を1本指で移動、2本指で拡大できます。',
     shutterLabel: '現在の映像を選択中のエリアへ撮影',
     unavailableHeading: 'カメラを利用できません',
-    alternativesLater:
-      '写真または単色で塗る方法は、今後のアップデートで追加します。',
     backToCreation: '制作へ戻る',
     errors: {
       denied:
