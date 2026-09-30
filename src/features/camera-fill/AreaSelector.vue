@@ -120,7 +120,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="area-selector" :aria-label="label">
+  <section class="area-selector fade-edge" :aria-label="label">
     <div class="area-selector__frame" aria-hidden="true" />
     <div
       ref="container"
@@ -179,5 +179,27 @@ onBeforeUnmount(() => {
 
 .area-selector__scroller::-webkit-scrollbar {
   display: none;
+}
+
+.fade-edge {
+  /* マスクを適用（プレフィックス付きも併記して互換性を確保） */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 10%,
+    #000 90%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 10%,
+    #000 90%,
+    transparent
+  );
+
+  /* 横スクロール要素などの場合は以下も合わせて指定すると効果的です */
+  overflow-x: auto;
+  white-space: nowrap;
 }
 </style>

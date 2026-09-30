@@ -363,18 +363,17 @@ export const createCanvasCameraCompositor = (
     },
     renderAreaHighlight(canvas, state, areaId) {
       const { mask } = requireAreaMask(state, areaId)
-      // const selectedAreaPattern = dependencies.selectedAreaPattern
-      // if (!selectedAreaPattern) {
-      //   throw new Error('選択Areaの斜線patternがありません。')
-      // }
+      const selectedAreaPattern = dependencies.selectedAreaPattern
+      if (!selectedAreaPattern) {
+        throw new Error('選択Areaの斜線patternがありません。')
+      }
       const context = requireContext(canvas)
       context.save()
       try {
         context.clearRect(0, 0, canvas.width, canvas.height)
         context.scale(canvas.width / artworkSize, canvas.height / artworkSize)
-        // const pattern = context.createPattern(selectedAreaPattern, 'repeat')
-        // if (!pattern) throw new Error('選択Areaの斜線patternを作成できません。')
-        // context.fillStyle = pattern
+        const pattern = context.createPattern(selectedAreaPattern, 'repeat')
+        if (!pattern) throw new Error('選択Areaの斜線patternを作成できません。')
         const index = state.template.areas.findIndex(
           (area) => area.id === areaId,
         )
@@ -382,6 +381,12 @@ export const createCanvasCameraCompositor = (
         context.fillStyle = definition?.initialColor ?? '#7d7d7d7f'
         context.fillRect(0, 0, artworkSize, artworkSize)
         context.drawImage(artworkPlane, 0, 0, artworkSize, artworkSize)
+        context.globalCompositeOperation = 'screen'
+        context.fillStyle = pattern
+        context.fillRect(0, 0, artworkSize, artworkSize)
+        context.globalCompositeOperation = 'multiply'
+        context.fillStyle = pattern
+        context.fillRect(0, 0, artworkSize, artworkSize)
         context.globalCompositeOperation = 'destination-in'
         context.drawImage(mask.source, 0, 0, artworkSize, artworkSize)
       } finally {

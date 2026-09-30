@@ -160,12 +160,10 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 
 @keyframes selected-area-blink {
   from {
-    filter: brightness(1.3);
-    blend-mode: screen;
+    filter: brightness(1.2);
   }
   to {
-    filter: brightness(0.6);
-    blend-mode: multiply;
+    filter: brightness(0.8);
   }
 }
 </style>
