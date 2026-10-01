@@ -24,7 +24,7 @@ export const ja = {
   },
   templates: {
     heading: 'テンプレートを選ぶ',
-    lead: '今日の気分に合う絵を選んでください。',
+    lead: 'どのキャンバスで描きますか？',
     empty: '現在利用できるテンプレートがありません。',
     preparing: '作品を準備しています…',
     loadFailed:

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import FrameButton from '@/shared/ui/FrameButton.vue'
 
 import {
   clientPointToLogical,
@@ -270,16 +271,14 @@ onBeforeUnmount(() => {
       />
 
       <div class="camera-panel__blend">
-        <button
-          type="button"
-          :aria-label="t('camera.showSource')"
+        <FrameButton
+          type="hide"
           :disabled="isCapturing"
+          :aria-label="t('camera.showSource')"
           @click="setBlend(0)"
-        >
-          ☆
-        </button>
+        />
         <label>
-          <span>{{ t('camera.blend') }}</span>
+          <span v-show="false">{{ t('camera.blend') }}</span>
           <input
             type="range"
             min="0"
@@ -290,14 +289,12 @@ onBeforeUnmount(() => {
             @input="handleBlend"
           />
         </label>
-        <button
-          type="button"
-          :aria-label="t('camera.showArtwork')"
+        <FrameButton
+          type="show"
           :disabled="isCapturing"
+          :aria-label="t('camera.showArtwork')"
           @click="setBlend(1)"
-        >
-          ★
-        </button>
+        />
       </div>
 
       <p class="camera-panel__gesture-help">{{ t('camera.gestureHelp') }}</p>
@@ -435,6 +432,10 @@ onBeforeUnmount(() => {
   text-align: center;
 }
 
+.camera-panel button.camera-panel__shutter {
+  padding: 0.25rem;
+}
+
 .camera-panel__shutter {
   justify-self: center;
   width: 4.5rem;
@@ -451,6 +452,7 @@ onBeforeUnmount(() => {
   height: 100%;
   background: #fff;
   border-radius: 50%;
+  aspect-ratio: 1;
 }
 
 .camera-panel__message {
