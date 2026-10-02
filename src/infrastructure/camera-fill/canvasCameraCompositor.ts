@@ -197,6 +197,7 @@ export const createCanvasCameraCompositor = (
     preparedPhoto.assets !== state.assets ||
     preparedPhoto.areaId !== state.selectedAreaId
 
+  /** template assetを使って、作品座標へcamera sourceとtemplate artworkを合成して描画する。 */
   const drawArtwork = (
     context: CanvasRenderingContext2D,
     state: CameraArtworkContext,
@@ -370,16 +371,12 @@ export const createCanvasCameraCompositor = (
       const context = requireContext(canvas)
       context.save()
       try {
+        const artworkContext = requireContext(artworkPlane)
+        drawArtwork(artworkContext, state)
         context.clearRect(0, 0, canvas.width, canvas.height)
         context.scale(canvas.width / artworkSize, canvas.height / artworkSize)
         const pattern = context.createPattern(selectedAreaPattern, 'repeat')
         if (!pattern) throw new Error('選択Areaの斜線patternを作成できません。')
-        const index = state.template.areas.findIndex(
-          (area) => area.id === areaId,
-        )
-        const definition = state.template.areas[index]
-        context.fillStyle = definition?.initialColor ?? '#7d7d7d7f'
-        context.fillRect(0, 0, artworkSize, artworkSize)
         context.drawImage(artworkPlane, 0, 0, artworkSize, artworkSize)
         context.globalCompositeOperation = 'screen'
         context.fillStyle = pattern
