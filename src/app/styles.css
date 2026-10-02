@@ -3,6 +3,13 @@
   --color-muted: #6e6575;
   --color-accent: #8b5171;
   --color-focus: #725ca4;
+  --color-white: #ffffff;
+  --color-main-1: #ff8888;
+  --color-main-2: #36b2e8;
+  --color-main-3: #f8a900;
+  --gradient-main-1: linear-gradient(0deg, #49c871 0%, #f7ff00 100%);
+  --gradient-main-2: linear-gradient(0deg, #ed62ff 0%, #ffc02e 100%);
+  --gradient-main-3: linear-gradient(0deg, #8a38f5 0%, #47fff0 100%);
   --screen-padding-block-start: clamp(1rem, 4vw, 1.5rem);
   --screen-padding-inline: clamp(1rem, 6vw, 2rem);
   --screen-padding-block-end: clamp(1.25rem, 5vw, 2rem);
@@ -65,4 +72,10 @@ button {
 
 .shadow-md {
   box-shadow: 0.2rem 0.2rem 0.3rem #00000028;
+}
+
+.iosevka-charon-mono-medium {
+  font-family: 'Iosevka Charon Mono', monospace;
+  font-weight: 500;
+  font-style: normal;
 }

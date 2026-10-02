@@ -24,7 +24,7 @@ export const ja = {
   },
   templates: {
     heading: 'テンプレートを選ぶ',
-    lead: '今日の気分に合う絵を選んでください。',
+    lead: 'どのキャンバスで描きますか？',
     empty: '現在利用できるテンプレートがありません。',
     preparing: '作品を準備しています…',
     loadFailed:
@@ -36,12 +36,12 @@ export const ja = {
     areas: '作品のエリア',
     chooseArea: '色をつけるエリアを選んでください',
     cameraFilled: '設定済み',
-    fillMethods: '色のつけ方',
-    cameraAction: '景色から切り取る',
+    fillMethods: 'どこから切り取りますか?',
+    cameraAction: 'KESHIKI',
     cameraActionHint: 'カメラで撮影する',
-    photoAction: '思い出から切り取る',
+    photoAction: 'OMOIDE',
     photoActionHint: '端末の写真を選ぶ',
-    solidColorAction: '気持ちからつくる',
+    solidColorAction: 'KOKORO',
     solidColorActionHint: '好きな色を選ぶ',
     complete: '作品を完成する',
     completing: '完成画像を生成しています…',
@@ -113,8 +113,6 @@ export const ja = {
     gestureHelp: '正方形の中を1本指で移動、2本指で拡大できます。',
     shutterLabel: '現在の映像を選択中のエリアへ撮影',
     unavailableHeading: 'カメラを利用できません',
-    alternativesLater:
-      '写真または単色で塗る方法は、今後のアップデートで追加します。',
     backToCreation: '制作へ戻る',
     errors: {
       denied:

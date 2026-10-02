@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import FrameButton from '@/shared/ui/FrameButton.vue'
 
 import type { PhotoFillState } from './photoState'
 import {
@@ -211,14 +212,15 @@ onBeforeUnmount(() => {
         @lostpointercapture="pointerEnd"
       />
       <div class="photo-fill-panel__blend">
-        <button type="button" @click="setBlend(0)">☆</button
-        ><input
+        <FrameButton type="hide" @click="setBlend(0)" />
+        <input
           type="range"
           min="0"
           max="100"
           :value="Math.round(editing.blend * 100)"
           @input="blend"
-        /><button type="button" @click="setBlend(1)">★</button>
+        />
+        <FrameButton type="show" @click="setBlend(1)" />
       </div>
       <p>{{ t('photo.gestureHelp') }}</p>
       <div class="photo-fill-panel__actions">
@@ -284,7 +286,7 @@ onBeforeUnmount(() => {
 }
 .photo-fill-panel__blend {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0.65rem;
   align-items: center;
   margin-top: 0.8rem;
