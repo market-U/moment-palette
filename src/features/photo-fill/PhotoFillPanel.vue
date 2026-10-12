@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import FrameButton from '@/shared/ui/FrameButton.vue'
+import IconButton from '@/shared/ui/IconButton.vue'
 
 import type { PhotoFillState } from './photoState'
 import {
@@ -212,7 +212,7 @@ onBeforeUnmount(() => {
         @lostpointercapture="pointerEnd"
       />
       <div class="photo-fill-panel__blend">
-        <FrameButton type="hide" @click="setBlend(0)" />
+        <IconButton type="hide" size="sm" @click="setBlend(0)" />
         <input
           type="range"
           min="0"
@@ -220,14 +220,22 @@ onBeforeUnmount(() => {
           :value="Math.round(editing.blend * 100)"
           @input="blend"
         />
-        <FrameButton type="show" @click="setBlend(1)" />
+        <IconButton type="show" size="sm" @click="setBlend(1)" />
       </div>
-      <p>{{ t('photo.gestureHelp') }}</p>
+      <p class="photo-fill-panel__gesture-help">{{ t('photo.gestureHelp') }}</p>
       <div class="photo-fill-panel__actions">
-        <button type="button" @click="cancel">{{ t('photo.cancel') }}</button
-        ><button class="primary" type="button" @click="apply">
-          {{ t('photo.apply') }}
-        </button>
+        <IconButton
+          type="cancel"
+          :aria-label="t('photo.cancel')"
+          @click="cancel"
+        />
+        <IconButton
+          type="check"
+          :aria-label="t('photo.apply')"
+          size="lg"
+          @click="apply"
+        />
+        <span aria-hidden="true" />
       </div>
     </div>
   </section>
@@ -266,6 +274,12 @@ onBeforeUnmount(() => {
   margin: 0;
   font-size: 1rem;
 }
+.photo-fill-panel__gesture-help {
+  margin: 0.5rem 0 0;
+  color: rgb(255 255 255 / 72%);
+  font-size: 0.78rem;
+  text-align: center;
+}
 .photo-fill-panel button {
   min-height: 2.75rem;
   padding: 0.55rem 0.9rem;
@@ -296,10 +310,14 @@ onBeforeUnmount(() => {
   touch-action: manipulation;
 }
 .photo-fill-panel__actions {
-  display: flex;
-  justify-content: center;
-  gap: 0.65rem;
-  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: calc(var(--icon-button-size-md) + 1.8rem) auto calc(
+      var(--icon-button-size-md) + 1.8rem
+    );
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  justify-items: center;
 }
 .photo-fill-panel .primary {
   color: #fff;

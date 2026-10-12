@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import iconUrl from '@/app/assets/icon_back.svg'
 defineProps<{
   label: string
   hideLabel?: boolean
@@ -17,14 +18,13 @@ const emit = defineEmits<{
     :disabled="disabled"
     @click="emit('click', $event)"
   >
-    <svg
+    <img
       class="back-button__icon"
       aria-hidden="true"
-      viewBox="0 0 24 24"
-      focusable="false"
-    >
-      <path d="m14.5 5-7 7 7 7" />
-    </svg>
+      :src="iconUrl"
+      width="48"
+      height="48"
+    />
     <span v-show="!hideLabel">{{ label }}</span>
   </button>
 </template>
@@ -35,7 +35,7 @@ const emit = defineEmits<{
   gap: 0.3rem;
   align-items: center;
   min-height: 2.75rem;
-  padding: 0.55rem 1rem 0.55rem 0.75rem;
+  /* padding: 0.55rem 1rem 0.55rem 0.75rem; */
   color: var(--color-muted);
   cursor: pointer;
   background: transparent;
@@ -55,8 +55,8 @@ const emit = defineEmits<{
 }
 
 .back-button__icon {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 2rem;
+  height: 2rem;
   fill: none;
   stroke: currentcolor;
   stroke-linecap: round;
