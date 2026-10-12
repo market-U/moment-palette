@@ -112,8 +112,6 @@ export const en = {
       'Drag with one finger and pinch with two fingers inside the square.',
     shutterLabel: 'Capture the current view in the selected area',
     unavailableHeading: 'Camera unavailable',
-    alternativesLater:
-      'Photo and solid-color alternatives will be added in a future update.',
     backToCreation: 'Back to artwork',
     errors: {
       denied:

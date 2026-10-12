@@ -14,6 +14,7 @@ const props = defineProps<{
   selectedAreaId: string
   label: string
   renderThumbnail: (canvas: HTMLCanvasElement, areaId: string) => void
+  renderLineArt: (canvas: HTMLCanvasElement) => void
 }>()
 
 const emit = defineEmits<{
@@ -119,7 +120,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="area-selector" :aria-label="label">
+  <section class="area-selector fade-edge" :aria-label="label">
     <div class="area-selector__frame" aria-hidden="true" />
     <div
       ref="container"
@@ -133,6 +134,7 @@ onBeforeUnmount(() => {
         :area="area"
         :selected="selectedAreaId === area.id"
         :render-thumbnail="renderThumbnail"
+        :render-line-art="renderLineArt"
         @select="handleItemClick"
       />
     </div>
@@ -145,20 +147,21 @@ onBeforeUnmount(() => {
   width: 100%;
   min-width: 0;
   overflow: hidden;
+  /* background: rgb(77 77 77 / 74%); */
 }
 
 .area-selector__frame {
   position: absolute;
   z-index: 1;
-  top: 0;
+  top: 50%;
   left: 50%;
-  width: 7.5rem;
-  height: 100%;
+  height: 90%;
+  aspect-ratio: 1;
   pointer-events: none;
-  border: 2px solid var(--color-focus);
-  border-radius: 1rem;
-  box-shadow: 0 0 0 3px rgb(114 92 164 / 14%);
-  transform: translateX(-50%);
+  border: 3px solid var(--color-main-1);
+  border-radius: 0.5rem;
+  box-shadow: 0 0 3px rgb(114 92 164 / 14%);
+  transform: translateX(-50%) translateY(-50%);
 }
 
 .area-selector__scroller {
@@ -166,7 +169,7 @@ onBeforeUnmount(() => {
   gap: 0.65rem;
   width: 100%;
   min-width: 0;
-  padding: 0.35rem var(--area-padding-end, 50%);
+  padding-right: var(--area-padding-end, 50%);
   padding-left: var(--area-padding-start, 50%);
   overflow-x: auto;
   overscroll-behavior-x: contain;
@@ -176,5 +179,27 @@ onBeforeUnmount(() => {
 
 .area-selector__scroller::-webkit-scrollbar {
   display: none;
+}
+
+.fade-edge {
+  /* マスクを適用（プレフィックス付きも併記して互換性を確保） */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 10%,
+    #000 90%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 10%,
+    #000 90%,
+    transparent
+  );
+
+  /* 横スクロール要素などの場合は以下も合わせて指定すると効果的です */
+  overflow-x: auto;
+  white-space: nowrap;
 }
 </style>

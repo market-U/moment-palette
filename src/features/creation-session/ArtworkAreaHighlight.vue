@@ -127,7 +127,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   margin: 0 auto;
   overflow: hidden;
   background: #fff;
-  border-radius: 1.5rem;
+  /* border-radius: 1.5rem; */
 }
 
 .artwork-area-highlight__image,
@@ -148,7 +148,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   z-index: 1;
   pointer-events: none;
   mix-blend-mode: normal;
-  animation: selected-area-blink 3s linear infinite;
+  animation: selected-area-blink 0.5s ease-in-out infinite alternate;
 }
 
 .artwork-area-highlight__line-art {
@@ -159,26 +159,11 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 }
 
 @keyframes selected-area-blink {
-  0% {
-    filter: hue-rotate(0deg) brightness(1.6);
+  from {
+    filter: brightness(1.2);
   }
-  17% {
-    filter: hue-rotate(120deg) brightness(0.4);
-  }
-  34% {
-    filter: hue-rotate(240deg) brightness(1.6);
-  }
-  51% {
-    filter: hue-rotate(360deg) brightness(0.4);
-  }
-  68% {
-    filter: hue-rotate(480deg) brightness(1.6);
-  }
-  85% {
-    filter: hue-rotate(600deg) brightness(0.4);
-  }
-  100% {
-    filter: hue-rotate(720deg) brightness(1.6);
+  to {
+    filter: brightness(0.8);
   }
 }
 </style>

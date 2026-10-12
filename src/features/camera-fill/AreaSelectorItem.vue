@@ -10,6 +10,7 @@ defineProps<{
   area: AreaItem
   selected: boolean
   renderThumbnail: (canvas: HTMLCanvasElement, areaId: string) => void
+  renderLineArt: (canvas: HTMLCanvasElement) => void
 }>()
 
 const emit = defineEmits<{
@@ -27,23 +28,27 @@ const emit = defineEmits<{
     :aria-pressed="selected"
     @click="emit('select', area.id)"
   >
-    <AreaMaskThumbnail :area-id="area.id" :render="renderThumbnail" />
+    <AreaMaskThumbnail
+      :area-id="area.id"
+      :render="renderThumbnail"
+      :render-line-art="renderLineArt"
+    />
   </button>
 </template>
 
 <style scoped>
 .area-selector-item {
   display: grid;
-  flex: 0 0 7.5rem;
+  flex: 0 0 auto;
   place-items: center;
-  min-height: 5.25rem;
+  /* min-height: 5.25rem; */
   padding: 0.35rem;
   color: var(--color-ink);
   text-align: left;
   cursor: pointer;
-  background: rgb(255 255 255 / 74%);
-  border: 1px solid rgb(65 54 76 / 14%);
-  border-radius: 0.9rem;
+  background: transparent;
+  border: none;
+  /* border-radius: 0.9rem; */
   opacity: 0.68;
   scroll-snap-align: center;
   scroll-snap-stop: always;

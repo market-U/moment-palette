@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import IconButton from '@/shared/ui/IconButton.vue'
 
 import {
   clientPointToLogical,
@@ -243,19 +244,9 @@ onBeforeUnmount(() => {
 
     <div v-else-if="liveState" class="camera-panel__workspace">
       <header class="camera-panel__header">
-        <button type="button" :disabled="isCapturing" @click="cancel">
-          {{ t('camera.cancel') }}
-        </button>
+        <span aria-hidden="true" />
         <h2>{{ t('camera.heading') }}</h2>
-        <button
-          v-if="liveState.canSwitch"
-          type="button"
-          :disabled="isCapturing"
-          @click="switchFacing"
-        >
-          {{ t('camera.switch') }}
-        </button>
-        <span v-else aria-hidden="true" />
+        <span aria-hidden="true" />
       </header>
 
       <canvas
@@ -270,16 +261,15 @@ onBeforeUnmount(() => {
       />
 
       <div class="camera-panel__blend">
-        <button
-          type="button"
-          :aria-label="t('camera.showSource')"
+        <IconButton
+          type="hide"
+          size="sm"
           :disabled="isCapturing"
+          :aria-label="t('camera.showSource')"
           @click="setBlend(0)"
-        >
-          ☆
-        </button>
+        />
         <label>
-          <span>{{ t('camera.blend') }}</span>
+          <span v-show="false">{{ t('camera.blend') }}</span>
           <input
             type="range"
             min="0"
@@ -290,33 +280,47 @@ onBeforeUnmount(() => {
             @input="handleBlend"
           />
         </label>
-        <button
-          type="button"
-          :aria-label="t('camera.showArtwork')"
+        <IconButton
+          type="show"
+          size="sm"
           :disabled="isCapturing"
+          :aria-label="t('camera.showArtwork')"
           @click="setBlend(1)"
-        >
-          ★
-        </button>
+        />
       </div>
 
       <p class="camera-panel__gesture-help">{{ t('camera.gestureHelp') }}</p>
-      <button
-        class="camera-panel__shutter"
-        type="button"
-        :disabled="isCapturing"
-        :aria-label="t('camera.shutterLabel')"
-        @click="capture"
-      >
-        <span aria-hidden="true" />
-      </button>
+      <div class="camera-panel__actions">
+        <IconButton
+          type="cancel"
+          :disabled="isCapturing"
+          :aria-label="t('camera.cancel')"
+          @click="cancel"
+        />
+        <button
+          class="camera-panel__shutter"
+          type="button"
+          :disabled="isCapturing"
+          :aria-label="t('camera.shutterLabel')"
+          @click="capture"
+        >
+          <span aria-hidden="true" />
+        </button>
+        <IconButton
+          v-if="liveState.canSwitch"
+          type="switch"
+          :disabled="isCapturing"
+          :aria-label="t('camera.switch')"
+          @click="switchFacing"
+        />
+        <span v-else aria-hidden="true" />
+      </div>
     </div>
 
     <div v-else class="camera-panel__message" role="alert">
       <p class="eyebrow">{{ t('camera.eyebrow') }}</p>
       <h2>{{ t('camera.unavailableHeading') }}</h2>
       <p>{{ failureMessage }}</p>
-      <p>{{ t('camera.alternativesLater') }}</p>
       <div class="camera-panel__message-actions">
         <button class="primary-button" type="button" @click="retry">
           {{ t('actions.retry') }}
@@ -436,6 +440,21 @@ onBeforeUnmount(() => {
   text-align: center;
 }
 
+.camera-panel__actions {
+  display: grid;
+  grid-template-columns: calc(var(--icon-button-size-md) + 1.8rem) auto calc(
+      var(--icon-button-size-md) + 1.8rem
+    );
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  justify-items: center;
+}
+
+.camera-panel button.camera-panel__shutter {
+  padding: 0.25rem;
+}
+
 .camera-panel__shutter {
   justify-self: center;
   width: 4.5rem;
@@ -452,6 +471,7 @@ onBeforeUnmount(() => {
   height: 100%;
   background: #fff;
   border-radius: 50%;
+  aspect-ratio: 1;
 }
 
 .camera-panel__message {

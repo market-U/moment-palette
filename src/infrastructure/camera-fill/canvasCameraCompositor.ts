@@ -197,6 +197,7 @@ export const createCanvasCameraCompositor = (
     preparedPhoto.assets !== state.assets ||
     preparedPhoto.areaId !== state.selectedAreaId
 
+  /** template assetを使って、作品座標へcamera sourceとtemplate artworkを合成して描画する。 */
   const drawArtwork = (
     context: CanvasRenderingContext2D,
     state: CameraArtworkContext,
@@ -370,10 +371,17 @@ export const createCanvasCameraCompositor = (
       const context = requireContext(canvas)
       context.save()
       try {
+        const artworkContext = requireContext(artworkPlane)
+        drawArtwork(artworkContext, state)
         context.clearRect(0, 0, canvas.width, canvas.height)
         context.scale(canvas.width / artworkSize, canvas.height / artworkSize)
         const pattern = context.createPattern(selectedAreaPattern, 'repeat')
         if (!pattern) throw new Error('選択Areaの斜線patternを作成できません。')
+        context.drawImage(artworkPlane, 0, 0, artworkSize, artworkSize)
+        context.globalCompositeOperation = 'screen'
+        context.fillStyle = pattern
+        context.fillRect(0, 0, artworkSize, artworkSize)
+        context.globalCompositeOperation = 'multiply'
         context.fillStyle = pattern
         context.fillRect(0, 0, artworkSize, artworkSize)
         context.globalCompositeOperation = 'destination-in'
@@ -393,10 +401,11 @@ export const createCanvasCameraCompositor = (
         context.restore()
       }
     },
+    // AreaSelectorのサムネイル表示用に、maskと初期色だけで描画する。
     renderAreaThumbnail(canvas, state, areaId) {
-      const { definition, mask } = requireAreaMask(state, areaId)
+      const { mask } = requireAreaMask(state, areaId)
       const context = requireContext(canvas)
-      const size = Math.min(canvas.width, canvas.height) * 0.84
+      const size = Math.min(canvas.width, canvas.height) * 1
       context.save()
       try {
         context.clearRect(0, 0, canvas.width, canvas.height)
@@ -404,7 +413,8 @@ export const createCanvasCameraCompositor = (
         context.scale(size / artworkSize, size / artworkSize)
         context.drawImage(mask.source, 0, 0, artworkSize, artworkSize)
         context.globalCompositeOperation = 'source-in'
-        context.fillStyle = definition.initialColor
+        // context.fillStyle = definition.initialColor
+        context.fillStyle = '#7d7d7d7f'
         context.fillRect(0, 0, artworkSize, artworkSize)
       } finally {
         context.restore()

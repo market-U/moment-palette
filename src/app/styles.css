@@ -3,6 +3,13 @@
   --color-muted: #6e6575;
   --color-accent: #8b5171;
   --color-focus: #725ca4;
+  --color-white: #ffffff;
+  --color-main-1: #ff8888;
+  --color-main-2: #36b2e8;
+  --color-main-3: #f8a900;
+  --gradient-main-1: linear-gradient(0deg, #49c871 0%, #f7ff00 100%);
+  --gradient-main-2: linear-gradient(0deg, #ed62ff 0%, #ffc02e 100%);
+  --gradient-main-3: linear-gradient(0deg, #8a38f5 0%, #47fff0 100%);
   --screen-padding-block-start: clamp(1rem, 4vw, 1.5rem);
   --screen-padding-inline: clamp(1rem, 6vw, 2rem);
   --screen-padding-block-end: clamp(1.25rem, 5vw, 2rem);
@@ -13,6 +20,9 @@
     radial-gradient(circle at 10% 12%, rgb(250 191 104 / 30%), transparent 30%),
     radial-gradient(circle at 90% 78%, rgb(117 198 188 / 26%), transparent 34%),
     linear-gradient(155deg, #fffaf0 0%, #f8eef2 50%, #f1effa 100%);
+  --icon-button-size-sm: 36px;
+  --icon-button-size-md: 48px;
+  --icon-button-size-lg: 72px;
   color: #352c3c;
   font-family:
     Inter, Avenir, 'Helvetica Neue', 'Hiragino Kaku Gothic ProN', 'Yu Gothic',
@@ -65,4 +75,10 @@ button {
 
 .shadow-md {
   box-shadow: 0.2rem 0.2rem 0.3rem #00000028;
+}
+
+.iosevka-charon-mono-medium {
+  font-family: 'Iosevka Charon Mono', monospace;
+  font-weight: 500;
+  font-style: normal;
 }
